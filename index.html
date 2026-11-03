@@ -28,20 +28,11 @@
           <p class="header-description">사업별 홍보·운영자료를 한곳에서</p>
         </div>
         <div class="header-side">
-          <p class="header-note">필요한 자료를 확인하고 원본 파일로 내려받으세요.</p>
           <button id="installPwaButton" class="pwa-install-button" type="button" hidden>
             <span class="pwa-install-icon" aria-hidden="true">↓</span>
             앱으로 설치
           </button>
-        </div>
-      </div>
-    </header>
-
-    <main id="materials" class="shell main-content">
-      <section class="materials-section" aria-labelledby="materials-heading">
-        <div class="section-heading search-section-heading">
-          <div class="material-search" role="search">
-            <h2 id="materials-heading" class="visually-hidden">자료 검색</h2>
+          <div class="material-search header-search" role="search">
             <label class="visually-hidden" for="materialSearch">자료명 검색</label>
             <div class="material-search-control">
               <span class="material-search-icon" aria-hidden="true"></span>
@@ -57,8 +48,14 @@
               </button>
             </div>
           </div>
-          <p id="resultSummary" class="result-summary" aria-live="polite">자료를 확인하고 있습니다.</p>
         </div>
+      </div>
+    </header>
+
+    <main id="materials" class="shell main-content">
+      <section class="materials-section" aria-labelledby="materials-heading">
+        <h2 id="materials-heading" class="visually-hidden">사업별 자료</h2>
+        <p id="resultSummary" class="visually-hidden" aria-live="polite">자료를 확인하고 있습니다.</p>
 
         <div class="tabs-scroll category-tabs-scroll" aria-label="사업 구분">
           <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="사업 선택"></div>

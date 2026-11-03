@@ -105,6 +105,7 @@ a {
 
 .header-side {
   display: flex;
+  width: min(430px, 40vw);
   align-items: flex-end;
   flex-direction: column;
   gap: 13px;
@@ -130,14 +131,6 @@ a {
   margin: 10px 0 0;
   color: #dbeaff;
   font-size: clamp(1rem, 2vw, 1.18rem);
-}
-
-.header-note {
-  max-width: 330px;
-  margin: 0 0 3px;
-  color: #c4d4e7;
-  font-size: 0.92rem;
-  text-align: right;
 }
 
 .pwa-install-button {
@@ -184,19 +177,11 @@ a {
 }
 
 .main-content {
-  padding-block: 50px 72px;
+  padding: 36px 0 72px;
 }
 
 .materials-section {
   min-height: 430px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
 }
 
 .visually-hidden {
@@ -212,12 +197,8 @@ a {
   white-space: nowrap !important;
 }
 
-.search-section-heading {
-  align-items: center;
-}
-
 .material-search {
-  width: min(100%, 540px);
+  width: 100%;
 }
 
 .material-search-control {
@@ -238,6 +219,12 @@ a {
   transition:
     border-color 0.16s ease,
     box-shadow 0.16s ease;
+}
+
+.header-search .material-search-control input {
+  min-height: 46px;
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.17);
 }
 
 .material-search-control input::placeholder {
@@ -319,19 +306,6 @@ a {
 
 .section-kicker {
   color: var(--blue-700);
-}
-
-.section-heading h2 {
-  margin: 0;
-  font-size: clamp(1.55rem, 3vw, 2rem);
-  line-height: 1.3;
-  letter-spacing: -0.035em;
-}
-
-.result-summary {
-  margin: 0 0 2px;
-  color: var(--slate-500);
-  font-size: 0.92rem;
 }
 
 .tabs-scroll {
@@ -1189,11 +1163,8 @@ button.button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .header-note {
-    display: none;
-  }
-
   .header-side {
+    width: min(390px, 45vw);
     align-items: flex-end;
     align-self: center;
   }
@@ -1205,35 +1176,39 @@ button.button {
   }
 
   .header-inner {
-    min-height: 146px;
-    align-items: flex-start;
+    min-height: 0;
+    align-items: stretch;
+    flex-direction: column;
     padding-block: 25px 23px;
-    gap: 12px;
+    gap: 18px;
   }
 
   .header-side {
-    align-self: flex-end;
-    padding-bottom: 2px;
+    width: auto;
+    align-items: center;
+    align-self: stretch;
+    flex-direction: row;
+    padding-bottom: 0;
+    gap: 8px;
+  }
+
+  .header-search {
+    min-width: 0;
+    flex: 1;
+    order: 2;
   }
 
   .pwa-install-button {
     min-height: 38px;
+    flex: 0 0 auto;
+    order: 1;
     gap: 6px;
     padding: 7px 10px;
     font-size: 0.76rem;
   }
 
   .main-content {
-    padding-block: 36px 52px;
-  }
-
-  .section-heading {
-    display: block;
-    margin-bottom: 20px;
-  }
-
-  .result-summary {
-    margin-top: 8px;
+    padding-block: 24px 52px;
   }
 
   .tabs-scroll {
