@@ -70,7 +70,7 @@
       "file": "assets/materials/school-safety/brochures/20261103-122152-학생통합안전시스템_브로셔_온라인_압축본.pdf",
       "thumbnail": "assets/thumbnails/20261103-122152-main.png",
       "updatedAt": "2026-11-03",
-      "order": 100
+      "registeredAt": "2026-11-03T12:21:52+09:00"
     },
     {
       "id": "lodging-brochure-mw05mb6b",
@@ -82,7 +82,7 @@
       "file": "assets/materials/lodging/brochures/20261103-125427-무인숙박_제품_카탈로그_2026.10_압축본.pdf",
       "thumbnail": "assets/thumbnails/20261103-125427-main2.png",
       "updatedAt": "2026-11-03",
-      "order": 100
+      "registeredAt": "2026-11-03T12:54:27+09:00"
     },
     {
       "id": "school-safety-video-mw0b5xc7",
@@ -94,7 +94,7 @@
       "file": "https://youtu.be/EVSTk2U4-5w?si=MQrVsHW1OAabraUa",
       "thumbnail": "assets/thumbnails/20261103-152955-main.png",
       "updatedAt": "2026-11-03",
-      "order": 100,
+      "registeredAt": "2026-11-03T15:27:45+09:00",
       "sourceType": "youtube"
     }
   ]

@@ -33,7 +33,6 @@
     description: document.querySelector("#description"),
     descriptionCount: document.querySelector("#descriptionCount"),
     updatedAt: document.querySelector("#updatedAt"),
-    order: document.querySelector("#order"),
     destinationPreview: document.querySelector("#destinationPreview"),
     progress: document.querySelector("#uploadProgress"),
     progressTitle: document.querySelector("#progressTitle"),
@@ -146,6 +145,27 @@
     const date = new Date(`${value}T00:00:00`);
     if (Number.isNaN(date.getTime())) return value;
     return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date);
+  }
+
+  function getRegistrationTime(material) {
+    const registeredTime = Date.parse(material?.registeredAt || "");
+    if (Number.isFinite(registeredTime)) return registeredTime;
+
+    const pathTimestamp = String(material?.file || "").match(/(?:^|\/)(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/);
+    if (pathTimestamp) {
+      const [, year, month, day, hour, minute, second] = pathTimestamp;
+      return new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second),
+      ).getTime();
+    }
+
+    const updatedTime = Date.parse(material?.updatedAt ? `${material.updatedAt}T00:00:00` : "");
+    return Number.isFinite(updatedTime) ? updatedTime : 0;
   }
 
   function getVideoSourceMethod() {
@@ -337,8 +357,8 @@
         ? unknownMaterials
         : materials.filter((material) => material.category === group.id)
       ).sort((a, b) => {
-        const orderDifference = (a.order ?? 999) - (b.order ?? 999);
-        return orderDifference || String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""), "ko");
+        const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
+        return registrationDifference || String(b.id || "").localeCompare(String(a.id || ""), "ko");
       });
 
       const section = createElement("section", "inventory-group");
@@ -602,7 +622,6 @@
         thumbnailBlob = await createBlob(verifiedToken, bytesToBase64(await thumbnail.arrayBuffer()));
       }
 
-      const parsedOrder = Number.parseInt(elements.order.value, 10);
       const material = {
         id: `${category.id}-${type.id}-${Date.now().toString(36)}`,
         category: category.id,
@@ -613,7 +632,7 @@
         file: materialPath,
         thumbnail: thumbnailPath,
         updatedAt: elements.updatedAt.value,
-        order: Number.isInteger(parsedOrder) ? parsedOrder : 100,
+        registeredAt: now.toISOString(),
       };
       if (type.id === "video") material.sourceType = videoSource;
       latestLibrary.materials = Array.isArray(latestLibrary.materials) ? latestLibrary.materials : [];
@@ -664,7 +683,6 @@
       );
       elements.form.reset();
       elements.updatedAt.value = localDateString();
-      elements.order.value = "100";
       elements.descriptionCount.textContent = "0";
       elements.materialFileName.textContent = "선택된 파일 없음";
       elements.thumbnailFileName.textContent = "선택된 이미지 없음";

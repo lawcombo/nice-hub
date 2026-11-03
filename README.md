@@ -92,11 +92,13 @@ PC에서는 브라우저의 기본 PDF 표시 기능을 사용하고, 모바일�
 
 1. 사업 카테고리와 자료 유형을 선택합니다.
 2. PDF 자료는 파일을 선택합니다. 동영상은 **직접 파일 업로드** 또는 **YouTube 링크 등록** 중 하나를 선택합니다.
-3. 자료명, 설명, 등록·수정일, 정렬 순서를 입력합니다.
+3. 자료명, 설명, 등록·수정일을 입력합니다.
 4. 표지가 있으면 WebP, JPG 또는 PNG 이미지를 선택합니다.
 5. **GitHub에 업로드**를 누릅니다.
 
 업로드가 완료되면 자료 파일, 표지, `assets/data/library.json` 변경이 `main` 브랜치의 한 커밋으로 저장됩니다. GitHub Pages에 반영되기까지 잠시 시간이 걸릴 수 있습니다.
+
+자료의 실제 업로드 시각은 `registeredAt`에 자동 기록됩니다. 공개 자료실과 관리 화면의 자료 목록은 이 시각을 기준으로 최신 자료부터 표시되므로 정렬 순서를 따로 입력할 필요가 없습니다.
 
 ### 등록 자료 확인 및 삭제
 
@@ -147,7 +149,7 @@ GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으�
     "file": "assets/materials/school-safety/brochures/school-safety-brochure-2026.pdf",
     "thumbnail": "assets/thumbnails/school-safety-brochure-2026.webp",
     "updatedAt": "2026-11-03",
-    "order": 10
+    "registeredAt": "2026-11-03T14:30:00+09:00"
   }
 ]
 ```
@@ -193,7 +195,7 @@ GitHub에서 직접 YouTube 영상을 등록할 때는 다음처럼 `sourceType`
   "sourceType": "youtube",
   "thumbnail": "assets/thumbnails/lodging-intro-video.webp",
   "updatedAt": "2026-11-03",
-  "order": 20
+  "registeredAt": "2026-11-03T15:00:00+09:00"
 }
 ```
 
@@ -211,7 +213,7 @@ GitHub에서 직접 YouTube 영상을 등록할 때는 다음처럼 `sourceType`
   "sourceType": "file",
   "thumbnail": "assets/thumbnails/lodging-guide.webp",
   "updatedAt": "2026-11-03",
-  "order": 30
+  "registeredAt": "2026-11-03T15:30:00+09:00"
 }
 ```
 

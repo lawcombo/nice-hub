@@ -182,10 +182,30 @@
       .filter((material) => activeMaterialType === "all" || material.type === activeMaterialType)
       .filter((material) => material && material.id && material.title && material.file)
       .sort((a, b) => {
-        const orderDifference = (a.order ?? 999) - (b.order ?? 999);
-        if (orderDifference !== 0) return orderDifference;
-        return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""), "ko");
+        const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
+        return registrationDifference || String(b.id || "").localeCompare(String(a.id || ""), "ko");
       });
+  }
+
+  function getRegistrationTime(material) {
+    const registeredTime = Date.parse(material?.registeredAt || "");
+    if (Number.isFinite(registeredTime)) return registeredTime;
+
+    const pathTimestamp = String(material?.file || "").match(/(?:^|\/)(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/);
+    if (pathTimestamp) {
+      const [, year, month, day, hour, minute, second] = pathTimestamp;
+      return new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second),
+      ).getTime();
+    }
+
+    const updatedTime = Date.parse(material?.updatedAt ? `${material.updatedAt}T00:00:00` : "");
+    return Number.isFinite(updatedTime) ? updatedTime : 0;
   }
 
   function renderMaterials() {
