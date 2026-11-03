@@ -37,8 +37,15 @@
           <p id="resultSummary" class="result-summary" aria-live="polite">자료를 확인하고 있습니다.</p>
         </div>
 
-        <div class="tabs-scroll" aria-label="사업 구분">
+        <div class="tabs-scroll category-tabs-scroll" aria-label="사업 구분">
           <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="사업 선택"></div>
+        </div>
+
+        <div class="material-type-filter" aria-labelledby="materialTypeFilterLabel">
+          <span id="materialTypeFilterLabel" class="material-type-filter-label">자료 유형</span>
+          <div class="material-type-scroll">
+            <div id="materialTypeTabs" class="material-type-tabs" role="group" aria-label="자료 유형 선택"></div>
+          </div>
         </div>
 
         <div id="materialsPanel" role="tabpanel" tabindex="0" aria-labelledby="tab-all">

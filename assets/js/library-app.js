@@ -3,6 +3,7 @@
 
   const elements = {
     tabs: document.querySelector("#categoryTabs"),
+    typeTabs: document.querySelector("#materialTypeTabs"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
     empty: document.querySelector("#emptyState"),
@@ -32,10 +33,12 @@
   };
 
   let categories = [];
+  let materialTypes = [];
   let materials = [];
   let materialTypeMap = new Map();
   let categoryMap = new Map();
   let activeCategory = "all";
+  let activeMaterialType = "all";
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
   let pdfDocument = null;
@@ -101,6 +104,22 @@
     elements.tabs.replaceChildren(fragment);
   }
 
+  function renderMaterialTypeTabs() {
+    const typeItems = [{ id: "all", label: "전체 자료" }, ...materialTypes];
+    const fragment = document.createDocumentFragment();
+
+    typeItems.forEach((type) => {
+      const button = createElement("button", "material-type-button", type.label);
+      button.type = "button";
+      button.dataset.materialType = type.id;
+      button.setAttribute("aria-pressed", type.id === activeMaterialType ? "true" : "false");
+      button.addEventListener("click", () => selectMaterialType(type.id));
+      fragment.appendChild(button);
+    });
+
+    elements.typeTabs.replaceChildren(fragment);
+  }
+
   function handleTabKeydown(event) {
     const tabs = [...elements.tabs.querySelectorAll('[role="tab"]')];
     const currentIndex = tabs.indexOf(event.currentTarget);
@@ -131,9 +150,18 @@
     renderMaterials();
   }
 
+  function selectMaterialType(typeId) {
+    activeMaterialType = typeId;
+    elements.typeTabs.querySelectorAll("[data-material-type]").forEach((button) => {
+      button.setAttribute("aria-pressed", button.dataset.materialType === typeId ? "true" : "false");
+    });
+    renderMaterials();
+  }
+
   function getVisibleMaterials() {
     return materials
       .filter((material) => activeCategory === "all" || material.category === activeCategory)
+      .filter((material) => activeMaterialType === "all" || material.type === activeMaterialType)
       .filter((material) => material && material.id && material.title && material.file)
       .sort((a, b) => {
         const orderDifference = (a.order ?? 999) - (b.order ?? 999);
@@ -154,7 +182,8 @@
     elements.emptyMessage.textContent = "자료를 준비 중입니다.";
 
     const categoryLabel = activeCategory === "all" ? "전체" : getCategoryLabel(activeCategory);
-    elements.summary.textContent = `${categoryLabel} 자료 ${visibleMaterials.length}건`;
+    const typeLabel = activeMaterialType === "all" ? "전체 유형" : getTypeLabel(activeMaterialType);
+    elements.summary.textContent = `${categoryLabel} · ${typeLabel} 자료 ${visibleMaterials.length}건`;
   }
 
   function createMaterialCard(material) {
@@ -492,15 +521,17 @@
         ? [...data.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
         : [];
       materials = Array.isArray(data.materials) ? data.materials : [];
-      const materialTypes = Array.isArray(data.materialTypes) ? data.materialTypes : [];
+      materialTypes = Array.isArray(data.materialTypes) ? data.materialTypes : [];
       categoryMap = new Map(categories.map((category) => [category.id, category]));
       materialTypeMap = new Map(materialTypes.map((type) => [type.id, type]));
 
       renderTabs();
+      renderMaterialTypeTabs();
       renderMaterials();
     } catch (error) {
       console.error("자료 목록을 불러오지 못했습니다.", error);
       renderTabs();
+      renderMaterialTypeTabs();
       elements.grid.hidden = true;
       elements.empty.hidden = false;
       elements.emptyTitle.textContent = "자료 목록을 불러오지 못했습니다.";

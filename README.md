@@ -52,10 +52,12 @@ NICE 자료허브/
 │  │  ├─ lodging/                     # 무인숙박 자료
 │  │  │  ├─ brochures/                # 브로슈어 PDF
 │  │  │  ├─ manuals/                  # 매뉴얼 PDF
+│  │  │  ├─ proposals/                # 제안서 PDF
 │  │  │  └─ videos/                   # 영상 파일(필요 시)
 │  │  └─ school-safety/               # 등하교 자료
 │  │     ├─ brochures/
 │  │     ├─ manuals/
+│  │     ├─ proposals/
 │  │     └─ videos/
 │  └─ thumbnails/                     # 자료 표지 이미지
 ├─ .nojekyll                          # GitHub Pages의 Jekyll 처리 제외
@@ -109,7 +111,7 @@ PC에서는 브라우저의 기본 PDF 표시 기능을 사용하고, 모바일�
 
 ### 업로드 제한
 
-- 브로슈어·매뉴얼: PDF
+- 브로슈어·매뉴얼·제안서: PDF
 - 동영상: MP4 또는 WebM
 - 자료 파일: 최대 20MB
 - 표지 이미지: 최대 5MB
@@ -124,8 +126,10 @@ GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으�
 
 - 무인숙박 브로슈어: `assets/materials/lodging/brochures/`
 - 무인숙박 매뉴얼: `assets/materials/lodging/manuals/`
+- 무인숙박 제안서: `assets/materials/lodging/proposals/`
 - 등하교 브로슈어: `assets/materials/school-safety/brochures/`
 - 등하교 매뉴얼: `assets/materials/school-safety/manuals/`
+- 등하교 제안서: `assets/materials/school-safety/proposals/`
 
 파일명에는 가능하면 영문 소문자, 숫자, 하이픈을 사용하세요. 예: `school-safety-brochure-2026.pdf`
 
@@ -208,6 +212,7 @@ GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으�
 ```text
 assets/materials/ticketing/brochures/
 assets/materials/ticketing/manuals/
+assets/materials/ticketing/proposals/
 assets/materials/ticketing/videos/
 ```
 

@@ -37,6 +37,16 @@
       ]
     },
     {
+      "id": "proposal",
+      "label": "제안서",
+      "folder": "proposals",
+      "format": "pdf",
+      "accept": [
+        "application/pdf",
+        ".pdf"
+      ]
+    },
+    {
       "id": "video",
       "label": "동영상",
       "folder": "videos",
