@@ -39,11 +39,14 @@ py -m http.server 8000
 ```text
 NICE 자료허브/
 ├─ index.html                         # 화면 구조
+├─ admin.html                         # GitHub 자료 업로드 화면
 ├─ scripts/dev-server.js              # 설치 없는 로컬 정적 서버
 ├─ assets/
-│  ├─ css/styles.css                  # 디자인과 반응형 스타일
+│  ├─ css/                            # 공개·관리 화면 스타일
 │  ├─ data/library.json               # 사업 카테고리, 자료 유형, 자료 목록
-│  ├─ js/library-app.js                # 탭, 카드, PDF 미리보기 기능
+│  ├─ js/
+│  │  ├─ library-app.js               # 탭, 카드, PDF 미리보기 기능
+│  │  └─ admin.js                     # GitHub 업로드 및 커밋 기능
 │  ├─ materials/
 │  │  ├─ lodging/                     # 무인숙박 자료
 │  │  │  ├─ brochures/                # 브로슈어 PDF
@@ -60,32 +63,48 @@ NICE 자료허브/
 
 빈 자료 폴더에는 `.gitkeep` 파일이 들어 있어 Git에서도 폴더 구조가 유지됩니다.
 
-## GitHub에서 새 자료 등록하기
+## 관리 화면에서 자료 업로드하기
 
-자료는 [lawcombo/nice-hub 저장소](https://github.com/lawcombo/nice-hub)에서 직접 올립니다. 파일을 폴더에 올린 뒤 `assets/data/library.json`의 `materials` 배열에 자료 정보를 추가해야 사이트에 표시됩니다. 화면 HTML이나 JavaScript는 수정하지 않아도 됩니다.
+배포된 사이트의 `admin.html`에서 사업과 자료 유형을 선택해 파일을 등록할 수 있습니다.
 
-### GitHub에서 파일 올리는 순서
+- 관리 화면: `https://lawcombo.github.io/nice-hub/admin.html`
+- 공개 자료실: `https://lawcombo.github.io/nice-hub/`
 
-1. GitHub 저장소에서 아래 표에 맞는 폴더로 이동합니다.
-2. 오른쪽 위 **Add file → Upload files**를 누릅니다.
-3. PDF 또는 영상 파일을 끌어놓고 **Commit changes**를 누릅니다.
-4. 표지가 있으면 `assets/thumbnails/`에도 같은 방법으로 올립니다.
-5. `assets/data/library.json`을 열고 연필 모양 **Edit this file**을 누릅니다.
-6. 아래 예시처럼 `materials` 배열에 자료 정보를 추가하고 **Commit changes**를 누릅니다.
+### 1. GitHub Fine-grained 토큰 만들기
 
-파일만 올리고 `library.json`을 수정하지 않으면 자료허브 화면에는 나타나지 않습니다.
+관리 화면은 별도 서버 없이 GitHub API를 사용하므로 업로드 권한을 확인할 토큰이 필요합니다.
 
-### 자료별 업로드 경로
+1. [GitHub Fine-grained token 만들기](https://github.com/settings/personal-access-tokens/new)를 엽니다.
+2. 만료일은 가능한 한 짧게 설정합니다.
+3. **Repository access → Only select repositories**를 선택합니다.
+4. `lawcombo/nice-hub` 저장소만 지정합니다.
+5. **Repository permissions → Contents → Read and write**로 설정합니다.
+6. 토큰을 만든 뒤 관리 화면의 토큰 입력란에 붙여넣고 **연결 확인**을 누릅니다.
 
-| 사업 | 자료 유형 | GitHub 폴더 |
-| --- | --- | --- |
-| 무인숙박 | 브로슈어 | `assets/materials/lodging/brochures/` |
-| 무인숙박 | 매뉴얼 | `assets/materials/lodging/manuals/` |
-| 무인숙박 | 동영상 | `assets/materials/lodging/videos/` |
-| 등하교 | 브로슈어 | `assets/materials/school-safety/brochures/` |
-| 등하교 | 매뉴얼 | `assets/materials/school-safety/manuals/` |
-| 등하교 | 동영상 | `assets/materials/school-safety/videos/` |
-| 공통 | 표지 이미지 | `assets/thumbnails/` |
+토큰은 사이트 코드, GitHub 저장소, `localStorage`나 `sessionStorage`에 저장되지 않습니다. 현재 화면 메모리에서만 사용되며 새로고침하거나 닫으면 사라집니다. 공용 PC에서는 사용하지 마세요.
+
+### 2. 자료 정보 입력 및 업로드
+
+1. 사업 카테고리와 자료 유형을 선택합니다.
+2. 자료 파일을 선택합니다.
+3. 자료명, 설명, 등록·수정일, 정렬 순서를 입력합니다.
+4. 표지가 있으면 WebP, JPG 또는 PNG 이미지를 선택합니다.
+5. **GitHub에 업로드**를 누릅니다.
+
+업로드가 완료되면 자료 파일, 표지, `assets/data/library.json` 변경이 `main` 브랜치의 한 커밋으로 저장됩니다. GitHub Pages에 반영되기까지 잠시 시간이 걸릴 수 있습니다.
+
+### 업로드 제한
+
+- 브로슈어·매뉴얼: PDF
+- 동영상: MP4 또는 WebM
+- 자료 파일: 최대 20MB
+- 표지 이미지: 최대 5MB
+
+GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으면 저장소가 빠르게 커집니다. 큰 동영상은 GitHub에 직접 올리기보다 외부 영상 URL 사용을 권장합니다.
+
+## GitHub에서 직접 자료 등록하기
+
+관리 화면을 사용하지 않을 경우, 파일을 폴더에 넣은 다음 `assets/data/library.json`의 `materials` 배열에 자료 정보를 추가해도 됩니다. 화면 HTML이나 JavaScript 기능 코드는 수정하지 않아도 됩니다.
 
 ### 1. PDF 파일 넣기
 
@@ -180,7 +199,7 @@ assets/materials/ticketing/videos/
 
 3. 새 자료의 `category` 값을 `"ticketing"`으로 지정합니다.
 
-카테고리 설정만 추가하면 공개 자료실 탭이 자동으로 만들어집니다. HTML이나 JavaScript는 수정하지 않아도 됩니다.
+카테고리 설정만 추가하면 공개 자료실 탭과 관리 화면 선택 항목이 자동으로 만들어집니다. HTML이나 JavaScript는 수정하지 않아도 됩니다.
 
 ## 기존 자료 교체하기
 
@@ -235,5 +254,5 @@ git push -u origin main
 - ESC 키와 닫기 버튼으로 미리보기 모달이 닫히는지
 - PDF를 교체한 뒤 `updatedAt` 날짜도 수정했는지
 - 테스트용 PDF나 테스트 자료 객체가 실제 배포 목록에 남아 있지 않은지
-- 파일 업로드 후 `library.json`에도 자료 정보를 추가했는지
-- GitHub 커밋 후 Pages에 자료가 표시되는지
+- 관리 화면 토큰이 코드나 브라우저 저장소에 남지 않는지
+- 업로드 완료 후 GitHub 커밋과 Pages 반영을 확인했는지

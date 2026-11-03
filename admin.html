@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b2e59" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="NICE 자료허브 GitHub 자료 업로드 화면" />
+    <link rel="icon" href="data:," />
+    <title>자료 업로드 | NICE 자료허브</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <link rel="stylesheet" href="./assets/css/admin.css" />
+    <script src="./assets/js/admin.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#uploadMain">업로드 양식으로 바로가기</a>
+
+    <header class="site-header admin-header">
+      <div class="shell header-inner admin-header-inner">
+        <div>
+          <p class="header-kicker">NICE MATERIAL HUB</p>
+          <h1>자료 업로드</h1>
+          <p class="header-description">사업별 자료를 GitHub 저장소에 등록합니다.</p>
+        </div>
+        <a class="header-back-link" href="./index.html">자료허브로 돌아가기</a>
+      </div>
+    </header>
+
+    <main id="uploadMain" class="shell admin-main">
+      <div class="admin-layout">
+        <section class="admin-card" aria-labelledby="connectionHeading">
+          <div class="admin-card-heading">
+            <span class="step-number" aria-hidden="true">1</span>
+            <div>
+              <p class="section-kicker">GitHub 연결</p>
+              <h2 id="connectionHeading">업로드 권한 확인</h2>
+            </div>
+          </div>
+
+          <div class="security-note">
+            <strong>토큰은 저장하지 않습니다.</strong>
+            <p>입력한 토큰은 GitHub API 요청에만 사용되며, 이 화면을 닫거나 새로고침하면 사라집니다.</p>
+          </div>
+
+          <div class="field-group token-field-group">
+            <label for="githubToken">GitHub Fine-grained 토큰</label>
+            <div class="token-input-row">
+              <input
+                id="githubToken"
+                name="githubToken"
+                type="password"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="github_pat_..."
+                aria-describedby="tokenHelp"
+              />
+              <button id="connectButton" class="button button-primary" type="button">연결 확인</button>
+            </div>
+            <p id="tokenHelp" class="field-help">
+              <code>lawcombo/nice-hub</code> 저장소만 선택하고 Repository permissions의
+              <strong>Contents를 Read and write</strong>로 설정하세요.
+            </p>
+          </div>
+
+          <details class="token-guide">
+            <summary>토큰 만드는 방법 보기</summary>
+            <ol>
+              <li>
+                <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">
+                  GitHub Fine-grained token 만들기
+                </a>
+                를 엽니다.
+              </li>
+              <li>Repository access에서 <strong>Only select repositories</strong>를 선택하고 `nice-hub`만 지정합니다.</li>
+              <li>Repository permissions에서 <strong>Contents → Read and write</strong>만 설정합니다.</li>
+              <li>만료일을 짧게 지정해 생성한 뒤 토큰을 위 입력란에 붙여넣습니다.</li>
+            </ol>
+          </details>
+
+          <div id="connectionStatus" class="inline-status" aria-live="polite"></div>
+        </section>
+
+        <section class="admin-card" aria-labelledby="materialHeading">
+          <div class="admin-card-heading">
+            <span class="step-number" aria-hidden="true">2</span>
+            <div>
+              <p class="section-kicker">자료 정보</p>
+              <h2 id="materialHeading">업로드할 자료 입력</h2>
+            </div>
+          </div>
+
+          <form id="uploadForm" autocomplete="off">
+            <fieldset id="uploadFields" disabled>
+              <legend class="visually-hidden">자료 정보</legend>
+
+              <div class="form-grid form-grid-two">
+                <div class="field-group">
+                  <label for="category">사업 카테고리 <span aria-hidden="true">*</span></label>
+                  <select id="category" name="category" required></select>
+                </div>
+                <div class="field-group">
+                  <label for="materialType">자료 유형 <span aria-hidden="true">*</span></label>
+                  <select id="materialType" name="materialType" required></select>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="materialFile">자료 파일 <span aria-hidden="true">*</span></label>
+                <label class="file-picker" for="materialFile">
+                  <span class="file-picker-title">파일 선택</span>
+                  <span id="materialFileName" class="file-picker-name">선택된 파일 없음</span>
+                </label>
+                <input id="materialFile" name="materialFile" class="native-file-input" type="file" required />
+                <p id="fileHelp" class="field-help">브로슈어·매뉴얼은 PDF, 동영상은 MP4 또는 WebM을 선택하세요. 최대 20MB입니다.</p>
+              </div>
+
+              <div class="field-group">
+                <label for="title">자료명 <span aria-hidden="true">*</span></label>
+                <input id="title" name="title" type="text" maxlength="120" required placeholder="예: 2026 등하교 안전 브로슈어" />
+              </div>
+
+              <div class="field-group">
+                <label for="description">짧은 설명 <span aria-hidden="true">*</span></label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="4"
+                  maxlength="300"
+                  required
+                  placeholder="자료의 내용과 용도를 간단히 입력하세요."
+                ></textarea>
+                <p class="character-count"><span id="descriptionCount">0</span>/300</p>
+              </div>
+
+              <div class="form-grid form-grid-two">
+                <div class="field-group">
+                  <label for="updatedAt">등록·수정일 <span aria-hidden="true">*</span></label>
+                  <input id="updatedAt" name="updatedAt" type="date" required />
+                </div>
+                <div class="field-group">
+                  <label for="order">정렬 순서</label>
+                  <input id="order" name="order" type="number" min="0" max="9999" step="1" value="100" />
+                  <p class="field-help">숫자가 작을수록 먼저 표시됩니다.</p>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="thumbnailFile">표지 이미지 <span class="optional-label">선택</span></label>
+                <label class="file-picker file-picker-secondary" for="thumbnailFile">
+                  <span class="file-picker-title">표지 선택</span>
+                  <span id="thumbnailFileName" class="file-picker-name">선택된 이미지 없음</span>
+                </label>
+                <input
+                  id="thumbnailFile"
+                  name="thumbnailFile"
+                  class="native-file-input"
+                  type="file"
+                  accept="image/webp,image/jpeg,image/png,.webp,.jpg,.jpeg,.png"
+                />
+                <p class="field-help">WebP, JPG, PNG 형식이며 최대 5MB입니다. 없으면 기본 표지가 표시됩니다.</p>
+              </div>
+
+              <div class="destination-box">
+                <span>저장 위치</span>
+                <code id="destinationPreview">사업과 자료 유형을 선택해 주세요.</code>
+              </div>
+
+              <button id="uploadButton" class="button button-primary upload-submit" type="submit">
+                GitHub에 업로드
+              </button>
+            </fieldset>
+          </form>
+
+          <div id="uploadProgress" class="upload-progress" hidden aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <div>
+              <strong id="progressTitle">업로드를 준비하고 있습니다.</strong>
+              <p id="progressMessage">이 화면을 닫지 마세요.</p>
+            </div>
+          </div>
+
+          <div id="uploadResult" class="upload-result" hidden aria-live="polite"></div>
+        </section>
+      </div>
+
+      <aside class="admin-help" aria-labelledby="noticeHeading">
+        <h2 id="noticeHeading">업로드 전 확인</h2>
+        <ul>
+          <li>업로드하면 `main` 브랜치에 자료 파일과 목록 정보가 한 번에 커밋됩니다.</li>
+          <li>GitHub Pages 반영에는 보통 잠시 시간이 걸립니다.</li>
+          <li>공용 PC에서는 사용하지 말고, 작업이 끝나면 토큰을 폐기하거나 만료시키세요.</li>
+          <li>큰 동영상은 저장소가 빠르게 커질 수 있으므로 외부 영상 URL 사용을 권장합니다.</li>
+        </ul>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>NICE 자료허브</p>
+        <div class="footer-links">
+          <a href="./index.html">자료 목록으로 돌아가기</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
