@@ -987,7 +987,34 @@ button.button {
   -webkit-overflow-scrolling: touch;
 }
 
+.image-preview-viewer {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: auto;
+  place-items: center;
+  padding: 18px;
+  background: #cfd7e1;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.image-preview-viewer img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 5px 20px rgba(7, 29, 55, 0.18);
+}
+
 .pdf-canvas-viewer[hidden],
+.image-preview-viewer[hidden],
+.image-preview-viewer img[hidden],
 .pdf-preview-status[hidden],
 .pdf-canvas-viewer canvas[hidden] {
   display: none;

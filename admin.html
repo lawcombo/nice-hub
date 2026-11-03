@@ -100,7 +100,12 @@
                   <select id="category" name="category" required></select>
                 </div>
                 <div class="field-group">
-                  <label for="materialType">자료 유형 <span aria-hidden="true">*</span></label>
+                  <div class="field-label-row">
+                    <label for="materialType">자료 유형 <span aria-hidden="true">*</span></label>
+                    <button id="openMaterialTypeDialog" class="inline-add-button" type="button">
+                      + 자료 유형 추가
+                    </button>
+                  </div>
                   <select id="materialType" name="materialType" required></select>
                 </div>
               </div>
@@ -132,7 +137,7 @@
                   <span id="materialFileName" class="file-picker-name">선택된 파일 없음</span>
                 </label>
                 <input id="materialFile" name="materialFile" class="native-file-input" type="file" required />
-                <p id="fileHelp" class="field-help">PDF 자료는 최대 20MB입니다.</p>
+                <p id="fileHelp" class="field-help">PDF 또는 이미지 자료는 최대 20MB입니다.</p>
               </div>
 
               <div id="youtubeUrlGroup" class="field-group" hidden>
@@ -251,6 +256,40 @@
         </div>
       </div>
     </footer>
+
+    <dialog id="materialTypeDialog" class="material-type-dialog" aria-labelledby="materialTypeDialogTitle">
+      <form id="materialTypeForm" method="dialog" autocomplete="off">
+        <div class="dialog-heading-row">
+          <div>
+            <p class="section-kicker">자료 분류 설정</p>
+            <h2 id="materialTypeDialogTitle">자료 유형 추가</h2>
+          </div>
+          <button id="closeMaterialTypeDialog" class="icon-button" type="button" aria-label="자료 유형 추가 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <p class="material-type-dialog-description">
+          새 자료 유형을 추가하면 모든 사업 카테고리에 전용 폴더가 함께 생성됩니다.
+        </p>
+        <div class="field-group">
+          <label for="newMaterialTypeName">자료 유형명 <span aria-hidden="true">*</span></label>
+          <input
+            id="newMaterialTypeName"
+            name="newMaterialTypeName"
+            type="text"
+            maxlength="30"
+            placeholder="예: 운영 가이드"
+            required
+          />
+          <p class="field-help">PDF, PNG, JPG, JPEG, WebP 파일을 등록할 수 있는 유형으로 추가됩니다.</p>
+        </div>
+        <p id="materialTypeDialogStatus" class="dialog-status" aria-live="polite"></p>
+        <div class="material-type-dialog-actions">
+          <button id="cancelMaterialTypeDialog" class="button button-secondary" type="button">취소</button>
+          <button id="saveMaterialTypeButton" class="button button-primary" type="submit">GitHub에 저장</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="deleteDialog" class="delete-dialog" aria-labelledby="deleteDialogTitle">
       <div class="delete-dialog-icon" aria-hidden="true">!</div>

@@ -18,6 +18,7 @@
     closeAdminAccess: document.querySelector("#closeAdminAccess"),
     cancelAdminAccess: document.querySelector("#cancelAdminAccess"),
     modal: document.querySelector("#previewModal"),
+    previewTypeLabel: document.querySelector("#previewTypeLabel"),
     modalTitle: document.querySelector("#previewTitle"),
     closeModal: document.querySelector("#closePreview"),
     pdfCanvasViewer: document.querySelector("#pdfCanvasViewer"),
@@ -27,6 +28,9 @@
     previousPreviewPage: document.querySelector("#previousPreviewPage"),
     nextPreviewPage: document.querySelector("#nextPreviewPage"),
     previewPageIndicator: document.querySelector("#previewPageIndicator"),
+    imagePreviewViewer: document.querySelector("#imagePreviewViewer"),
+    imagePreviewStatus: document.querySelector("#imagePreviewStatus"),
+    imagePreview: document.querySelector("#imagePreview"),
     downloadPreview: document.querySelector("#downloadPreview"),
     openPreviewNewTab: document.querySelector("#openPreviewNewTab"),
     videoModal: document.querySelector("#videoModal"),
@@ -98,6 +102,11 @@
     } catch (error) {
       return false;
     }
+  }
+
+  function isImageMaterial(material) {
+    if (String(material?.format || "").toLowerCase() === "image") return true;
+    return /\.(?:png|jpe?g|webp)(?:[?#].*)?$/i.test(String(material?.file || ""));
   }
 
   function renderTabs() {
@@ -257,7 +266,7 @@
     const date = createElement("p", "material-date", formatUpdatedDate(material.updatedAt));
     const actions = createElement("div", "card-actions");
 
-    if (String(material.format).toLowerCase() === "pdf") {
+    if (String(material.format).toLowerCase() === "pdf" || isImageMaterial(material)) {
       const previewButton = createElement("button", "button button-primary", "미리보기");
       previewButton.type = "button";
       previewButton.addEventListener("click", () => openPreview(material, previewButton));
@@ -315,9 +324,9 @@
   function getFileName(path, fallbackTitle) {
     try {
       const pathname = new URL(path, document.baseURI).pathname;
-      return decodeURIComponent(pathname.split("/").pop()) || `${fallbackTitle}.pdf`;
+      return decodeURIComponent(pathname.split("/").pop()) || fallbackTitle;
     } catch (error) {
-      return `${fallbackTitle}.pdf`;
+      return fallbackTitle;
     }
   }
 
@@ -425,12 +434,37 @@
     }
   }
 
+  function openImagePreview(material, fileUrl, session) {
+    elements.imagePreviewViewer.hidden = false;
+    elements.imagePreviewStatus.hidden = false;
+    elements.imagePreviewStatus.classList.remove("is-error");
+    elements.imagePreviewStatus.textContent = "이미지를 불러오고 있습니다.";
+    elements.imagePreview.hidden = true;
+    elements.imagePreview.alt = `${material.title} 미리보기`;
+    elements.imagePreview.onload = () => {
+      if (session !== previewSession) return;
+      elements.imagePreviewStatus.hidden = true;
+      elements.imagePreview.hidden = false;
+    };
+    elements.imagePreview.onerror = () => {
+      if (session !== previewSession) return;
+      elements.imagePreview.hidden = true;
+      elements.imagePreviewStatus.hidden = false;
+      elements.imagePreviewStatus.classList.add("is-error");
+      elements.imagePreviewStatus.textContent =
+        "이미지를 표시하지 못했습니다. 새 탭에서 열기 또는 다운로드를 이용해 주세요.";
+    };
+    elements.imagePreview.src = fileUrl;
+  }
+
   function openPreview(material, trigger) {
     const fileUrl = resolveUrl(material.file);
     if (!fileUrl) return;
 
     const session = ++previewSession;
+    const imageMaterial = isImageMaterial(material);
     lastFocusedElement = trigger || document.activeElement;
+    elements.previewTypeLabel.textContent = imageMaterial ? "IMAGE 미리보기" : "PDF 미리보기";
     elements.modalTitle.textContent = material.title;
     elements.downloadPreview.href = fileUrl;
     elements.downloadPreview.download = getFileName(material.file, material.title);
@@ -440,7 +474,14 @@
     document.addEventListener("keydown", handleModalKeydown);
     window.requestAnimationFrame(() => elements.closeModal.focus());
 
-    openCanvasPreview(fileUrl, session);
+    if (imageMaterial) {
+      elements.previewPagination.hidden = true;
+      elements.pdfCanvasViewer.hidden = true;
+      openImagePreview(material, fileUrl, session);
+    } else {
+      elements.imagePreviewViewer.hidden = true;
+      openCanvasPreview(fileUrl, session);
+    }
   }
 
   function closePreview() {
@@ -450,6 +491,12 @@
     renderRequest += 1;
     elements.modal.hidden = true;
     elements.pdfCanvasViewer.hidden = true;
+    elements.imagePreviewViewer.hidden = true;
+    elements.imagePreview.hidden = true;
+    elements.imagePreview.onload = null;
+    elements.imagePreview.onerror = null;
+    elements.imagePreview.removeAttribute("src");
+    elements.imagePreview.removeAttribute("alt");
     elements.previewPagination.hidden = true;
     elements.pdfPreviewCanvas.hidden = true;
     elements.downloadPreview.removeAttribute("href");

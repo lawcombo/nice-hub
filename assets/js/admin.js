@@ -11,6 +11,18 @@
     maxThumbnailBytes: 5 * 1024 * 1024,
   };
 
+  const documentAccept = [
+    "application/pdf",
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    ".pdf",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+  ];
+
   const elements = {
     token: document.querySelector("#githubToken"),
     connectButton: document.querySelector("#connectButton"),
@@ -47,14 +59,24 @@
     deleteDialogMessage: document.querySelector("#deleteDialogMessage"),
     cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
     confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
+    openMaterialTypeDialog: document.querySelector("#openMaterialTypeDialog"),
+    materialTypeDialog: document.querySelector("#materialTypeDialog"),
+    materialTypeForm: document.querySelector("#materialTypeForm"),
+    newMaterialTypeName: document.querySelector("#newMaterialTypeName"),
+    materialTypeDialogStatus: document.querySelector("#materialTypeDialogStatus"),
+    saveMaterialTypeButton: document.querySelector("#saveMaterialTypeButton"),
+    closeMaterialTypeDialog: document.querySelector("#closeMaterialTypeDialog"),
+    cancelMaterialTypeDialog: document.querySelector("#cancelMaterialTypeDialog"),
   };
 
   let library = null;
   let verifiedToken = "";
   let isUploading = false;
   let isDeleting = false;
+  let isAddingMaterialType = false;
   let pendingDeleteId = "";
   let lastDeleteTrigger = null;
+  let lastMaterialTypeTrigger = null;
 
   class GitHubApiError extends Error {
     constructor(status, message) {
@@ -172,6 +194,19 @@
     return elements.videoSourceInputs.find((input) => input.checked)?.value || "file";
   }
 
+  function isVideoType(type) {
+    return type?.id === "video" || type?.format === "video";
+  }
+
+  function getUploadedFormat(file, type) {
+    if (isVideoType(type)) return "video";
+    const lowerName = String(file?.name || "").toLowerCase();
+    const lowerMime = String(file?.type || "").toLowerCase();
+    if (lowerMime === "application/pdf" || lowerName.endsWith(".pdf")) return "pdf";
+    if (lowerMime.startsWith("image/") || /\.(?:png|jpe?g|webp)$/.test(lowerName)) return "image";
+    return type?.format || "file";
+  }
+
   function normalizeYouTubeUrl(value) {
     let url;
     try {
@@ -194,7 +229,7 @@
 
   function updateFileAccept() {
     const type = getSelectedType();
-    const isVideo = type?.id === "video";
+    const isVideo = isVideoType(type);
     const videoSource = getVideoSourceMethod();
     const isYoutube = isVideo && videoSource === "youtube";
 
@@ -210,7 +245,7 @@
     } else if (isYoutube) {
       elements.fileHelp.textContent = "";
     } else {
-      elements.fileHelp.textContent = "PDF 자료는 최대 20MB입니다.";
+      elements.fileHelp.textContent = "PDF, PNG, JPG, JPEG 또는 WebP 자료를 선택하세요. 최대 20MB입니다.";
     }
     updateDestinationPreview();
   }
@@ -225,7 +260,7 @@
       return;
     }
 
-    if (type.id === "video" && getVideoSourceMethod() === "youtube") {
+    if (isVideoType(type) && getVideoSourceMethod() === "youtube") {
       elements.destinationPreview.textContent = elements.youtubeUrl.value.trim() || "YouTube 외부 링크로 등록";
       return;
     }
@@ -496,13 +531,13 @@
     const thumbnail = elements.thumbnailFile.files[0];
 
     if (!category || !type) throw new Error("사업 카테고리와 자료 유형을 선택해 주세요.");
-    const videoSource = type.id === "video" ? getVideoSourceMethod() : "file";
+    const videoSource = isVideoType(type) ? getVideoSourceMethod() : "file";
     const youtubeUrl = videoSource === "youtube" ? normalizeYouTubeUrl(elements.youtubeUrl.value) : "";
 
     if (videoSource === "file") {
       if (!file) throw new Error("업로드할 자료 파일을 선택해 주세요.");
-      const maximumBytes = type.id === "video" ? config.maxVideoBytes : config.maxDocumentBytes;
-      const maximumLabel = type.id === "video" ? "90MB" : "20MB";
+      const maximumBytes = isVideoType(type) ? config.maxVideoBytes : config.maxDocumentBytes;
+      const maximumLabel = isVideoType(type) ? "90MB" : "20MB";
       if (file.size > maximumBytes) throw new Error(`자료 파일은 ${maximumLabel} 이하만 업로드할 수 있습니다.`);
       if (!fileMatchesType(file, type)) throw new Error(`${type.label}에 허용되지 않는 파일 형식입니다.`);
     }
@@ -601,7 +636,7 @@
       const stamp = timestampString(now);
       const categoryFolder = validateFolderSegment(category.folder || category.id, "사업 카테고리");
       const typeFolder = validateFolderSegment(type.folder, "자료 유형");
-      const isYoutubeVideo = type.id === "video" && videoSource === "youtube";
+      const isYoutubeVideo = isVideoType(type) && videoSource === "youtube";
       const materialPath = isYoutubeVideo
         ? youtubeUrl
         : `assets/materials/${categoryFolder}/${typeFolder}/${stamp}-${sanitizeFileName(file.name)}`;
@@ -626,7 +661,7 @@
         id: `${category.id}-${type.id}-${Date.now().toString(36)}`,
         category: category.id,
         type: type.id,
-        format: type.format,
+        format: getUploadedFormat(file, type),
         title: elements.title.value.trim(),
         description: elements.description.value.trim(),
         file: materialPath,
@@ -634,7 +669,8 @@
         updatedAt: elements.updatedAt.value,
         registeredAt: now.toISOString(),
       };
-      if (type.id === "video") material.sourceType = videoSource;
+      if (file?.type) material.mimeType = file.type;
+      if (isVideoType(type)) material.sourceType = videoSource;
       latestLibrary.materials = Array.isArray(latestLibrary.materials) ? latestLibrary.materials : [];
       latestLibrary.materials.push(material);
 
@@ -792,6 +828,135 @@
     }
   }
 
+  function setMaterialTypeDialogStatus(message = "", type = "") {
+    elements.materialTypeDialogStatus.textContent = message;
+    elements.materialTypeDialogStatus.className = `dialog-status${type ? ` status-${type}` : ""}`;
+  }
+
+  function openMaterialTypeDialog() {
+    if (!verifiedToken || isAddingMaterialType) return;
+    lastMaterialTypeTrigger = document.activeElement;
+    elements.materialTypeForm.reset();
+    setMaterialTypeDialogStatus();
+    elements.materialTypeDialog.showModal();
+    window.requestAnimationFrame(() => elements.newMaterialTypeName.focus());
+  }
+
+  function closeMaterialTypeDialog() {
+    if (isAddingMaterialType || !elements.materialTypeDialog.open) return;
+    elements.materialTypeDialog.close();
+  }
+
+  function createMaterialTypeSetting(label, sourceLibrary) {
+    const existingLabels = new Set(
+      (sourceLibrary.materialTypes || []).map((type) => String(type.label || "").trim().toLocaleLowerCase("ko")),
+    );
+    if (existingLabels.has(label.toLocaleLowerCase("ko"))) {
+      throw new Error("같은 이름의 자료 유형이 이미 등록되어 있습니다.");
+    }
+
+    let suffix = Date.now().toString(36);
+    const existingIds = new Set((sourceLibrary.materialTypes || []).map((type) => type.id));
+    while (existingIds.has(`type-${suffix}`)) suffix = `${suffix}-${Math.random().toString(36).slice(2, 6)}`;
+    return {
+      id: `type-${suffix}`,
+      label,
+      folder: `type-${suffix}`,
+      format: "document",
+      accept: [...documentAccept],
+    };
+  }
+
+  async function addMaterialType(event) {
+    event.preventDefault();
+    if (isAddingMaterialType) return;
+    if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
+      setMaterialTypeDialogStatus("토큰 연결을 다시 확인한 뒤 추가해 주세요.", "error");
+      return;
+    }
+
+    const label = elements.newMaterialTypeName.value.trim().replace(/\s+/g, " ");
+    if (!label) {
+      setMaterialTypeDialogStatus("자료 유형명을 입력해 주세요.", "error");
+      elements.newMaterialTypeName.focus();
+      return;
+    }
+
+    isAddingMaterialType = true;
+    elements.saveMaterialTypeButton.disabled = true;
+    elements.closeMaterialTypeDialog.disabled = true;
+    elements.cancelMaterialTypeDialog.disabled = true;
+    setMaterialTypeDialogStatus("GitHub에 자료 유형과 사업별 폴더를 만들고 있습니다.", "progress");
+
+    try {
+      const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
+      latestLibrary.materialTypes = Array.isArray(latestLibrary.materialTypes) ? latestLibrary.materialTypes : [];
+      const materialType = createMaterialTypeSetting(label, latestLibrary);
+      latestLibrary.materialTypes.push(materialType);
+
+      const categories = Array.isArray(latestLibrary.categories) ? latestLibrary.categories : [];
+      if (!categories.length) throw new Error("폴더를 만들 사업 카테고리가 없습니다.");
+
+      const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
+      const emptyBlob = await createBlob(verifiedToken, "");
+      const parentCommit = await githubApi(
+        `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
+        verifiedToken,
+      );
+      const treeEntries = [{ path: config.dataPath, mode: "100644", type: "blob", sha: dataBlob.sha }];
+      categories.forEach((category) => {
+        const categoryFolder = validateFolderSegment(category.folder || category.id, "사업 카테고리");
+        treeEntries.push({
+          path: `assets/materials/${categoryFolder}/${materialType.folder}/.gitkeep`,
+          mode: "100644",
+          type: "blob",
+          sha: emptyBlob.sha,
+        });
+      });
+
+      const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {
+        method: "POST",
+        body: JSON.stringify({ base_tree: parentCommit.tree.sha, tree: treeEntries }),
+      });
+      const commit = await githubApi(`/repos/${config.owner}/${config.repo}/git/commits`, verifiedToken, {
+        method: "POST",
+        body: JSON.stringify({
+          message: `Add material type: ${materialType.label}`,
+          tree: tree.sha,
+          parents: [reference.object.sha],
+        }),
+      });
+      await githubApi(`/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, verifiedToken, {
+        method: "PATCH",
+        body: JSON.stringify({ sha: commit.sha, force: false }),
+      });
+
+      library = latestLibrary;
+      populateSelect(elements.category, library.categories || []);
+      populateSelect(elements.materialType, library.materialTypes || []);
+      elements.materialType.value = materialType.id;
+      updateFileAccept();
+      renderInventory(library);
+      elements.materialTypeDialog.close();
+      clearResult();
+      showResult(
+        "success",
+        "자료 유형이 추가되었습니다.",
+        `‘${materialType.label}’ 유형과 ${categories.length}개 사업별 폴더를 GitHub에 만들었습니다.`,
+        commit.sha,
+      );
+      setConnectionStatus(`‘${materialType.label}’ 자료 유형이 추가되었습니다.`, "success");
+      window.requestAnimationFrame(() => elements.materialType.focus());
+    } catch (error) {
+      setMaterialTypeDialogStatus(userFriendlyError(error), "error");
+    } finally {
+      isAddingMaterialType = false;
+      elements.saveMaterialTypeButton.disabled = false;
+      elements.closeMaterialTypeDialog.disabled = false;
+      elements.cancelMaterialTypeDialog.disabled = false;
+    }
+  }
+
   async function initialize() {
     try {
       const response = await fetch(new URL("assets/data/library.json", document.baseURI), { cache: "no-cache" });
@@ -812,6 +977,19 @@
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
   elements.cancelDeleteButton.addEventListener("click", closeDeleteDialog);
   elements.confirmDeleteButton.addEventListener("click", deleteSelectedMaterial);
+  elements.openMaterialTypeDialog.addEventListener("click", openMaterialTypeDialog);
+  elements.materialTypeForm.addEventListener("submit", addMaterialType);
+  elements.closeMaterialTypeDialog.addEventListener("click", closeMaterialTypeDialog);
+  elements.cancelMaterialTypeDialog.addEventListener("click", closeMaterialTypeDialog);
+  elements.materialTypeDialog.addEventListener("cancel", (event) => {
+    if (isAddingMaterialType) event.preventDefault();
+  });
+  elements.materialTypeDialog.addEventListener("close", () => {
+    elements.materialTypeForm.reset();
+    setMaterialTypeDialogStatus();
+    if (lastMaterialTypeTrigger && document.contains(lastMaterialTypeTrigger)) lastMaterialTypeTrigger.focus();
+    lastMaterialTypeTrigger = null;
+  });
   elements.deleteDialog.addEventListener("click", (event) => {
     if (event.target === elements.deleteDialog) closeDeleteDialog();
   });
