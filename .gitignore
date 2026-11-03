@@ -1,0 +1,8 @@
+# 운영체제 및 편집기 임시 파일
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# 로컬 테스트 전용 파일
+.tmp/

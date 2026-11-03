@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b2e59" />
+    <link rel="icon" href="data:," />
+    <meta
+      name="description"
+      content="사업별 브로슈어, 매뉴얼, 동영상을 한곳에서 확인하고 내려받는 NICE 자료허브입니다."
+    />
+    <title>NICE 자료허브</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <script src="./assets/js/data.js" defer></script>
+    <script src="./assets/js/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#materials">자료 목록으로 바로가기</a>
+
+    <header class="site-header">
+      <div class="shell header-inner">
+        <div>
+          <p class="header-kicker">NICE MATERIAL HUB</p>
+          <h1>NICE 자료허브</h1>
+          <p class="header-description">사업별 홍보·운영자료를 한곳에서</p>
+        </div>
+        <p class="header-note">필요한 자료를 확인하고 원본 파일로 내려받으세요.</p>
+      </div>
+    </header>
+
+    <main id="materials" class="shell main-content">
+      <section class="materials-section" aria-labelledby="materials-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">자료 찾기</p>
+            <h2 id="materials-heading">사업별 자료</h2>
+          </div>
+          <p id="resultSummary" class="result-summary" aria-live="polite">자료를 확인하고 있습니다.</p>
+        </div>
+
+        <div class="tabs-scroll" aria-label="사업 구분">
+          <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="사업 선택"></div>
+        </div>
+
+        <div id="materialsPanel" role="tabpanel" tabindex="0" aria-labelledby="tab-all">
+          <div id="materialsGrid" class="materials-grid"></div>
+
+          <div id="emptyState" class="empty-state" hidden>
+            <div class="empty-icon" aria-hidden="true">
+              <span></span>
+            </div>
+            <h3>등록된 자료가 없습니다.</h3>
+            <p>자료를 준비 중입니다.</p>
+          </div>
+        </div>
+
+        <noscript>
+          <div class="noscript-message">
+            자료 목록을 보려면 브라우저에서 JavaScript를 사용하도록 설정해 주세요.
+          </div>
+        </noscript>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>NICE 자료허브</p>
+        <p>등록된 자료는 각 사업의 최신 안내에 따라 업데이트됩니다.</p>
+      </div>
+    </footer>
+
+    <div id="previewModal" class="modal" hidden>
+      <div class="modal-backdrop" data-close-modal></div>
+      <section
+        class="modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="previewTitle"
+        aria-describedby="previewHelp"
+      >
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-label">PDF 미리보기</span>
+            <h2 id="previewTitle">자료 미리보기</h2>
+          </div>
+          <button id="closePreview" class="icon-button" type="button" aria-label="미리보기 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+
+        <div class="modal-toolbar" aria-label="PDF 작업">
+          <a id="downloadPreview" class="button button-primary" href="#" download>다운로드</a>
+          <a id="openPreviewNewTab" class="button button-secondary" href="#" target="_blank" rel="noopener">
+            새 탭에서 열기
+          </a>
+        </div>
+
+        <div class="preview-frame-wrap">
+          <iframe id="previewFrame" title="PDF 자료 미리보기" src="about:blank" tabindex="-1"></iframe>
+        </div>
+        <p id="previewHelp" class="preview-help">
+          PDF가 표시되지 않으면 ‘새 탭에서 열기’ 또는 ‘다운로드’를 이용해 주세요.
+        </p>
+      </section>
+    </div>
+  </body>
+</html>
