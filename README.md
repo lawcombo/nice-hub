@@ -124,7 +124,7 @@ NICE 자료허브는 Android에서 PWA 앱으로 설치할 수 있습니다.
 4. 표지가 있으면 WebP, JPG 또는 PNG 이미지를 선택합니다.
 5. **GitHub에 업로드**를 누릅니다.
 
-업로드가 완료되면 자료 파일, 표지, `assets/data/library.json` 변경이 `main` 브랜치의 한 커밋으로 저장됩니다. GitHub Pages에 반영되기까지 잠시 시간이 걸릴 수 있습니다.
+업로드가 완료되면 자료 파일, 표지, `assets/data/library.json` 변경이 `main` 브랜치의 한 커밋으로 저장됩니다. 이때 파일 종류와 용량이 자동 기록되고, PDF는 페이지 수도 자동으로 확인합니다. GitHub Pages에 반영되기까지 잠시 시간이 걸릴 수 있습니다.
 
 자료의 실제 업로드 시각은 `registeredAt`에 자동 기록됩니다. 공개 자료실과 관리 화면의 자료 목록은 이 시각을 기준으로 최신 자료부터 표시되므로 정렬 순서를 따로 입력할 필요가 없습니다.
 
@@ -186,13 +186,15 @@ GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으�
     "description": "등하교 안전 서비스 소개 자료입니다.",
     "file": "assets/materials/school-safety/brochures/school-safety-brochure-2026.pdf",
     "thumbnail": "assets/thumbnails/school-safety-brochure-2026.webp",
+    "fileSizeBytes": 12582912,
+    "pageCount": 16,
     "updatedAt": "2026-11-03",
     "registeredAt": "2026-11-03T14:30:00+09:00"
   }
 ]
 ```
 
-썸네일이 없으면 `thumbnail` 값을 빈 문자열(`""`)로 적거나 항목 자체를 생략하세요. 자료 유형에 맞는 기본 표지가 자동으로 표시됩니다.
+썸네일이 없으면 `thumbnail` 값을 빈 문자열(`""`)로 적거나 항목 자체를 생략하세요. 자료 유형에 맞는 기본 표지가 자동으로 표시됩니다. `fileSizeBytes`에는 원본 파일 크기를 바이트 단위로 적고, PDF라면 `pageCount`에 전체 페이지 수를 적습니다. 관리 화면에서 업로드할 때는 두 값이 자동으로 기록됩니다.
 
 `file` 값이 없거나 잘못된 자료는 화면에 표시되지 않습니다. 미리보기와 다운로드 버튼은 실제 파일 경로가 등록된 PDF 또는 이미지 자료에 표시됩니다. 이미지 자료는 `format`을 `"image"`로 지정하세요.
 

@@ -572,8 +572,16 @@ a {
   -webkit-line-clamp: 3;
 }
 
+.material-file-info {
+  margin: auto 0 0;
+  color: var(--slate-700);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
 .material-date {
-  margin: auto 0 16px;
+  margin: 6px 0 16px;
   color: var(--slate-500);
   font-size: 0.78rem;
 }

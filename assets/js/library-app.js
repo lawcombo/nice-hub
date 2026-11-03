@@ -241,6 +241,35 @@
     return /\.(?:png|jpe?g|webp)(?:[?#].*)?$/i.test(String(material?.file || ""));
   }
 
+  function getMaterialFileKindLabel(material) {
+    const format = String(material?.format || "").toLowerCase();
+    if (format === "pdf") return "PDF";
+    if (isImageMaterial(material)) return "이미지";
+    if (format === "video" || material?.type === "video" || isYouTubeMaterial(material)) return "동영상";
+    return "파일";
+  }
+
+  function formatFileSize(value) {
+    const bytes = Number(value);
+    if (!Number.isFinite(bytes) || bytes <= 0) return "";
+    const units = ["B", "KB", "MB", "GB"];
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const amount = bytes / 1024 ** unitIndex;
+    const decimals = unitIndex === 0 || amount >= 100 ? 0 : 1;
+    return `${amount.toFixed(decimals)}${units[unitIndex]}`;
+  }
+
+  function getMaterialFileInfo(material) {
+    const details = [getMaterialFileKindLabel(material)];
+    const fileSize = formatFileSize(material?.fileSizeBytes);
+    const pageCount = Number(material?.pageCount);
+    if (fileSize) details.push(fileSize);
+    if (String(material?.format || "").toLowerCase() === "pdf" && Number.isInteger(pageCount) && pageCount > 0) {
+      details.push(`${pageCount}페이지`);
+    }
+    return details.join(" · ");
+  }
+
   function renderTabs() {
     const tabItems = [{ id: "all", label: "전체" }, ...categories];
     const fragment = document.createDocumentFragment();
@@ -412,6 +441,7 @@
       "material-description",
       material.description || "자료의 자세한 내용은 파일에서 확인해 주세요.",
     );
+    const fileInfo = createElement("p", "material-file-info", getMaterialFileInfo(material));
     const date = createElement("p", "material-date", formatUpdatedDate(material.updatedAt));
     const actions = createElement("div", "card-actions");
 
@@ -452,7 +482,7 @@
     actions.appendChild(createShareButton(material));
     if (actions.childElementCount === 3) actions.classList.add("card-actions-three");
 
-    body.append(meta, title, description, date, actions);
+    body.append(meta, title, description, fileInfo, date, actions);
     card.append(thumbnail, body);
     return card;
   }

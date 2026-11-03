@@ -108,7 +108,9 @@
       "file": "assets/materials/school-safety/brochures/20261103-122152-학생통합안전시스템_브로셔_온라인_압축본.pdf",
       "thumbnail": "assets/thumbnails/20261103-122152-main.png",
       "updatedAt": "2026-11-03",
-      "registeredAt": "2026-11-03T12:21:52+09:00"
+      "registeredAt": "2026-11-03T12:21:52+09:00",
+      "fileSizeBytes": 18290452,
+      "pageCount": 8
     },
     {
       "id": "lodging-brochure-mw05mb6b",
@@ -120,7 +122,9 @@
       "file": "assets/materials/lodging/brochures/20261103-125427-무인숙박_제품_카탈로그_2026.10_압축본.pdf",
       "thumbnail": "assets/thumbnails/20261103-125427-main2.png",
       "updatedAt": "2026-11-03",
-      "registeredAt": "2026-11-03T12:54:27+09:00"
+      "registeredAt": "2026-11-03T12:54:27+09:00",
+      "fileSizeBytes": 17657715,
+      "pageCount": 12
     },
     {
       "id": "school-safety-video-mw0b5xc7",
@@ -146,7 +150,8 @@
       "thumbnail": "assets/thumbnails/20261103-175552-무인숙박_점주-프로모션_수정본_2026.10.23.png",
       "updatedAt": "2026-11-03",
       "registeredAt": "2026-11-03T08:55:52.964Z",
-      "mimeType": "image/png"
+      "mimeType": "image/png",
+      "fileSizeBytes": 3634592
     },
     {
       "id": "lodging-type-mw0gavti-mw0ggg1t",
@@ -159,7 +164,8 @@
       "thumbnail": "assets/thumbnails/20261103-175801-대리점-프로모션_수정본_2026.10.23.png",
       "updatedAt": "2026-11-03",
       "registeredAt": "2026-11-03T08:58:01.098Z",
-      "mimeType": "image/png"
+      "mimeType": "image/png",
+      "fileSizeBytes": 2866648
     }
   ]
 }

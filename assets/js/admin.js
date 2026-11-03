@@ -77,6 +77,7 @@
   let pendingDeleteId = "";
   let lastDeleteTrigger = null;
   let lastMaterialTypeTrigger = null;
+  let pdfJsModulePromise = null;
 
   class GitHubApiError extends Error {
     constructor(status, message) {
@@ -205,6 +206,31 @@
     if (lowerMime === "application/pdf" || lowerName.endsWith(".pdf")) return "pdf";
     if (lowerMime.startsWith("image/") || /\.(?:png|jpe?g|webp)$/.test(lowerName)) return "image";
     return type?.format || "file";
+  }
+
+  function loadPdfJs() {
+    if (!pdfJsModulePromise) {
+      pdfJsModulePromise = import(new URL("assets/vendor/pdfjs/pdf.min.mjs", document.baseURI).href).then((pdfjs) => {
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL("assets/vendor/pdfjs/pdf.worker.min.mjs", document.baseURI).href;
+        return pdfjs;
+      });
+    }
+    return pdfJsModulePromise;
+  }
+
+  async function getPdfPageCount(arrayBuffer) {
+    const pdfjs = await loadPdfJs();
+    const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
+    let document = null;
+    try {
+      document = await loadingTask.promise;
+      return document.numPages;
+    } catch (error) {
+      throw new Error("PDF 페이지 수를 확인하지 못했습니다. 정상적인 PDF 파일인지 확인해 주세요.");
+    } finally {
+      if (document) await document.destroy();
+      else await loadingTask.destroy().catch(() => {});
+    }
   }
 
   function normalizeYouTubeUrl(value) {
@@ -641,11 +667,18 @@
         ? youtubeUrl
         : `assets/materials/${categoryFolder}/${typeFolder}/${stamp}-${sanitizeFileName(file.name)}`;
       const thumbnailPath = thumbnail ? `assets/thumbnails/${stamp}-${sanitizeFileName(thumbnail.name)}` : "";
+      const uploadedFormat = getUploadedFormat(file, type);
 
       let fileBlob = null;
+      let pageCount = null;
       if (!isYoutubeVideo) {
         setProgress("자료 파일을 변환하고 있습니다.", `${file.name}을(를) 업로드할 준비 중입니다.`);
-        const fileContent = bytesToBase64(await file.arrayBuffer());
+        const fileBuffer = await file.arrayBuffer();
+        if (uploadedFormat === "pdf") {
+          setProgress("PDF 정보를 확인하고 있습니다.", "카드에 표시할 페이지 수를 계산하는 중입니다.");
+          pageCount = await getPdfPageCount(fileBuffer);
+        }
+        const fileContent = bytesToBase64(fileBuffer);
         fileBlob = await createBlob(verifiedToken, fileContent);
       } else {
         setProgress("YouTube 링크를 준비하고 있습니다.", "영상 주소와 자료 정보를 등록하는 중입니다.");
@@ -661,7 +694,7 @@
         id: `${category.id}-${type.id}-${Date.now().toString(36)}`,
         category: category.id,
         type: type.id,
-        format: getUploadedFormat(file, type),
+        format: uploadedFormat,
         title: elements.title.value.trim(),
         description: elements.description.value.trim(),
         file: materialPath,
@@ -670,6 +703,8 @@
         registeredAt: now.toISOString(),
       };
       if (file?.type) material.mimeType = file.type;
+      if (file?.size) material.fileSizeBytes = file.size;
+      if (Number.isInteger(pageCount) && pageCount > 0) material.pageCount = pageCount;
       if (isVideoType(type)) material.sourceType = videoSource;
       latestLibrary.materials = Array.isArray(latestLibrary.materials) ? latestLibrary.materials : [];
       latestLibrary.materials.push(material);
