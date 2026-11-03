@@ -20,7 +20,6 @@
     modal: document.querySelector("#previewModal"),
     modalTitle: document.querySelector("#previewTitle"),
     closeModal: document.querySelector("#closePreview"),
-    previewFrame: document.querySelector("#previewFrame"),
     pdfCanvasViewer: document.querySelector("#pdfCanvasViewer"),
     pdfPreviewStatus: document.querySelector("#pdfPreviewStatus"),
     pdfPreviewCanvas: document.querySelector("#pdfPreviewCanvas"),
@@ -329,10 +328,6 @@
     return `업데이트 ${new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date)}`;
   }
 
-  function shouldUseCanvasPreview() {
-    return window.matchMedia("(max-width: 800px), (pointer: coarse)").matches;
-  }
-
   function loadPdfJs() {
     if (!pdfJsModulePromise) {
       pdfJsModulePromise = import(resolveUrl("assets/vendor/pdfjs/pdf.min.mjs")).then((pdfjs) => {
@@ -409,7 +404,6 @@
   }
 
   async function openCanvasPreview(fileUrl, session) {
-    elements.previewFrame.hidden = true;
     elements.pdfCanvasViewer.hidden = false;
     elements.previewPagination.hidden = false;
     currentPdfPage = 1;
@@ -446,16 +440,7 @@
     document.addEventListener("keydown", handleModalKeydown);
     window.requestAnimationFrame(() => elements.closeModal.focus());
 
-    if (shouldUseCanvasPreview()) {
-      openCanvasPreview(fileUrl, session);
-    } else {
-      const previewUrl = new URL(fileUrl);
-      previewUrl.hash = "toolbar=1&navpanes=0&view=FitH";
-      elements.pdfCanvasViewer.hidden = true;
-      elements.previewPagination.hidden = true;
-      elements.previewFrame.hidden = false;
-      elements.previewFrame.src = previewUrl.href;
-    }
+    openCanvasPreview(fileUrl, session);
   }
 
   function closePreview() {
@@ -464,8 +449,6 @@
     previewSession += 1;
     renderRequest += 1;
     elements.modal.hidden = true;
-    elements.previewFrame.src = "about:blank";
-    elements.previewFrame.hidden = false;
     elements.pdfCanvasViewer.hidden = true;
     elements.previewPagination.hidden = true;
     elements.pdfPreviewCanvas.hidden = true;
