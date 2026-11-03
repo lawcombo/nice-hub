@@ -94,8 +94,8 @@ a {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  min-height: 224px;
-  padding-block: 52px 46px;
+  min-height: 160px;
+  padding-block: 29px 27px;
   gap: 40px;
 }
 
@@ -869,8 +869,8 @@ button.button {
   }
 
   .header-inner {
-    min-height: 190px;
-    padding-block: 39px 35px;
+    min-height: 146px;
+    padding-block: 25px 23px;
   }
 
   .main-content {
