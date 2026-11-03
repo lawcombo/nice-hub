@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">NICE 자료허브</title>
+  <rect width="512" height="512" fill="#0b2e59" />
+  <rect x="72" y="72" width="368" height="368" rx="64" fill="#164574" />
+  <rect x="126" y="120" width="260" height="272" rx="34" fill="#ffffff" />
+  <text x="256" y="224" fill="#0b2e59" font-family="Arial, sans-serif" font-size="56" font-weight="800" text-anchor="middle">NICE</text>
+  <rect x="174" y="248" width="164" height="10" fill="#2472d4" />
+  <text x="256" y="324" fill="#0b2e59" font-family="'Malgun Gothic', 'Noto Sans KR', sans-serif" font-size="34" font-weight="800" text-anchor="middle">자료허브</text>
+</svg>

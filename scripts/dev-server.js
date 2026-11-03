@@ -17,6 +17,7 @@ const mimeTypes = {
   ".pdf": "application/pdf",
   ".png": "image/png",
   ".svg": "image/svg+xml",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".webp": "image/webp",
 };
 

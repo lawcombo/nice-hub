@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b2e59" />
-    <link rel="icon" href="data:," />
+    <meta name="application-name" content="NICE 자료허브" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/app-icon-192.png" />
     <meta
       name="description"
       content="사업별 브로슈어, 매뉴얼, 동영상을 한곳에서 확인하고 내려받는 NICE 자료허브입니다."
@@ -12,18 +15,25 @@
     <title>NICE 자료허브</title>
     <link rel="stylesheet" href="./assets/css/styles.css" />
     <script src="./assets/js/library-app.js" defer></script>
+    <script src="./assets/js/pwa-install.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#materials">자료 목록으로 바로가기</a>
 
     <header class="site-header">
       <div class="shell header-inner">
-        <div>
+        <div class="header-copy">
           <p class="header-kicker">NICE MATERIAL HUB</p>
           <h1>NICE 자료허브</h1>
           <p class="header-description">사업별 홍보·운영자료를 한곳에서</p>
         </div>
-        <p class="header-note">필요한 자료를 확인하고 원본 파일로 내려받으세요.</p>
+        <div class="header-side">
+          <p class="header-note">필요한 자료를 확인하고 원본 파일로 내려받으세요.</p>
+          <button id="installPwaButton" class="pwa-install-button" type="button" hidden>
+            <span class="pwa-install-icon" aria-hidden="true">↓</span>
+            앱으로 설치
+          </button>
+        </div>
       </div>
     </header>
 
@@ -114,6 +124,39 @@
             <button class="button button-primary" type="submit">확인</button>
           </div>
         </form>
+      </section>
+    </div>
+
+    <div id="pwaInstallModal" class="modal install-modal" hidden>
+      <div class="modal-backdrop" data-close-pwa-install></div>
+      <section
+        class="install-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pwaInstallTitle"
+        aria-describedby="pwaInstallDescription"
+      >
+        <header class="access-dialog-header">
+          <div>
+            <span class="modal-label">INSTALL APP</span>
+            <h2 id="pwaInstallTitle">기본 브라우저에서 열어 설치하기</h2>
+          </div>
+          <button id="closePwaInstall" class="icon-button" type="button" aria-label="설치 안내 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <div class="install-guide">
+          <p id="pwaInstallDescription">
+            현재 브라우저에서는 설치창을 바로 열 수 없습니다. 기본 브라우저로 열면 홈 화면에 설치할 수 있습니다.
+          </p>
+          <ol id="pwaInstallSteps" class="install-steps"></ol>
+          <p class="install-guide-note">Chrome이 없어도 삼성 인터넷 등 기본 브라우저에서 설치할 수 있습니다.</p>
+          <p id="pwaInstallStatus" class="install-status" aria-live="polite"></p>
+          <div class="install-actions">
+            <button id="copyInstallUrl" class="button button-secondary" type="button">설치 주소 복사</button>
+            <button id="confirmPwaInstall" class="button button-primary" type="button">확인</button>
+          </div>
+        </div>
       </section>
     </div>
 
