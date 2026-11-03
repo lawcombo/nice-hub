@@ -81,6 +81,20 @@
     );
   }
 
+  function openInDefaultBrowser() {
+    const targetUrl = new URL(installUrl);
+    const intentTarget = `${targetUrl.host}${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+    const scheme = targetUrl.protocol.replace(":", "");
+    const fallbackUrl = encodeURIComponent(targetUrl.href);
+    const intentUrl =
+      `intent://${intentTarget}#Intent;` +
+      `scheme=${scheme};` +
+      "action=android.intent.action.VIEW;" +
+      "category=android.intent.category.BROWSABLE;" +
+      `S.browser_fallback_url=${fallbackUrl};end`;
+    window.location.assign(intentUrl);
+  }
+
   function openInstallGuide() {
     lastFocusedElement = document.activeElement;
     elements.status.textContent = "";
@@ -163,7 +177,12 @@
   }
 
   async function requestInstallation() {
-    if (isKakaoInApp || !deferredInstallPrompt) {
+    if (isKakaoInApp) {
+      openInDefaultBrowser();
+      return;
+    }
+
+    if (!deferredInstallPrompt) {
       openInstallGuide();
       return;
     }
