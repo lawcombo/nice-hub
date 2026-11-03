@@ -536,6 +536,18 @@ button.button {
   font-weight: 800;
 }
 
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.footer-links a {
+  color: var(--blue-700);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
 .modal {
   position: fixed;
   z-index: 1000;
@@ -708,6 +720,13 @@ button.button {
   }
 
   .footer-inner p + p {
+    margin-top: 4px;
+  }
+
+  .footer-links {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
     margin-top: 4px;
   }
 

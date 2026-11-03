@@ -1,18 +1,13 @@
 (function () {
   "use strict";
 
-  const data = window.NICE_HUB_DATA || {};
-  const categories = Array.isArray(data.categories)
-    ? [...data.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
-    : [];
-  const materials = Array.isArray(data.materials) ? data.materials : [];
-  const materialTypes = data.materialTypes || {};
-
   const elements = {
     tabs: document.querySelector("#categoryTabs"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
     empty: document.querySelector("#emptyState"),
+    emptyTitle: document.querySelector("#emptyState h3"),
+    emptyMessage: document.querySelector("#emptyState p"),
     summary: document.querySelector("#resultSummary"),
     modal: document.querySelector("#previewModal"),
     modalTitle: document.querySelector("#previewTitle"),
@@ -22,7 +17,10 @@
     openPreviewNewTab: document.querySelector("#openPreviewNewTab"),
   };
 
-  const categoryMap = new Map(categories.map((category) => [category.id, category]));
+  let categories = [];
+  let materials = [];
+  let materialTypeMap = new Map();
+  let categoryMap = new Map();
   let activeCategory = "all";
   let lastFocusedElement = null;
 
@@ -49,7 +47,7 @@
   }
 
   function getTypeLabel(type) {
-    return materialTypes[type] || type || "자료";
+    return materialTypeMap.get(type)?.label || type || "자료";
   }
 
   function getFormatLabel(material) {
@@ -127,6 +125,8 @@
     elements.grid.replaceChildren(fragment);
     elements.grid.hidden = visibleMaterials.length === 0;
     elements.empty.hidden = visibleMaterials.length !== 0;
+    elements.emptyTitle.textContent = "등록된 자료가 없습니다.";
+    elements.emptyMessage.textContent = "자료를 준비 중입니다.";
 
     const categoryLabel = activeCategory === "all" ? "전체" : getCategoryLabel(activeCategory);
     elements.summary.textContent = `${categoryLabel} 자료 ${visibleMaterials.length}건`;
@@ -225,9 +225,11 @@
     const fileUrl = resolveUrl(material.file);
     if (!fileUrl) return;
 
+    const previewUrl = new URL(fileUrl);
+    previewUrl.hash = "toolbar=1&navpanes=0&view=FitH";
     lastFocusedElement = trigger || document.activeElement;
     elements.modalTitle.textContent = material.title;
-    elements.previewFrame.src = `${fileUrl}#toolbar=1&navpanes=0&view=FitH`;
+    elements.previewFrame.src = previewUrl.href;
     elements.downloadPreview.href = fileUrl;
     elements.downloadPreview.download = getFileName(material.file, material.title);
     elements.openPreviewNewTab.href = fileUrl;
@@ -275,9 +277,34 @@
     }
   }
 
+  async function initialize() {
+    try {
+      const response = await fetch(resolveUrl("assets/data/library.json"), { cache: "no-cache" });
+      if (!response.ok) throw new Error(`자료 목록 응답 오류: ${response.status}`);
+      const data = await response.json();
+
+      categories = Array.isArray(data.categories)
+        ? [...data.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+        : [];
+      materials = Array.isArray(data.materials) ? data.materials : [];
+      const materialTypes = Array.isArray(data.materialTypes) ? data.materialTypes : [];
+      categoryMap = new Map(categories.map((category) => [category.id, category]));
+      materialTypeMap = new Map(materialTypes.map((type) => [type.id, type]));
+
+      renderTabs();
+      renderMaterials();
+    } catch (error) {
+      console.error("자료 목록을 불러오지 못했습니다.", error);
+      renderTabs();
+      elements.grid.hidden = true;
+      elements.empty.hidden = false;
+      elements.emptyTitle.textContent = "자료 목록을 불러오지 못했습니다.";
+      elements.emptyMessage.textContent = "잠시 후 새로고침해 주세요.";
+      elements.summary.textContent = "자료 목록 오류";
+    }
+  }
+
   elements.closeModal.addEventListener("click", closePreview);
   elements.modal.querySelector("[data-close-modal]").addEventListener("click", closePreview);
-
-  renderTabs();
-  renderMaterials();
+  initialize();
 })();
