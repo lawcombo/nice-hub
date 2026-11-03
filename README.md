@@ -5,9 +5,7 @@
 - 페이지명: **NICE 자료허브**
 - 소개 문구: **사업별 홍보·운영자료를 한곳에서**
 - 현재 사업 구분: **무인숙박 / 등하교**
-- 현재 실제 등록 자료: **0건**
-
-> 실제 등하교 브로슈어 PDF는 추후 전달받은 뒤 등록할 예정입니다. 현재 저장소에는 배포용 PDF가 없습니다.
+- 실제 등록 자료는 `assets/data/library.json`의 `materials` 목록에서 관리합니다.
 
 ## 로컬에서 실행하기
 
@@ -45,7 +43,7 @@ NICE 자료허브/
 │  ├─ css/                            # 공개·관리 화면 스타일
 │  ├─ data/library.json               # 사업 카테고리, 자료 유형, 자료 목록
 │  ├─ js/
-│  │  ├─ library-app.js               # 탭, 카드, PDF 미리보기 기능
+│  │  ├─ library-app.js               # 탭, 카드, PDF·동영상 미리보기 기능
 │  │  └─ admin.js                     # GitHub 업로드 및 커밋 기능
 │  ├─ vendor/pdfjs/                    # 모바일 PDF 미리보기용 PDF.js
 │  ├─ materials/
@@ -93,7 +91,7 @@ PC에서는 브라우저의 기본 PDF 표시 기능을 사용하고, 모바일�
 ### 2. 자료 정보 입력 및 업로드
 
 1. 사업 카테고리와 자료 유형을 선택합니다.
-2. 자료 파일을 선택합니다.
+2. PDF 자료는 파일을 선택합니다. 동영상은 **직접 파일 업로드** 또는 **YouTube 링크 등록** 중 하나를 선택합니다.
 3. 자료명, 설명, 등록·수정일, 정렬 순서를 입력합니다.
 4. 표지가 있으면 WebP, JPG 또는 PNG 이미지를 선택합니다.
 5. **GitHub에 업로드**를 누릅니다.
@@ -112,11 +110,11 @@ PC에서는 브라우저의 기본 PDF 표시 기능을 사용하고, 모바일�
 ### 업로드 제한
 
 - 브로슈어·매뉴얼·제안서: PDF
-- 동영상: MP4 또는 WebM
-- 자료 파일: 최대 20MB
+- 동영상 직접 업로드: MP4 또는 WebM, 최대 90MB
+- 브로슈어·매뉴얼·제안서 파일: 최대 20MB
 - 표지 이미지: 최대 5MB
 
-GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으면 저장소가 빠르게 커집니다. 큰 동영상은 GitHub에 직접 올리기보다 외부 영상 URL 사용을 권장합니다.
+GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으면 저장소가 빠르게 커집니다. 90MB를 넘는 동영상이나 장시간 영상은 **YouTube 링크 등록**을 사용하세요.
 
 ## GitHub에서 직접 자료 등록하기
 
@@ -172,9 +170,16 @@ GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으�
 
 이미지 파일이 없거나 경로가 잘못되어도 카드가 깨지지 않고 기본 표지로 대체됩니다.
 
-## 외부 동영상 URL 등록하기
+## 동영상 등록하기
 
-향후 YouTube 등 외부 URL을 자료로 연결할 수 있습니다. 동영상은 PDF 모달 대신 새 탭에서 열립니다.
+관리 화면에서 자료 유형을 **동영상**으로 선택하면 아래 두 방식 중 하나를 고를 수 있습니다.
+
+- **직접 파일 업로드**: MP4 또는 WebM 파일을 `assets/materials/사업/videos/`에 저장합니다. 공개 자료실의 **바로 재생** 버튼을 누르면 페이지 안의 큰 재생 창에서 영상이 재생되며, 원본 다운로드도 제공됩니다.
+- **YouTube 링크 등록**: YouTube 또는 `youtu.be` 주소만 자료 목록에 저장합니다. 영상 파일은 GitHub에 저장하지 않으며, 공개 자료실의 **YouTube에서 보기** 버튼을 누르면 새 탭으로 이동합니다.
+
+두 방식 모두 공개 카드에는 동일하게 자료명, 설명, 표지 이미지가 표시됩니다. 표지를 등록하지 않으면 동영상 기본 표지가 표시됩니다.
+
+GitHub에서 직접 YouTube 영상을 등록할 때는 다음처럼 `sourceType`을 `youtube`로 지정합니다.
 
 ```json
 {
@@ -184,10 +189,29 @@ GitHub는 단일 파일 100MB를 차단하며 큰 바이너리 파일이 많으�
   "format": "video",
   "title": "무인숙박 서비스 소개 영상",
   "description": "서비스 구성과 이용 방법을 소개합니다.",
-  "file": "https://example.com/video",
+  "file": "https://www.youtube.com/watch?v=영상ID",
+  "sourceType": "youtube",
   "thumbnail": "assets/thumbnails/lodging-intro-video.webp",
   "updatedAt": "2026-11-03",
   "order": 20
+}
+```
+
+직접 업로드한 영상은 `file`에 저장소 안의 MP4/WebM 경로를 적고 `sourceType`을 `file`로 지정합니다.
+
+```json
+{
+  "id": "lodging-intro-video-file",
+  "category": "lodging",
+  "type": "video",
+  "format": "video",
+  "title": "무인숙박 사용 안내 영상",
+  "description": "키오스크 사용 순서를 안내합니다.",
+  "file": "assets/materials/lodging/videos/lodging-guide.mp4",
+  "sourceType": "file",
+  "thumbnail": "assets/thumbnails/lodging-guide.webp",
+  "updatedAt": "2026-11-03",
+  "order": 30
 }
 ```
 

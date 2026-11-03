@@ -163,5 +163,29 @@
         </p>
       </section>
     </div>
+
+    <div id="videoModal" class="modal video-modal" hidden>
+      <div class="modal-backdrop" data-close-video-modal></div>
+      <section class="video-dialog" role="dialog" aria-modal="true" aria-labelledby="videoPreviewTitle">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-label">VIDEO</span>
+            <h2 id="videoPreviewTitle">동영상 재생</h2>
+          </div>
+          <button id="closeVideoPreview" class="icon-button" type="button" aria-label="동영상 재생 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <div class="video-player-wrap">
+          <video id="videoPlayer" controls playsinline preload="metadata"></video>
+        </div>
+        <div class="video-actions">
+          <a id="downloadVideo" class="button button-primary" href="#" download>동영상 다운로드</a>
+          <a id="openVideoNewTab" class="button button-secondary" href="#" target="_blank" rel="noopener">
+            새 탭에서 열기
+          </a>
+        </div>
+      </section>
+    </div>
   </body>
 </html>

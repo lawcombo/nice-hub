@@ -110,6 +110,81 @@
   margin-bottom: 21px;
 }
 
+.field-group[hidden],
+.video-source-fields[hidden] {
+  display: none;
+}
+
+.video-source-fields {
+  margin: 0 0 21px;
+}
+
+.video-source-fields legend {
+  margin-bottom: 8px;
+  color: var(--slate-900);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.video-source-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.video-source-option {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 78px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--slate-300);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.video-source-option:has(input:checked) {
+  border-color: var(--blue-600);
+  background: var(--blue-50);
+  box-shadow: 0 0 0 1px rgba(36, 114, 212, 0.1);
+}
+
+.video-source-option:has(input:focus-visible) {
+  box-shadow: var(--focus);
+}
+
+.video-source-option input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 2px 0 0;
+  accent-color: var(--blue-700);
+}
+
+.video-source-option span {
+  min-width: 0;
+}
+
+.video-source-option strong,
+.video-source-option small {
+  display: block;
+}
+
+.video-source-option strong {
+  color: var(--navy-900);
+  font-size: 0.84rem;
+}
+
+.video-source-option small {
+  margin-top: 3px;
+  color: var(--slate-500);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
 .field-group label:not(.file-picker) {
   display: block;
   margin-bottom: 7px;
@@ -747,7 +822,8 @@ fieldset:disabled {
   }
 
   .form-grid-two,
-  .admin-help ul {
+  .admin-help ul,
+  .video-source-options {
     grid-template-columns: 1fr;
   }
 

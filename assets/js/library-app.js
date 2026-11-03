@@ -30,6 +30,12 @@
     previewPageIndicator: document.querySelector("#previewPageIndicator"),
     downloadPreview: document.querySelector("#downloadPreview"),
     openPreviewNewTab: document.querySelector("#openPreviewNewTab"),
+    videoModal: document.querySelector("#videoModal"),
+    videoTitle: document.querySelector("#videoPreviewTitle"),
+    videoPlayer: document.querySelector("#videoPlayer"),
+    closeVideo: document.querySelector("#closeVideoPreview"),
+    downloadVideo: document.querySelector("#downloadVideo"),
+    openVideoNewTab: document.querySelector("#openVideoNewTab"),
   };
 
   let categories = [];
@@ -49,6 +55,7 @@
   let renderRequest = 0;
   let resizeTimer = null;
   let lastAccessFocusedElement = null;
+  let lastVideoFocusedElement = null;
 
   const adminAccessPassword = "5959";
 
@@ -81,6 +88,17 @@
   function getFormatLabel(material) {
     if (material.format) return String(material.format).toUpperCase();
     return material.type === "video" ? "VIDEO" : "FILE";
+  }
+
+  function isYouTubeMaterial(material) {
+    if (material?.sourceType === "youtube") return true;
+    if (!material?.file || typeof material.file !== "string") return false;
+    try {
+      const hostname = new URL(material.file, document.baseURI).hostname.toLowerCase();
+      return hostname === "youtu.be" || hostname.endsWith(".youtu.be") || hostname === "youtube.com" || hostname.endsWith(".youtube.com");
+    } catch (error) {
+      return false;
+    }
   }
 
   function renderTabs() {
@@ -230,8 +248,24 @@
       downloadLink.className = "button button-secondary";
       downloadLink.textContent = "다운로드";
       actions.appendChild(downloadLink);
+    } else if (material.type === "video" && isYouTubeMaterial(material)) {
+      const openLink = createElement("a", "button button-primary", "YouTube에서 보기");
+      openLink.href = resolveUrl(material.file);
+      openLink.target = "_blank";
+      openLink.rel = "noopener";
+      actions.appendChild(openLink);
+    } else if (material.type === "video") {
+      const playButton = createElement("button", "button button-primary", "바로 재생");
+      playButton.type = "button";
+      playButton.addEventListener("click", () => openVideoPreview(material, playButton));
+      actions.appendChild(playButton);
+
+      const downloadLink = createDownloadLink(material);
+      downloadLink.className = "button button-secondary";
+      downloadLink.textContent = "다운로드";
+      actions.appendChild(downloadLink);
     } else {
-      const openLink = createElement("a", "button button-primary", material.type === "video" ? "영상 보기" : "자료 열기");
+      const openLink = createElement("a", "button button-primary", "자료 열기");
       openLink.href = resolveUrl(material.file);
       openLink.target = "_blank";
       openLink.rel = "noopener";
@@ -431,6 +465,64 @@
     currentPdfPage = 1;
   }
 
+  function openVideoPreview(material, trigger) {
+    const fileUrl = resolveUrl(material.file);
+    if (!fileUrl) return;
+
+    lastVideoFocusedElement = trigger || document.activeElement;
+    elements.videoTitle.textContent = material.title;
+    elements.videoPlayer.src = fileUrl;
+    elements.downloadVideo.href = fileUrl;
+    elements.downloadVideo.download = getFileName(material.file, material.title);
+    elements.openVideoNewTab.href = fileUrl;
+    elements.videoModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleVideoKeydown);
+    elements.videoPlayer.load();
+    void elements.videoPlayer.play().catch(() => {});
+    window.requestAnimationFrame(() => elements.closeVideo.focus());
+  }
+
+  function closeVideoPreview() {
+    if (elements.videoModal.hidden) return;
+
+    elements.videoPlayer.pause();
+    elements.videoPlayer.removeAttribute("src");
+    elements.videoPlayer.load();
+    elements.videoModal.hidden = true;
+    elements.downloadVideo.removeAttribute("href");
+    elements.openVideoNewTab.removeAttribute("href");
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleVideoKeydown);
+
+    if (lastVideoFocusedElement && document.contains(lastVideoFocusedElement)) lastVideoFocusedElement.focus();
+    lastVideoFocusedElement = null;
+  }
+
+  function handleVideoKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeVideoPreview();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const focusable = [
+      ...elements.videoModal.querySelectorAll('button:not([disabled]), a[href], video[controls]'),
+    ].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function openAdminAccess() {
     lastAccessFocusedElement = document.activeElement;
     elements.adminAccessPassword.value = "";
@@ -542,6 +634,8 @@
 
   elements.closeModal.addEventListener("click", closePreview);
   elements.modal.querySelector("[data-close-modal]").addEventListener("click", closePreview);
+  elements.closeVideo.addEventListener("click", closeVideoPreview);
+  elements.videoModal.querySelector("[data-close-video-modal]").addEventListener("click", closeVideoPreview);
   elements.openAdminAccess.addEventListener("click", openAdminAccess);
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
   elements.closeAdminAccess.addEventListener("click", closeAdminAccess);

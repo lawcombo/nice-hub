@@ -105,14 +105,47 @@
                 </div>
               </div>
 
-              <div class="field-group">
+              <fieldset id="videoSourceFields" class="video-source-fields" hidden>
+                <legend>동영상 등록 방식 <span aria-hidden="true">*</span></legend>
+                <div class="video-source-options">
+                  <label class="video-source-option">
+                    <input type="radio" name="videoSource" value="file" checked />
+                    <span>
+                      <strong>직접 파일 업로드</strong>
+                      <small>MP4 또는 WebM 파일을 GitHub에 저장합니다.</small>
+                    </span>
+                  </label>
+                  <label class="video-source-option">
+                    <input type="radio" name="videoSource" value="youtube" />
+                    <span>
+                      <strong>YouTube 링크 등록</strong>
+                      <small>자료허브에서 YouTube 영상으로 바로 이동합니다.</small>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <div id="materialFileGroup" class="field-group">
                 <label for="materialFile">자료 파일 <span aria-hidden="true">*</span></label>
                 <label class="file-picker" for="materialFile">
                   <span class="file-picker-title">파일 선택</span>
                   <span id="materialFileName" class="file-picker-name">선택된 파일 없음</span>
                 </label>
                 <input id="materialFile" name="materialFile" class="native-file-input" type="file" required />
-                <p id="fileHelp" class="field-help">브로슈어·매뉴얼은 PDF, 동영상은 MP4 또는 WebM을 선택하세요. 최대 20MB입니다.</p>
+                <p id="fileHelp" class="field-help">PDF 자료는 최대 20MB입니다.</p>
+              </div>
+
+              <div id="youtubeUrlGroup" class="field-group" hidden>
+                <label for="youtubeUrl">YouTube 영상 링크 <span aria-hidden="true">*</span></label>
+                <input
+                  id="youtubeUrl"
+                  name="youtubeUrl"
+                  type="url"
+                  inputmode="url"
+                  autocomplete="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p class="field-help">YouTube 또는 youtu.be 주소를 입력하세요. 자료허브의 영상 버튼이 이 주소로 연결됩니다.</p>
               </div>
 
               <div class="field-group">

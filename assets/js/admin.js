@@ -6,7 +6,8 @@
     repo: "nice-hub",
     branch: "main",
     dataPath: "assets/data/library.json",
-    maxMaterialBytes: 20 * 1024 * 1024,
+    maxDocumentBytes: 20 * 1024 * 1024,
+    maxVideoBytes: 90 * 1024 * 1024,
     maxThumbnailBytes: 5 * 1024 * 1024,
   };
 
@@ -18,8 +19,14 @@
     fields: document.querySelector("#uploadFields"),
     category: document.querySelector("#category"),
     materialType: document.querySelector("#materialType"),
+    videoSourceFields: document.querySelector("#videoSourceFields"),
+    videoSourceInputs: [...document.querySelectorAll('input[name="videoSource"]')],
+    materialFileGroup: document.querySelector("#materialFileGroup"),
     materialFile: document.querySelector("#materialFile"),
     materialFileName: document.querySelector("#materialFileName"),
+    fileHelp: document.querySelector("#fileHelp"),
+    youtubeUrlGroup: document.querySelector("#youtubeUrlGroup"),
+    youtubeUrl: document.querySelector("#youtubeUrl"),
     thumbnailFile: document.querySelector("#thumbnailFile"),
     thumbnailFileName: document.querySelector("#thumbnailFileName"),
     title: document.querySelector("#title"),
@@ -141,9 +148,50 @@
     return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date);
   }
 
+  function getVideoSourceMethod() {
+    return elements.videoSourceInputs.find((input) => input.checked)?.value || "file";
+  }
+
+  function normalizeYouTubeUrl(value) {
+    let url;
+    try {
+      url = new URL(value.trim());
+    } catch (error) {
+      throw new Error("올바른 YouTube 영상 주소를 입력해 주세요.");
+    }
+
+    const hostname = url.hostname.toLowerCase();
+    const isYoutubeHost =
+      hostname === "youtu.be" ||
+      hostname.endsWith(".youtu.be") ||
+      hostname === "youtube.com" ||
+      hostname.endsWith(".youtube.com");
+    if (!isYoutubeHost || !["http:", "https:"].includes(url.protocol)) {
+      throw new Error("YouTube 또는 youtu.be 영상 주소만 등록할 수 있습니다.");
+    }
+    return url.href;
+  }
+
   function updateFileAccept() {
     const type = getSelectedType();
+    const isVideo = type?.id === "video";
+    const videoSource = getVideoSourceMethod();
+    const isYoutube = isVideo && videoSource === "youtube";
+
     elements.materialFile.accept = Array.isArray(type?.accept) ? type.accept.join(",") : "";
+    elements.videoSourceFields.hidden = !isVideo;
+    elements.materialFileGroup.hidden = isYoutube;
+    elements.youtubeUrlGroup.hidden = !isYoutube;
+    elements.materialFile.required = !isYoutube;
+    elements.youtubeUrl.required = isYoutube;
+
+    if (isVideo && !isYoutube) {
+      elements.fileHelp.textContent = "MP4 또는 WebM 동영상 파일을 선택하세요. 최대 90MB입니다.";
+    } else if (isYoutube) {
+      elements.fileHelp.textContent = "";
+    } else {
+      elements.fileHelp.textContent = "PDF 자료는 최대 20MB입니다.";
+    }
     updateDestinationPreview();
   }
 
@@ -154,6 +202,11 @@
 
     if (!category || !type) {
       elements.destinationPreview.textContent = "사업과 자료 유형을 선택해 주세요.";
+      return;
+    }
+
+    if (type.id === "video" && getVideoSourceMethod() === "youtube") {
+      elements.destinationPreview.textContent = elements.youtubeUrl.value.trim() || "YouTube 외부 링크로 등록";
       return;
     }
 
@@ -423,9 +476,16 @@
     const thumbnail = elements.thumbnailFile.files[0];
 
     if (!category || !type) throw new Error("사업 카테고리와 자료 유형을 선택해 주세요.");
-    if (!file) throw new Error("업로드할 자료 파일을 선택해 주세요.");
-    if (file.size > config.maxMaterialBytes) throw new Error("자료 파일은 20MB 이하만 업로드할 수 있습니다.");
-    if (!fileMatchesType(file, type)) throw new Error(`${type.label}에 허용되지 않는 파일 형식입니다.`);
+    const videoSource = type.id === "video" ? getVideoSourceMethod() : "file";
+    const youtubeUrl = videoSource === "youtube" ? normalizeYouTubeUrl(elements.youtubeUrl.value) : "";
+
+    if (videoSource === "file") {
+      if (!file) throw new Error("업로드할 자료 파일을 선택해 주세요.");
+      const maximumBytes = type.id === "video" ? config.maxVideoBytes : config.maxDocumentBytes;
+      const maximumLabel = type.id === "video" ? "90MB" : "20MB";
+      if (file.size > maximumBytes) throw new Error(`자료 파일은 ${maximumLabel} 이하만 업로드할 수 있습니다.`);
+      if (!fileMatchesType(file, type)) throw new Error(`${type.label}에 허용되지 않는 파일 형식입니다.`);
+    }
     if (!elements.title.value.trim()) throw new Error("자료명을 입력해 주세요.");
     if (!elements.description.value.trim()) throw new Error("자료 설명을 입력해 주세요.");
     if (!elements.updatedAt.value) throw new Error("등록·수정일을 선택해 주세요.");
@@ -436,7 +496,7 @@
       if (thumbnail.size > config.maxThumbnailBytes) throw new Error("표지 이미지는 5MB 이하만 업로드할 수 있습니다.");
     }
 
-    return { category, type, file, thumbnail };
+    return { category, type, file, thumbnail, videoSource, youtubeUrl };
   }
 
   function userFriendlyError(error) {
@@ -516,17 +576,25 @@
     try {
       setProgress("최신 자료 목록을 확인하고 있습니다.", "GitHub의 main 브랜치를 읽는 중입니다.");
       const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
-      const { category, type, file, thumbnail } = validateInputs(latestLibrary);
+      const { category, type, file, thumbnail, videoSource, youtubeUrl } = validateInputs(latestLibrary);
       const now = new Date();
       const stamp = timestampString(now);
       const categoryFolder = validateFolderSegment(category.folder || category.id, "사업 카테고리");
       const typeFolder = validateFolderSegment(type.folder, "자료 유형");
-      const materialPath = `assets/materials/${categoryFolder}/${typeFolder}/${stamp}-${sanitizeFileName(file.name)}`;
+      const isYoutubeVideo = type.id === "video" && videoSource === "youtube";
+      const materialPath = isYoutubeVideo
+        ? youtubeUrl
+        : `assets/materials/${categoryFolder}/${typeFolder}/${stamp}-${sanitizeFileName(file.name)}`;
       const thumbnailPath = thumbnail ? `assets/thumbnails/${stamp}-${sanitizeFileName(thumbnail.name)}` : "";
 
-      setProgress("자료 파일을 변환하고 있습니다.", `${file.name}을(를) 업로드할 준비 중입니다.`);
-      const fileContent = bytesToBase64(await file.arrayBuffer());
-      const fileBlob = await createBlob(verifiedToken, fileContent);
+      let fileBlob = null;
+      if (!isYoutubeVideo) {
+        setProgress("자료 파일을 변환하고 있습니다.", `${file.name}을(를) 업로드할 준비 중입니다.`);
+        const fileContent = bytesToBase64(await file.arrayBuffer());
+        fileBlob = await createBlob(verifiedToken, fileContent);
+      } else {
+        setProgress("YouTube 링크를 준비하고 있습니다.", "영상 주소와 자료 정보를 등록하는 중입니다.");
+      }
 
       let thumbnailBlob = null;
       if (thumbnail) {
@@ -547,6 +615,7 @@
         updatedAt: elements.updatedAt.value,
         order: Number.isInteger(parsedOrder) ? parsedOrder : 100,
       };
+      if (type.id === "video") material.sourceType = videoSource;
       latestLibrary.materials = Array.isArray(latestLibrary.materials) ? latestLibrary.materials : [];
       latestLibrary.materials.push(material);
 
@@ -556,10 +625,10 @@
         `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
         verifiedToken,
       );
-      const treeEntries = [
-        { path: materialPath, mode: "100644", type: "blob", sha: fileBlob.sha },
-        { path: config.dataPath, mode: "100644", type: "blob", sha: dataBlob.sha },
-      ];
+      const treeEntries = [{ path: config.dataPath, mode: "100644", type: "blob", sha: dataBlob.sha }];
+      if (fileBlob) {
+        treeEntries.unshift({ path: materialPath, mode: "100644", type: "blob", sha: fileBlob.sha });
+      }
       if (thumbnailBlob) {
         treeEntries.push({ path: thumbnailPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha });
       }
@@ -588,7 +657,9 @@
       showResult(
         "success",
         "업로드가 완료되었습니다.",
-        "파일과 자료 목록이 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다.",
+        isYoutubeVideo
+          ? "YouTube 링크와 자료 정보가 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다."
+          : "파일과 자료 목록이 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다.",
         commit.sha,
       );
       elements.form.reset();
@@ -686,7 +757,13 @@
       });
 
       library = latestLibrary;
-      setInventoryStatus(`‘${material.title}’ 자료와 원본 파일을 삭제했습니다.`, "success", commit.sha);
+      setInventoryStatus(
+        materialPath
+          ? `‘${material.title}’ 자료와 원본 파일을 삭제했습니다.`
+          : `‘${material.title}’ 외부 링크 자료를 목록에서 삭제했습니다.`,
+        "success",
+        commit.sha,
+      );
     } catch (error) {
       setInventoryStatus(userFriendlyError(error), "error");
     } finally {
@@ -727,6 +804,8 @@
   });
   elements.category.addEventListener("change", updateDestinationPreview);
   elements.materialType.addEventListener("change", updateFileAccept);
+  elements.videoSourceInputs.forEach((input) => input.addEventListener("change", updateFileAccept));
+  elements.youtubeUrl.addEventListener("input", updateDestinationPreview);
   elements.materialFile.addEventListener("change", updateFileLabels);
   elements.thumbnailFile.addEventListener("change", updateFileLabels);
   elements.description.addEventListener("input", () => {

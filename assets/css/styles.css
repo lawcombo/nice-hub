@@ -448,6 +448,10 @@ a {
   gap: 8px;
 }
 
+.card-actions > :only-child {
+  grid-column: 1 / -1;
+}
+
 .button {
   display: inline-flex;
   min-height: 44px;
@@ -651,6 +655,40 @@ button.button {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+}
+
+.video-dialog {
+  position: relative;
+  width: min(920px, 100%);
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+}
+
+.video-player-wrap {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  padding: 14px;
+  background: #081523;
+}
+
+.video-player-wrap video {
+  display: block;
+  width: 100%;
+  max-height: min(68vh, 680px);
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.video-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--slate-200);
+  background: var(--blue-50);
 }
 
 .access-dialog-header {
@@ -1002,9 +1040,33 @@ button.button {
     padding: 18px;
   }
 
+  .video-modal {
+    padding: 10px;
+  }
+
   .access-dialog {
     width: 100%;
     border-radius: 16px;
+  }
+
+  .video-dialog {
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  .video-player-wrap {
+    min-height: 0;
+    padding: 5px;
+  }
+
+  .video-player-wrap video {
+    max-height: 62vh;
+  }
+
+  .video-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 9px;
   }
 
   .access-dialog-header {
