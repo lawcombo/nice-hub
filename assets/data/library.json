@@ -73,6 +73,18 @@
       "thumbnail": "assets/thumbnails/20261103-125427-main2.png",
       "updatedAt": "2026-11-03",
       "order": 100
+    },
+    {
+      "id": "school-safety-brochure-mw09v2xm",
+      "category": "school-safety",
+      "type": "brochure",
+      "format": "pdf",
+      "title": "학생통합안전시스템 제안서 송부용 2026.10ver",
+      "description": "학생통합안전시스템 제안서 송부용 2026.10ver",
+      "file": "assets/materials/school-safety/brochures/20261103-145322-학생통합안전시스템_제안서_송부용_2026.10ver.pdf",
+      "thumbnail": "",
+      "updatedAt": "2026-11-03",
+      "order": 100
     }
   ]
 }
