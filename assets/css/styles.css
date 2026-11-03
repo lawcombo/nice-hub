@@ -588,6 +588,22 @@ a {
   grid-column: 1 / -1;
 }
 
+.card-actions-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.card-actions-three .button {
+  min-width: 0;
+  padding-inline: 7px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.share-link-button {
+  white-space: nowrap;
+}
+
 .button {
   display: inline-flex;
   min-height: 44px;
@@ -1235,6 +1251,11 @@ button.button {
 
   .materials-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card-actions-three .button {
+    padding-inline: 4px;
+    font-size: 0.78rem;
   }
 
   .footer-inner {

@@ -449,6 +449,9 @@
       actions.appendChild(openLink);
     }
 
+    actions.appendChild(createShareButton(material));
+    if (actions.childElementCount === 3) actions.classList.add("card-actions-three");
+
     body.append(meta, title, description, date, actions);
     card.append(thumbnail, body);
     return card;
@@ -468,6 +471,85 @@
     link.href = resolveUrl(material.file);
     link.download = getFileName(material.file, material.title);
     return link;
+  }
+
+  function isMobileDevice() {
+    if (navigator.userAgentData?.mobile === true) return true;
+    if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return true;
+    return window.matchMedia("(max-width: 767px) and (pointer: coarse)").matches;
+  }
+
+  function getShareActionLabel() {
+    return isMobileDevice() ? "공유하기" : "링크 복사";
+  }
+
+  function createShareButton(material) {
+    const label = getShareActionLabel();
+    const button = createElement("button", "button button-secondary share-link-button", label);
+    button.type = "button";
+    button.dataset.defaultLabel = label;
+    button.dataset.defaultAriaLabel = `${material.title} ${label}`;
+    button.setAttribute("aria-label", button.dataset.defaultAriaLabel);
+    button.addEventListener("click", () => shareMaterialLink(material, button));
+    return button;
+  }
+
+  async function shareMaterialLink(material, button) {
+    const url = resolveUrl(material.file);
+    if (!url) return;
+
+    if (isMobileDevice() && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: material.title,
+          text: `${material.title} 자료를 확인해 보세요.`,
+          url,
+        });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+        console.warn("모바일 공유창을 열지 못해 링크 복사로 전환합니다.", error);
+      }
+    }
+
+    try {
+      await copyText(url);
+      showShareFeedback(button, "링크 복사됨");
+    } catch (error) {
+      console.error("자료 링크를 복사하지 못했습니다.", error);
+      showShareFeedback(button, "복사 실패");
+    }
+  }
+
+  async function copyText(value) {
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = value;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length);
+    const copied = document.execCommand("copy");
+    textArea.remove();
+    if (!copied) throw new Error("브라우저가 클립보드 복사를 허용하지 않았습니다.");
+  }
+
+  function showShareFeedback(button, message) {
+    window.clearTimeout(Number(button.dataset.feedbackTimer || 0));
+    button.textContent = message;
+    button.setAttribute("aria-label", message);
+    const timer = window.setTimeout(() => {
+      button.textContent = button.dataset.defaultLabel || getShareActionLabel();
+      button.setAttribute("aria-label", button.dataset.defaultAriaLabel || button.textContent);
+      delete button.dataset.feedbackTimer;
+    }, 1800);
+    button.dataset.feedbackTimer = String(timer);
   }
 
   function getFileName(path, fallbackTitle) {
