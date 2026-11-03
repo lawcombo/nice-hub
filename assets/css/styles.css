@@ -263,17 +263,7 @@ a {
 }
 
 .material-type-filter {
-  display: flex;
-  align-items: center;
-  gap: 14px;
   margin-bottom: 30px;
-}
-
-.material-type-filter-label {
-  flex: 0 0 auto;
-  color: var(--slate-700);
-  font-size: 0.8rem;
-  font-weight: 800;
 }
 
 .material-type-scroll {
@@ -1124,9 +1114,6 @@ button.button {
   }
 
   .material-type-filter {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 5px;
     margin-bottom: 24px;
   }
 
