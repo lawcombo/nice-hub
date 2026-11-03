@@ -62,8 +62,13 @@
   let resizeTimer = null;
   let lastAccessFocusedElement = null;
   let lastVideoFocusedElement = null;
+  let pendingHistoryModalClose = "";
+  let exitGuardEnabled = false;
 
   const adminAccessPassword = "5959";
+  const modalHistoryKey = "niceHubModal";
+  const exitGuardHistoryKey = "niceHubExitGuard";
+  const exitBaseHistoryKey = "niceHubExitBase";
 
   function resolveUrl(path) {
     if (!path || typeof path !== "string") return "";
@@ -74,6 +79,130 @@
       console.warn("자료 경로를 해석할 수 없습니다.", path, error);
       return "";
     }
+  }
+
+  function getHistoryState() {
+    return history.state && typeof history.state === "object" ? history.state : {};
+  }
+
+  function isStandaloneApp() {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+
+  function pushModalHistory(modalName) {
+    if (getHistoryState()[modalHistoryKey] === modalName) return true;
+    try {
+      history.pushState({ ...getHistoryState(), [modalHistoryKey]: modalName }, "", window.location.href);
+      return true;
+    } catch (error) {
+      console.warn("미리보기 뒤로가기 기록을 추가하지 못했습니다.", error);
+      return false;
+    }
+  }
+
+  function pushExitGuard() {
+    try {
+      history.pushState(
+        {
+          ...getHistoryState(),
+          [modalHistoryKey]: "",
+          [exitBaseHistoryKey]: false,
+          [exitGuardHistoryKey]: true,
+        },
+        "",
+        window.location.href,
+      );
+      exitGuardEnabled = true;
+    } catch (error) {
+      console.warn("앱 종료 확인 기록을 추가하지 못했습니다.", error);
+      exitGuardEnabled = false;
+    }
+  }
+
+  function initializeBackNavigation() {
+    window.addEventListener("popstate", handleBrowserBack);
+    if (!isStandaloneApp()) return;
+
+    const currentState = getHistoryState();
+    if (currentState[modalHistoryKey]) {
+      history.replaceState({ ...currentState, [modalHistoryKey]: "" }, "", window.location.href);
+    }
+
+    const normalizedState = getHistoryState();
+    if (normalizedState[exitGuardHistoryKey]) {
+      exitGuardEnabled = true;
+      return;
+    }
+    if (normalizedState[exitBaseHistoryKey]) {
+      pushExitGuard();
+      return;
+    }
+    if (history.length > 1) return;
+
+    try {
+      history.replaceState(
+        {
+          ...normalizedState,
+          [modalHistoryKey]: "",
+          [exitBaseHistoryKey]: true,
+          [exitGuardHistoryKey]: false,
+        },
+        "",
+        window.location.href,
+      );
+      pushExitGuard();
+    } catch (error) {
+      console.warn("앱 종료 확인 기능을 준비하지 못했습니다.", error);
+    }
+  }
+
+  function requestModalClose(modalName, closeFunction) {
+    if (pendingHistoryModalClose) return;
+    if (getHistoryState()[modalHistoryKey] !== modalName) {
+      closeFunction();
+      return;
+    }
+
+    pendingHistoryModalClose = modalName;
+    history.back();
+    window.setTimeout(() => {
+      if (pendingHistoryModalClose !== modalName) return;
+      pendingHistoryModalClose = "";
+      closeFunction();
+    }, 500);
+  }
+
+  function closeVisibleModal() {
+    if (!elements.modal.hidden) {
+      closePreview();
+      return true;
+    }
+    if (!elements.videoModal.hidden) {
+      closeVideoPreview();
+      return true;
+    }
+    if (!elements.adminAccessModal.hidden) {
+      closeAdminAccess();
+      return true;
+    }
+    return false;
+  }
+
+  function handleBrowserBack(event) {
+    pendingHistoryModalClose = "";
+    if (closeVisibleModal()) return;
+    if (!exitGuardEnabled || event.state?.[exitGuardHistoryKey]) return;
+
+    if (!window.confirm("앱을 종료하시겠습니까?")) {
+      pushExitGuard();
+      return;
+    }
+
+    exitGuardEnabled = false;
+    window.setTimeout(() => {
+      window.close();
+      window.setTimeout(() => history.back(), 100);
+    }, 0);
   }
 
   function createElement(tagName, className, text) {
@@ -481,6 +610,7 @@
     const fileUrl = resolveUrl(material.file);
     if (!fileUrl) return;
 
+    pushModalHistory("preview");
     const session = ++previewSession;
     const imageMaterial = isImageMaterial(material);
     lastFocusedElement = trigger || document.activeElement;
@@ -539,6 +669,7 @@
     const fileUrl = resolveUrl(material.file);
     if (!fileUrl) return;
 
+    pushModalHistory("video");
     lastVideoFocusedElement = trigger || document.activeElement;
     elements.videoTitle.textContent = material.title;
     elements.videoPlayer.src = fileUrl;
@@ -572,7 +703,7 @@
   function handleVideoKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
-      closeVideoPreview();
+      requestModalClose("video", closeVideoPreview);
       return;
     }
 
@@ -594,6 +725,7 @@
   }
 
   function openAdminAccess() {
+    pushModalHistory("admin-access");
     lastAccessFocusedElement = document.activeElement;
     elements.adminAccessPassword.value = "";
     elements.adminAccessError.textContent = "";
@@ -617,7 +749,7 @@
   function handleAdminAccessSubmit(event) {
     event.preventDefault();
     if (elements.adminAccessPassword.value === adminAccessPassword) {
-      window.location.assign(resolveUrl("admin.html"));
+      window.location.replace(resolveUrl("admin.html"));
       return;
     }
 
@@ -628,7 +760,7 @@
   function handleAdminAccessKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
-      closeAdminAccess();
+      requestModalClose("admin-access", closeAdminAccess);
       return;
     }
 
@@ -652,7 +784,7 @@
   function handleModalKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
-      closePreview();
+      requestModalClose("preview", closePreview);
       return;
     }
 
@@ -702,15 +834,21 @@
     }
   }
 
-  elements.closeModal.addEventListener("click", closePreview);
-  elements.modal.querySelector("[data-close-modal]").addEventListener("click", closePreview);
-  elements.closeVideo.addEventListener("click", closeVideoPreview);
-  elements.videoModal.querySelector("[data-close-video-modal]").addEventListener("click", closeVideoPreview);
+  elements.closeModal.addEventListener("click", () => requestModalClose("preview", closePreview));
+  elements.modal
+    .querySelector("[data-close-modal]")
+    .addEventListener("click", () => requestModalClose("preview", closePreview));
+  elements.closeVideo.addEventListener("click", () => requestModalClose("video", closeVideoPreview));
+  elements.videoModal
+    .querySelector("[data-close-video-modal]")
+    .addEventListener("click", () => requestModalClose("video", closeVideoPreview));
   elements.openAdminAccess.addEventListener("click", openAdminAccess);
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
-  elements.closeAdminAccess.addEventListener("click", closeAdminAccess);
-  elements.cancelAdminAccess.addEventListener("click", closeAdminAccess);
-  elements.adminAccessModal.querySelector("[data-close-admin-access]").addEventListener("click", closeAdminAccess);
+  elements.closeAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
+  elements.cancelAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
+  elements.adminAccessModal
+    .querySelector("[data-close-admin-access]")
+    .addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
   elements.previousPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage - 1));
   elements.nextPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage + 1));
   elements.searchInput.addEventListener("input", updateSearch);
@@ -721,5 +859,6 @@
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => renderPdfPage(currentPdfPage), 180);
   });
+  initializeBackNavigation();
   initialize();
 })();
