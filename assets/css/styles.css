@@ -572,8 +572,17 @@ a {
   -webkit-line-clamp: 3;
 }
 
+.material-detail-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: auto 0 16px;
+}
+
 .material-file-info {
-  margin: auto 0 0;
+  min-width: 0;
+  margin: 0;
   color: var(--slate-700);
   font-size: 0.78rem;
   font-weight: 750;
@@ -581,9 +590,13 @@ a {
 }
 
 .material-date {
-  margin: 6px 0 16px;
+  flex: 0 0 auto;
+  margin: 0;
   color: var(--slate-500);
   font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .card-actions {

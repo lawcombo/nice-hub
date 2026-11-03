@@ -443,6 +443,9 @@
     );
     const fileInfo = createElement("p", "material-file-info", getMaterialFileInfo(material));
     const date = createElement("p", "material-date", formatUpdatedDate(material.updatedAt));
+    date.setAttribute("aria-label", `업데이트 날짜 ${material.updatedAt || "미등록"}`);
+    const detailRow = createElement("div", "material-detail-row");
+    detailRow.append(fileInfo, date);
     const actions = createElement("div", "card-actions");
 
     if (String(material.format).toLowerCase() === "pdf" || isImageMaterial(material)) {
@@ -482,7 +485,7 @@
     actions.appendChild(createShareButton(material));
     if (actions.childElementCount === 3) actions.classList.add("card-actions-three");
 
-    body.append(meta, title, description, fileInfo, date, actions);
+    body.append(meta, title, description, detailRow, actions);
     card.append(thumbnail, body);
     return card;
   }
@@ -592,10 +595,10 @@
   }
 
   function formatUpdatedDate(value) {
-    if (!value) return "업데이트 날짜 미등록";
-    const date = new Date(`${value}T00:00:00`);
-    if (Number.isNaN(date.getTime())) return `업데이트 ${value}`;
-    return `업데이트 ${new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date)}`;
+    if (!value) return "날짜 미등록";
+    const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return String(value);
+    return `${match[1]}.${match[2]}.${match[3]}`;
   }
 
   function loadPdfJs() {
