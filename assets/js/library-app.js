@@ -10,6 +10,8 @@
     emptyTitle: document.querySelector("#emptyState h3"),
     emptyMessage: document.querySelector("#emptyState p"),
     summary: document.querySelector("#resultSummary"),
+    searchInput: document.querySelector("#materialSearch"),
+    clearSearch: document.querySelector("#clearMaterialSearch"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
     adminAccessForm: document.querySelector("#adminAccessForm"),
@@ -48,6 +50,7 @@
   let categoryMap = new Map();
   let activeCategory = "all";
   let activeMaterialType = "all";
+  let activeSearch = "";
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
   let pdfDocument = null;
@@ -188,6 +191,7 @@
     return materials
       .filter((material) => activeCategory === "all" || material.category === activeCategory)
       .filter((material) => activeMaterialType === "all" || material.type === activeMaterialType)
+      .filter((material) => !activeSearch || String(material?.title || "").toLocaleLowerCase("ko").includes(activeSearch))
       .filter((material) => material && material.id && material.title && material.file)
       .sort((a, b) => {
         const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
@@ -224,12 +228,28 @@
     elements.grid.replaceChildren(fragment);
     elements.grid.hidden = visibleMaterials.length === 0;
     elements.empty.hidden = visibleMaterials.length !== 0;
-    elements.emptyTitle.textContent = "등록된 자료가 없습니다.";
-    elements.emptyMessage.textContent = "자료를 준비 중입니다.";
+    elements.emptyTitle.textContent = activeSearch ? "검색 결과가 없습니다." : "등록된 자료가 없습니다.";
+    elements.emptyMessage.textContent = activeSearch
+      ? "다른 검색어를 입력하거나 사업·자료 유형을 변경해 보세요."
+      : "자료를 준비 중입니다.";
 
     const categoryLabel = activeCategory === "all" ? "전체" : getCategoryLabel(activeCategory);
     const typeLabel = activeMaterialType === "all" ? "전체 유형" : getTypeLabel(activeMaterialType);
-    elements.summary.textContent = `${categoryLabel} · ${typeLabel} 자료 ${visibleMaterials.length}건`;
+    elements.summary.textContent = activeSearch
+      ? `‘${elements.searchInput.value.trim()}’ 검색 결과 ${visibleMaterials.length}건`
+      : `${categoryLabel} · ${typeLabel} 자료 ${visibleMaterials.length}건`;
+  }
+
+  function updateSearch() {
+    activeSearch = elements.searchInput.value.trim().toLocaleLowerCase("ko");
+    elements.clearSearch.hidden = !elements.searchInput.value;
+    renderMaterials();
+  }
+
+  function clearSearch() {
+    elements.searchInput.value = "";
+    updateSearch();
+    elements.searchInput.focus();
   }
 
   function createMaterialCard(material) {
@@ -693,6 +713,9 @@
   elements.adminAccessModal.querySelector("[data-close-admin-access]").addEventListener("click", closeAdminAccess);
   elements.previousPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage - 1));
   elements.nextPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage + 1));
+  elements.searchInput.addEventListener("input", updateSearch);
+  elements.searchInput.addEventListener("search", updateSearch);
+  elements.clearSearch.addEventListener("click", clearSearch);
   window.addEventListener("resize", () => {
     if (elements.modal.hidden || elements.pdfCanvasViewer.hidden || !pdfDocument) return;
     window.clearTimeout(resizeTimer);

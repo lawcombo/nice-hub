@@ -39,10 +39,23 @@
 
     <main id="materials" class="shell main-content">
       <section class="materials-section" aria-labelledby="materials-heading">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">자료 찾기</p>
-            <h2 id="materials-heading">사업별 자료</h2>
+        <div class="section-heading search-section-heading">
+          <div class="material-search" role="search">
+            <h2 id="materials-heading" class="visually-hidden">자료 검색</h2>
+            <label class="visually-hidden" for="materialSearch">자료명 검색</label>
+            <div class="material-search-control">
+              <span class="material-search-icon" aria-hidden="true"></span>
+              <input
+                id="materialSearch"
+                type="search"
+                placeholder="자료명을 검색해 주세요"
+                autocomplete="off"
+                maxlength="120"
+              />
+              <button id="clearMaterialSearch" class="material-search-clear" type="button" aria-label="검색어 지우기" hidden>
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
           </div>
           <p id="resultSummary" class="result-summary" aria-live="polite">자료를 확인하고 있습니다.</p>
         </div>
