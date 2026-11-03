@@ -95,13 +95,25 @@
           <a id="openPreviewNewTab" class="button button-secondary" href="#" target="_blank" rel="noopener">
             새 탭에서 열기
           </a>
+          <div id="previewPagination" class="preview-pagination" aria-label="PDF 페이지 이동" hidden>
+            <button id="previousPreviewPage" class="page-button" type="button" aria-label="이전 페이지">이전</button>
+            <span id="previewPageIndicator" aria-live="polite">1 / 1</span>
+            <button id="nextPreviewPage" class="page-button" type="button" aria-label="다음 페이지">다음</button>
+          </div>
         </div>
 
         <div class="preview-frame-wrap">
           <iframe id="previewFrame" title="PDF 자료 미리보기" src="about:blank" tabindex="-1"></iframe>
+          <div id="pdfCanvasViewer" class="pdf-canvas-viewer" hidden>
+            <p id="pdfPreviewStatus" class="pdf-preview-status" role="status">PDF를 불러오고 있습니다.</p>
+            <div class="pdf-canvas-stage">
+              <canvas id="pdfPreviewCanvas" aria-label="PDF 미리보기 페이지"></canvas>
+            </div>
+          </div>
         </div>
         <p id="previewHelp" class="preview-help">
-          PDF가 표시되지 않으면 ‘새 탭에서 열기’ 또는 ‘다운로드’를 이용해 주세요.
+          모바일에서는 페이지 이동 버튼으로 내용을 확인할 수 있습니다. 표시되지 않으면 ‘새 탭에서 열기’ 또는
+          ‘다운로드’를 이용해 주세요.
         </p>
       </section>
     </div>

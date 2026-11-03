@@ -638,13 +638,51 @@ button.button {
 
 .modal-toolbar {
   display: flex;
+  align-items: center;
   gap: 8px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--slate-200);
   background: var(--blue-50);
 }
 
+.preview-pagination {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  color: var(--slate-700);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.preview-pagination[hidden] {
+  display: none;
+}
+
+.page-button {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid var(--slate-300);
+  border-radius: 9px;
+  color: var(--navy-900);
+  background: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.page-button:disabled {
+  color: #9aa7b7;
+  background: var(--slate-100);
+  cursor: default;
+}
+
+.page-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
 .preview-frame-wrap {
+  position: relative;
   min-height: 0;
   flex: 1;
   padding: 12px;
@@ -658,6 +696,58 @@ button.button {
   border: 0;
   border-radius: 5px;
   background: #fff;
+}
+
+.pdf-canvas-viewer {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #cfd7e1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pdf-canvas-viewer[hidden],
+.pdf-preview-status[hidden],
+.pdf-canvas-viewer canvas[hidden] {
+  display: none;
+}
+
+.pdf-canvas-stage {
+  display: grid;
+  min-height: 100%;
+  place-items: start center;
+  padding: 12px;
+}
+
+.pdf-canvas-stage canvas {
+  display: block;
+  max-width: 100%;
+  height: auto !important;
+  background: #fff;
+  box-shadow: 0 5px 20px rgba(7, 29, 55, 0.18);
+}
+
+.pdf-preview-status {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: min(86%, 420px);
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 10px;
+  color: var(--navy-900);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 6px 22px rgba(7, 29, 55, 0.14);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.pdf-preview-status.is-error {
+  color: #8b2d2d;
 }
 
 .preview-help {
@@ -746,13 +836,24 @@ button.button {
   }
 
   .modal-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 10px 12px;
   }
 
   .modal-toolbar .button {
-    flex: 1;
     padding-inline: 10px;
     font-size: 0.82rem;
+  }
+
+  .preview-pagination {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+
+  .page-button {
+    min-width: 78px;
   }
 
   .preview-frame-wrap {

@@ -13,6 +13,13 @@
     modalTitle: document.querySelector("#previewTitle"),
     closeModal: document.querySelector("#closePreview"),
     previewFrame: document.querySelector("#previewFrame"),
+    pdfCanvasViewer: document.querySelector("#pdfCanvasViewer"),
+    pdfPreviewStatus: document.querySelector("#pdfPreviewStatus"),
+    pdfPreviewCanvas: document.querySelector("#pdfPreviewCanvas"),
+    previewPagination: document.querySelector("#previewPagination"),
+    previousPreviewPage: document.querySelector("#previousPreviewPage"),
+    nextPreviewPage: document.querySelector("#nextPreviewPage"),
+    previewPageIndicator: document.querySelector("#previewPageIndicator"),
     downloadPreview: document.querySelector("#downloadPreview"),
     openPreviewNewTab: document.querySelector("#openPreviewNewTab"),
   };
@@ -23,6 +30,14 @@
   let categoryMap = new Map();
   let activeCategory = "all";
   let lastFocusedElement = null;
+  let pdfJsModulePromise = null;
+  let pdfDocument = null;
+  let pdfLoadingTask = null;
+  let pdfRenderTask = null;
+  let currentPdfPage = 1;
+  let previewSession = 0;
+  let renderRequest = 0;
+  let resizeTimer = null;
 
   function resolveUrl(path) {
     if (!path || typeof path !== "string") return "";
@@ -221,15 +236,112 @@
     return `업데이트 ${new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date)}`;
   }
 
+  function shouldUseCanvasPreview() {
+    return window.matchMedia("(max-width: 800px), (pointer: coarse)").matches;
+  }
+
+  function loadPdfJs() {
+    if (!pdfJsModulePromise) {
+      pdfJsModulePromise = import(resolveUrl("assets/vendor/pdfjs/pdf.min.mjs")).then((pdfjs) => {
+        pdfjs.GlobalWorkerOptions.workerSrc = resolveUrl("assets/vendor/pdfjs/pdf.worker.min.mjs");
+        return pdfjs;
+      });
+    }
+    return pdfJsModulePromise;
+  }
+
+  function setCanvasPreviewStatus(message, isError) {
+    elements.pdfPreviewStatus.textContent = message;
+    elements.pdfPreviewStatus.classList.toggle("is-error", Boolean(isError));
+    elements.pdfPreviewStatus.hidden = false;
+    elements.pdfPreviewCanvas.hidden = true;
+  }
+
+  function updatePagination() {
+    const pageCount = pdfDocument?.numPages || 1;
+    elements.previewPageIndicator.textContent = `${currentPdfPage} / ${pageCount}`;
+    elements.previousPreviewPage.disabled = currentPdfPage <= 1;
+    elements.nextPreviewPage.disabled = currentPdfPage >= pageCount;
+  }
+
+  async function renderPdfPage(pageNumber, session = previewSession) {
+    if (!pdfDocument || session !== previewSession) return;
+
+    const request = ++renderRequest;
+    currentPdfPage = Math.min(Math.max(pageNumber, 1), pdfDocument.numPages);
+    updatePagination();
+    setCanvasPreviewStatus(`${currentPdfPage}페이지를 표시하고 있습니다.`, false);
+
+    if (pdfRenderTask) {
+      pdfRenderTask.cancel();
+      pdfRenderTask = null;
+    }
+
+    try {
+      const page = await pdfDocument.getPage(currentPdfPage);
+      if (session !== previewSession || request !== renderRequest) return;
+
+      const baseViewport = page.getViewport({ scale: 1 });
+      const availableWidth = Math.max(elements.pdfCanvasViewer.clientWidth - 24, 280);
+      const cssScale = Math.min(availableWidth / baseViewport.width, 1.6);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const renderViewport = page.getViewport({ scale: cssScale * pixelRatio });
+      const canvas = elements.pdfPreviewCanvas;
+      const context = canvas.getContext("2d", { alpha: false });
+
+      canvas.width = Math.floor(renderViewport.width);
+      canvas.height = Math.floor(renderViewport.height);
+      canvas.style.width = `${Math.floor(baseViewport.width * cssScale)}px`;
+      canvas.style.height = `${Math.floor(baseViewport.height * cssScale)}px`;
+
+      const renderTask = page.render({ canvasContext: context, viewport: renderViewport });
+      pdfRenderTask = renderTask;
+      await renderTask.promise;
+      if (session !== previewSession || request !== renderRequest) return;
+
+      elements.pdfPreviewStatus.hidden = true;
+      canvas.hidden = false;
+      canvas.setAttribute("aria-label", `PDF ${currentPdfPage}페이지, 전체 ${pdfDocument.numPages}페이지`);
+      elements.pdfCanvasViewer.scrollTo({ top: 0, behavior: "auto" });
+    } catch (error) {
+      if (error?.name === "RenderingCancelledException") return;
+      console.error("PDF 페이지를 표시하지 못했습니다.", error);
+      setCanvasPreviewStatus("미리보기를 표시하지 못했습니다. 새 탭에서 열기 또는 다운로드를 이용해 주세요.", true);
+    } finally {
+      if (request === renderRequest) pdfRenderTask = null;
+    }
+  }
+
+  async function openCanvasPreview(fileUrl, session) {
+    elements.previewFrame.hidden = true;
+    elements.pdfCanvasViewer.hidden = false;
+    elements.previewPagination.hidden = false;
+    currentPdfPage = 1;
+    updatePagination();
+    setCanvasPreviewStatus("PDF를 불러오고 있습니다.", false);
+
+    try {
+      const pdfjs = await loadPdfJs();
+      if (session !== previewSession) return;
+
+      pdfLoadingTask = pdfjs.getDocument({ url: fileUrl });
+      pdfDocument = await pdfLoadingTask.promise;
+      if (session !== previewSession) return;
+      await renderPdfPage(1, session);
+    } catch (error) {
+      if (session !== previewSession) return;
+      console.error("PDF를 불러오지 못했습니다.", error);
+      setCanvasPreviewStatus("미리보기를 불러오지 못했습니다. 새 탭에서 열기 또는 다운로드를 이용해 주세요.", true);
+    }
+  }
+
   function openPreview(material, trigger) {
     const fileUrl = resolveUrl(material.file);
     if (!fileUrl) return;
 
-    const previewUrl = new URL(fileUrl);
-    previewUrl.hash = "toolbar=1&navpanes=0&view=FitH";
+    const session = ++previewSession;
     lastFocusedElement = trigger || document.activeElement;
     elements.modalTitle.textContent = material.title;
-    elements.previewFrame.src = previewUrl.href;
     elements.downloadPreview.href = fileUrl;
     elements.downloadPreview.download = getFileName(material.file, material.title);
     elements.openPreviewNewTab.href = fileUrl;
@@ -237,13 +349,30 @@
     document.body.classList.add("modal-open");
     document.addEventListener("keydown", handleModalKeydown);
     window.requestAnimationFrame(() => elements.closeModal.focus());
+
+    if (shouldUseCanvasPreview()) {
+      openCanvasPreview(fileUrl, session);
+    } else {
+      const previewUrl = new URL(fileUrl);
+      previewUrl.hash = "toolbar=1&navpanes=0&view=FitH";
+      elements.pdfCanvasViewer.hidden = true;
+      elements.previewPagination.hidden = true;
+      elements.previewFrame.hidden = false;
+      elements.previewFrame.src = previewUrl.href;
+    }
   }
 
   function closePreview() {
     if (elements.modal.hidden) return;
 
+    previewSession += 1;
+    renderRequest += 1;
     elements.modal.hidden = true;
     elements.previewFrame.src = "about:blank";
+    elements.previewFrame.hidden = false;
+    elements.pdfCanvasViewer.hidden = true;
+    elements.previewPagination.hidden = true;
+    elements.pdfPreviewCanvas.hidden = true;
     elements.downloadPreview.removeAttribute("href");
     elements.openPreviewNewTab.removeAttribute("href");
     document.body.classList.remove("modal-open");
@@ -251,6 +380,13 @@
 
     if (lastFocusedElement && document.contains(lastFocusedElement)) lastFocusedElement.focus();
     lastFocusedElement = null;
+
+    if (pdfRenderTask) pdfRenderTask.cancel();
+    if (pdfLoadingTask) void pdfLoadingTask.destroy().catch(() => {});
+    pdfRenderTask = null;
+    pdfLoadingTask = null;
+    pdfDocument = null;
+    currentPdfPage = 1;
   }
 
   function handleModalKeydown(event) {
@@ -306,5 +442,12 @@
 
   elements.closeModal.addEventListener("click", closePreview);
   elements.modal.querySelector("[data-close-modal]").addEventListener("click", closePreview);
+  elements.previousPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage - 1));
+  elements.nextPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage + 1));
+  window.addEventListener("resize", () => {
+    if (elements.modal.hidden || elements.pdfCanvasViewer.hidden || !pdfDocument) return;
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => renderPdfPage(currentPdfPage), 180);
+  });
   initialize();
 })();
