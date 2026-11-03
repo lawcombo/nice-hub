@@ -147,19 +147,6 @@
       "updatedAt": "2026-11-03",
       "registeredAt": "2026-11-03T08:55:52.964Z",
       "mimeType": "image/png"
-    },
-    {
-      "id": "lodging-brochure-mw0geuv4",
-      "category": "lodging",
-      "type": "brochure",
-      "format": "image",
-      "title": "무인숙박 대리점 프로모션",
-      "description": "대리점 프로모션 홍보물",
-      "file": "assets/materials/lodging/brochures/20261103-175646-대리점-프로모션_수정본_2026.10.23.png",
-      "thumbnail": "assets/thumbnails/20261103-175646-대리점-프로모션_수정본_2026.10.23.png",
-      "updatedAt": "2026-11-03",
-      "registeredAt": "2026-11-03T08:56:46.516Z",
-      "mimeType": "image/png"
     }
   ]
 }
