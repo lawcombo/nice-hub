@@ -21,22 +21,46 @@
       "label": "브로슈어",
       "folder": "brochures",
       "format": "pdf",
-      "accept": ["application/pdf", ".pdf"]
+      "accept": [
+        "application/pdf",
+        ".pdf"
+      ]
     },
     {
       "id": "manual",
       "label": "매뉴얼",
       "folder": "manuals",
       "format": "pdf",
-      "accept": ["application/pdf", ".pdf"]
+      "accept": [
+        "application/pdf",
+        ".pdf"
+      ]
     },
     {
       "id": "video",
       "label": "동영상",
       "folder": "videos",
       "format": "video",
-      "accept": ["video/mp4", "video/webm", ".mp4", ".webm"]
+      "accept": [
+        "video/mp4",
+        "video/webm",
+        ".mp4",
+        ".webm"
+      ]
     }
   ],
-  "materials": []
+  "materials": [
+    {
+      "id": "school-safety-brochure-mw04g8ig",
+      "category": "school-safety",
+      "type": "brochure",
+      "format": "pdf",
+      "title": "학생통합안전시스템 브로셔",
+      "description": "온라인 공유용 (저해상도)",
+      "file": "assets/materials/school-safety/brochures/20261103-122152-학생통합안전시스템_브로셔_온라인_압축본.pdf",
+      "thumbnail": "assets/thumbnails/20261103-122152-main.png",
+      "updatedAt": "2026-11-03",
+      "order": 100
+    }
+  ]
 }
