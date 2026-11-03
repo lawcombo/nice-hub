@@ -282,8 +282,11 @@
       if (session !== previewSession || request !== renderRequest) return;
 
       const baseViewport = page.getViewport({ scale: 1 });
-      const availableWidth = Math.max(elements.pdfCanvasViewer.clientWidth - 24, 280);
-      const cssScale = Math.min(availableWidth / baseViewport.width, 1.6);
+      const availableWidth = Math.max(elements.pdfCanvasViewer.clientWidth - 16, 1);
+      const availableHeight = Math.max(elements.pdfCanvasViewer.clientHeight - 16, 1);
+      const widthScale = availableWidth / baseViewport.width;
+      const heightScale = availableHeight / baseViewport.height;
+      const cssScale = Math.min(widthScale, heightScale, 1.6);
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
       const renderViewport = page.getViewport({ scale: cssScale * pixelRatio });
       const canvas = elements.pdfPreviewCanvas;
