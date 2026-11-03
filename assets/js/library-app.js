@@ -9,6 +9,13 @@
     emptyTitle: document.querySelector("#emptyState h3"),
     emptyMessage: document.querySelector("#emptyState p"),
     summary: document.querySelector("#resultSummary"),
+    openAdminAccess: document.querySelector("#openAdminAccess"),
+    adminAccessModal: document.querySelector("#adminAccessModal"),
+    adminAccessForm: document.querySelector("#adminAccessForm"),
+    adminAccessPassword: document.querySelector("#adminAccessPassword"),
+    adminAccessError: document.querySelector("#adminAccessError"),
+    closeAdminAccess: document.querySelector("#closeAdminAccess"),
+    cancelAdminAccess: document.querySelector("#cancelAdminAccess"),
     modal: document.querySelector("#previewModal"),
     modalTitle: document.querySelector("#previewTitle"),
     closeModal: document.querySelector("#closePreview"),
@@ -38,6 +45,9 @@
   let previewSession = 0;
   let renderRequest = 0;
   let resizeTimer = null;
+  let lastAccessFocusedElement = null;
+
+  const adminAccessPassword = "5959";
 
   function resolveUrl(path) {
     if (!path || typeof path !== "string") return "";
@@ -392,6 +402,62 @@
     currentPdfPage = 1;
   }
 
+  function openAdminAccess() {
+    lastAccessFocusedElement = document.activeElement;
+    elements.adminAccessPassword.value = "";
+    elements.adminAccessError.textContent = "";
+    elements.adminAccessModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleAdminAccessKeydown);
+    window.requestAnimationFrame(() => elements.adminAccessPassword.focus());
+  }
+
+  function closeAdminAccess() {
+    if (elements.adminAccessModal.hidden) return;
+    elements.adminAccessModal.hidden = true;
+    elements.adminAccessPassword.value = "";
+    elements.adminAccessError.textContent = "";
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleAdminAccessKeydown);
+    if (lastAccessFocusedElement && document.contains(lastAccessFocusedElement)) lastAccessFocusedElement.focus();
+    lastAccessFocusedElement = null;
+  }
+
+  function handleAdminAccessSubmit(event) {
+    event.preventDefault();
+    if (elements.adminAccessPassword.value === adminAccessPassword) {
+      window.location.assign(resolveUrl("admin.html"));
+      return;
+    }
+
+    elements.adminAccessError.textContent = "비밀번호가 올바르지 않습니다.";
+    elements.adminAccessPassword.select();
+  }
+
+  function handleAdminAccessKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeAdminAccess();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const focusable = [...elements.adminAccessModal.querySelectorAll('button:not([disabled]), input:not([disabled])')].filter(
+      (element) => element.offsetParent !== null,
+    );
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function handleModalKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -445,6 +511,11 @@
 
   elements.closeModal.addEventListener("click", closePreview);
   elements.modal.querySelector("[data-close-modal]").addEventListener("click", closePreview);
+  elements.openAdminAccess.addEventListener("click", openAdminAccess);
+  elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
+  elements.closeAdminAccess.addEventListener("click", closeAdminAccess);
+  elements.cancelAdminAccess.addEventListener("click", closeAdminAccess);
+  elements.adminAccessModal.querySelector("[data-close-admin-access]").addEventListener("click", closeAdminAccess);
   elements.previousPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage - 1));
   elements.nextPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage + 1));
   window.addEventListener("resize", () => {

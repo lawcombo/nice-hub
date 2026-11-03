@@ -66,10 +66,49 @@
         <p>NICE 자료허브</p>
         <div class="footer-links">
           <p>등록된 자료는 각 사업의 최신 안내에 따라 업데이트됩니다.</p>
-          <a href="./admin.html">자료 관리</a>
+          <button id="openAdminAccess" class="footer-admin-button" type="button">자료 관리</button>
         </div>
       </div>
     </footer>
+
+    <div id="adminAccessModal" class="modal access-modal" hidden>
+      <div class="modal-backdrop" data-close-admin-access></div>
+      <section
+        class="access-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminAccessTitle"
+        aria-describedby="adminAccessDescription"
+      >
+        <header class="access-dialog-header">
+          <div>
+            <span class="modal-label">ADMIN ACCESS</span>
+            <h2 id="adminAccessTitle">자료 관리 확인</h2>
+          </div>
+          <button id="closeAdminAccess" class="icon-button" type="button" aria-label="자료 관리 확인 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <form id="adminAccessForm" class="access-form" autocomplete="off">
+          <p id="adminAccessDescription">자료 관리 페이지로 이동하려면 비밀번호를 입력해 주세요.</p>
+          <label for="adminAccessPassword">비밀번호</label>
+          <input
+            id="adminAccessPassword"
+            type="password"
+            inputmode="numeric"
+            maxlength="4"
+            autocomplete="off"
+            aria-describedby="adminAccessError"
+            required
+          />
+          <p id="adminAccessError" class="access-error" aria-live="polite"></p>
+          <div class="access-actions">
+            <button id="cancelAdminAccess" class="button button-secondary" type="button">취소</button>
+            <button class="button button-primary" type="submit">확인</button>
+          </div>
+        </form>
+      </section>
+    </div>
 
     <div id="previewModal" class="modal" hidden>
       <div class="modal-backdrop" data-close-modal></div>

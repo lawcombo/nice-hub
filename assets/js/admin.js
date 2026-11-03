@@ -32,11 +32,23 @@
     progressTitle: document.querySelector("#progressTitle"),
     progressMessage: document.querySelector("#progressMessage"),
     result: document.querySelector("#uploadResult"),
+    inventorySection: document.querySelector("#inventorySection"),
+    inventorySummary: document.querySelector("#inventorySummary"),
+    inventoryStatus: document.querySelector("#inventoryStatus"),
+    materialInventory: document.querySelector("#materialInventory"),
+    refreshMaterialsButton: document.querySelector("#refreshMaterialsButton"),
+    deleteDialog: document.querySelector("#deleteDialog"),
+    deleteDialogMessage: document.querySelector("#deleteDialogMessage"),
+    cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
+    confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
   };
 
   let library = null;
   let verifiedToken = "";
   let isUploading = false;
+  let isDeleting = false;
+  let pendingDeleteId = "";
+  let lastDeleteTrigger = null;
 
   class GitHubApiError extends Error {
     constructor(status, message) {
@@ -95,6 +107,38 @@
       fragment.appendChild(option);
     });
     select.replaceChildren(fragment);
+  }
+
+  function createElement(tagName, className, text) {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
+
+  function getCategoryLabel(categoryId, sourceLibrary = library) {
+    return sourceLibrary?.categories?.find((category) => category.id === categoryId)?.label || categoryId || "기타";
+  }
+
+  function getTypeLabel(typeId, sourceLibrary = library) {
+    return sourceLibrary?.materialTypes?.find((type) => type.id === typeId)?.label || typeId || "자료";
+  }
+
+  function getFileName(filePath) {
+    if (!filePath || typeof filePath !== "string") return "파일 경로 없음";
+    try {
+      const pathname = new URL(filePath, document.baseURI).pathname;
+      return decodeURIComponent(pathname.split("/").pop()) || filePath;
+    } catch (error) {
+      return filePath;
+    }
+  }
+
+  function formatDate(value) {
+    if (!value) return "날짜 미등록";
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date);
   }
 
   function updateFileAccept() {
@@ -173,6 +217,111 @@
     elements.result.focus({ preventScroll: true });
   }
 
+  function setInventoryStatus(message = "", type = "", commitSha = "") {
+    elements.inventoryStatus.replaceChildren();
+    elements.inventoryStatus.className = `inventory-status${type ? ` status-${type}` : ""}`;
+    if (!message) return;
+
+    elements.inventoryStatus.appendChild(document.createTextNode(message));
+    if (commitSha) {
+      const link = document.createElement("a");
+      link.href = `https://github.com/${config.owner}/${config.repo}/commit/${commitSha}`;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "커밋 확인";
+      elements.inventoryStatus.appendChild(link);
+    }
+  }
+
+  function createInventoryItem(material, sourceLibrary) {
+    const item = createElement("article", "inventory-item");
+    const main = createElement("div", "inventory-item-main");
+    const thumbnail = createElement("div", "inventory-thumbnail", String(material.format || "FILE").toUpperCase());
+
+    if (material.thumbnail) {
+      const image = document.createElement("img");
+      image.src = new URL(material.thumbnail, document.baseURI).href;
+      image.alt = "";
+      image.loading = "lazy";
+      image.addEventListener("error", () => image.remove());
+      thumbnail.appendChild(image);
+    }
+
+    const copy = createElement("div", "inventory-item-copy");
+    const meta = createElement("div", "inventory-item-meta");
+    meta.append(
+      createElement("span", "", getTypeLabel(material.type, sourceLibrary)),
+      createElement("span", "", `업데이트 ${formatDate(material.updatedAt)}`),
+    );
+    const title = createElement("h4", "inventory-item-title", material.title || "이름 없는 자료");
+    const fileName = createElement("p", "inventory-file-name", getFileName(material.file));
+    copy.append(meta, title, fileName);
+    main.append(thumbnail, copy);
+
+    const deleteButton = createElement("button", "button button-danger inventory-delete-button", "삭제");
+    deleteButton.type = "button";
+    deleteButton.disabled = isDeleting || !verifiedToken;
+    deleteButton.addEventListener("click", () => openDeleteDialog(material.id, deleteButton));
+    item.append(main, deleteButton);
+    return item;
+  }
+
+  function renderInventory(sourceLibrary = library) {
+    const categories = Array.isArray(sourceLibrary?.categories)
+      ? [...sourceLibrary.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+      : [];
+    const materials = Array.isArray(sourceLibrary?.materials) ? [...sourceLibrary.materials] : [];
+    const knownCategoryIds = new Set(categories.map((category) => category.id));
+    const unknownMaterials = materials.filter((material) => !knownCategoryIds.has(material.category));
+    const groups = categories.map((category) => ({ id: category.id, label: category.label, category }));
+    if (unknownMaterials.length) groups.push({ id: "__other__", label: "기타", category: null });
+
+    elements.inventorySummary.textContent = `${categories.length}개 사업 카테고리 · 등록 자료 ${materials.length}건`;
+    const fragment = document.createDocumentFragment();
+
+    groups.forEach((group) => {
+      const groupMaterials = (group.id === "__other__"
+        ? unknownMaterials
+        : materials.filter((material) => material.category === group.id)
+      ).sort((a, b) => {
+        const orderDifference = (a.order ?? 999) - (b.order ?? 999);
+        return orderDifference || String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""), "ko");
+      });
+
+      const section = createElement("section", "inventory-group");
+      const heading = createElement("div", "inventory-group-heading");
+      heading.append(
+        createElement("h3", "", group.label || group.id),
+        createElement("span", "inventory-count", `${groupMaterials.length}건`),
+      );
+      const list = createElement("div", "inventory-list");
+      if (groupMaterials.length) {
+        groupMaterials.forEach((material) => list.appendChild(createInventoryItem(material, sourceLibrary)));
+      } else {
+        list.appendChild(createElement("p", "inventory-empty", "등록된 자료가 없습니다."));
+      }
+      section.append(heading, list);
+      fragment.appendChild(section);
+    });
+
+    if (!groups.length) fragment.appendChild(createElement("p", "inventory-empty", "등록된 카테고리가 없습니다."));
+    elements.materialInventory.replaceChildren(fragment);
+  }
+
+  function openDeleteDialog(materialId, trigger) {
+    const material = library?.materials?.find((item) => item.id === materialId);
+    if (!material || isDeleting) return;
+    pendingDeleteId = materialId;
+    lastDeleteTrigger = trigger;
+    elements.deleteDialogMessage.textContent = `‘${material.title}’ 자료를 삭제합니다.`;
+    elements.deleteDialog.showModal();
+    window.requestAnimationFrame(() => elements.cancelDeleteButton.focus());
+  }
+
+  function closeDeleteDialog() {
+    if (elements.deleteDialog.open) elements.deleteDialog.close();
+  }
+
   async function githubApi(endpoint, token, options = {}) {
     const headers = {
       Accept: "application/vnd.github+json",
@@ -206,6 +355,31 @@
       throw new GitHubApiError(response.status, payload?.message || `GitHub API 오류 (${response.status})`);
     }
     return payload;
+  }
+
+  function encodeRepositoryPath(filePath) {
+    return filePath.split("/").map(encodeURIComponent).join("/");
+  }
+
+  async function fetchRepositoryState(token) {
+    const [reference, dataFile] = await Promise.all([
+      githubApi(`/repos/${config.owner}/${config.repo}/git/ref/heads/${config.branch}`, token),
+      githubApi(
+        `/repos/${config.owner}/${config.repo}/contents/${encodeRepositoryPath(config.dataPath)}?ref=${encodeURIComponent(config.branch)}`,
+        token,
+      ),
+    ]);
+    return {
+      reference,
+      library: JSON.parse(decodeBase64Utf8(dataFile.content)),
+    };
+  }
+
+  function getDeletableRepositoryPath(value, allowedPrefix) {
+    if (!value || typeof value !== "string" || !value.startsWith(allowedPrefix)) return "";
+    const segments = value.split("/");
+    if (segments.some((segment) => !segment || segment === "." || segment === "..")) return "";
+    return value;
   }
 
   function bytesToBase64(input) {
@@ -272,7 +446,7 @@
     if (error.status === 403) return "저장소 쓰기 권한이 없습니다. 토큰의 저장소 범위와 Contents 권한을 확인해 주세요.";
     if (error.status === 404) return "저장소 또는 브랜치를 찾지 못했습니다. 토큰이 nice-hub 저장소에 접근 가능한지 확인해 주세요.";
     if (error.status === 409) return "다른 변경사항이 먼저 반영되었습니다. 새로고침한 뒤 다시 시도해 주세요.";
-    if (error.status === 422) return "브랜치 보호 규칙 또는 파일 정보 때문에 커밋하지 못했습니다. GitHub 설정을 확인해 주세요.";
+    if (error.status === 422) return "다른 변경이 먼저 반영되었거나 브랜치 규칙 때문에 커밋하지 못했습니다. 목록을 새로고침한 뒤 다시 시도해 주세요.";
     return `GitHub 오류: ${error.message}`;
   }
 
@@ -288,18 +462,29 @@
     setConnectionStatus("GitHub 저장소 권한을 확인하고 있습니다.");
 
     try {
-      const repository = await githubApi(`/repos/${config.owner}/${config.repo}`, token);
+      const [repository, state] = await Promise.all([
+        githubApi(`/repos/${config.owner}/${config.repo}`, token),
+        fetchRepositoryState(token),
+      ]);
       if (repository.permissions && repository.permissions.push === false) {
         throw new GitHubApiError(403, "저장소 쓰기 권한이 없습니다.");
       }
-      await githubApi(`/repos/${config.owner}/${config.repo}/git/ref/heads/${config.branch}`, token);
       verifiedToken = token;
+      library = state.library;
       elements.fields.disabled = false;
-      setConnectionStatus("연결되었습니다. 자료 정보를 입력해 주세요.", "success");
+      elements.inventorySection.hidden = false;
+      populateSelect(elements.category, library.categories || []);
+      populateSelect(elements.materialType, library.materialTypes || []);
+      updateFileAccept();
+      renderInventory(library);
+      setInventoryStatus();
+      const materialCount = Array.isArray(library.materials) ? library.materials.length : 0;
+      setConnectionStatus(`연결되었습니다. 현재 등록 자료 ${materialCount}건을 불러왔습니다.`, "success");
       return true;
     } catch (error) {
       verifiedToken = "";
       elements.fields.disabled = true;
+      elements.inventorySection.hidden = true;
       setConnectionStatus(userFriendlyError(error), "error");
       return false;
     } finally {
@@ -330,15 +515,7 @@
 
     try {
       setProgress("최신 자료 목록을 확인하고 있습니다.", "GitHub의 main 브랜치를 읽는 중입니다.");
-      const encodedDataPath = config.dataPath.split("/").map(encodeURIComponent).join("/");
-      const [reference, dataFile] = await Promise.all([
-        githubApi(`/repos/${config.owner}/${config.repo}/git/ref/heads/${config.branch}`, verifiedToken),
-        githubApi(
-          `/repos/${config.owner}/${config.repo}/contents/${encodedDataPath}?ref=${encodeURIComponent(config.branch)}`,
-          verifiedToken,
-        ),
-      ]);
-      const latestLibrary = JSON.parse(decodeBase64Utf8(dataFile.content));
+      const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
       const { category, type, file, thumbnail } = validateInputs(latestLibrary);
       const now = new Date();
       const stamp = timestampString(now);
@@ -423,12 +600,100 @@
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
       updateFileAccept();
+      elements.inventorySection.hidden = false;
+      renderInventory(library);
+      setInventoryStatus("새 자료가 목록에 추가되었습니다.", "success", commit.sha);
     } catch (error) {
       elements.progress.hidden = true;
       showResult("error", "업로드하지 못했습니다.", userFriendlyError(error));
     } finally {
       isUploading = false;
       elements.fields.disabled = !verifiedToken;
+    }
+  }
+
+  async function refreshMaterials() {
+    if (!verifiedToken || isUploading || isDeleting) return;
+    elements.refreshMaterialsButton.disabled = true;
+    setInventoryStatus("GitHub에서 최신 자료 목록을 불러오고 있습니다.", "progress");
+
+    try {
+      const state = await fetchRepositoryState(verifiedToken);
+      library = state.library;
+      renderInventory(library);
+      setInventoryStatus("최신 자료 목록으로 갱신했습니다.", "success");
+    } catch (error) {
+      setInventoryStatus(userFriendlyError(error), "error");
+    } finally {
+      elements.refreshMaterialsButton.disabled = false;
+    }
+  }
+
+  async function deleteSelectedMaterial() {
+    const materialId = pendingDeleteId;
+    if (!materialId || isDeleting) return;
+    closeDeleteDialog();
+
+    if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
+      setInventoryStatus("토큰 연결을 다시 확인한 뒤 삭제해 주세요.", "error");
+      return;
+    }
+
+    isDeleting = true;
+    elements.fields.disabled = true;
+    elements.refreshMaterialsButton.disabled = true;
+    renderInventory(library);
+    setInventoryStatus("GitHub에서 자료 파일과 목록을 삭제하고 있습니다. 이 화면을 닫지 마세요.", "progress");
+
+    try {
+      const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
+      const material = latestLibrary.materials?.find((item) => item.id === materialId);
+      if (!material) throw new Error("삭제할 자료를 최신 목록에서 찾지 못했습니다. 목록을 새로고침해 주세요.");
+
+      latestLibrary.materials = latestLibrary.materials.filter((item) => item.id !== materialId);
+      const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
+      const parentCommit = await githubApi(
+        `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
+        verifiedToken,
+      );
+      const treeEntries = [{ path: config.dataPath, mode: "100644", type: "blob", sha: dataBlob.sha }];
+      const materialPath = getDeletableRepositoryPath(material.file, "assets/materials/");
+      const thumbnailPath = getDeletableRepositoryPath(material.thumbnail, "assets/thumbnails/");
+      const materialPathIsShared = latestLibrary.materials.some((item) => item.file === material.file);
+      const thumbnailPathIsShared = latestLibrary.materials.some((item) => item.thumbnail === material.thumbnail);
+      if (materialPath && !materialPathIsShared) {
+        treeEntries.push({ path: materialPath, mode: "100644", type: "blob", sha: null });
+      }
+      if (thumbnailPath && !thumbnailPathIsShared) {
+        treeEntries.push({ path: thumbnailPath, mode: "100644", type: "blob", sha: null });
+      }
+
+      const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {
+        method: "POST",
+        body: JSON.stringify({ base_tree: parentCommit.tree.sha, tree: treeEntries }),
+      });
+      const commit = await githubApi(`/repos/${config.owner}/${config.repo}/git/commits`, verifiedToken, {
+        method: "POST",
+        body: JSON.stringify({
+          message: `Delete ${getCategoryLabel(material.category, latestLibrary)} ${getTypeLabel(material.type, latestLibrary)}: ${material.title}`,
+          tree: tree.sha,
+          parents: [reference.object.sha],
+        }),
+      });
+      await githubApi(`/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, verifiedToken, {
+        method: "PATCH",
+        body: JSON.stringify({ sha: commit.sha, force: false }),
+      });
+
+      library = latestLibrary;
+      setInventoryStatus(`‘${material.title}’ 자료와 원본 파일을 삭제했습니다.`, "success", commit.sha);
+    } catch (error) {
+      setInventoryStatus(userFriendlyError(error), "error");
+    } finally {
+      isDeleting = false;
+      elements.fields.disabled = !verifiedToken;
+      elements.refreshMaterialsButton.disabled = false;
+      renderInventory(library);
     }
   }
 
@@ -449,6 +714,17 @@
 
   elements.connectButton.addEventListener("click", verifyConnection);
   elements.form.addEventListener("submit", handleUpload);
+  elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
+  elements.cancelDeleteButton.addEventListener("click", closeDeleteDialog);
+  elements.confirmDeleteButton.addEventListener("click", deleteSelectedMaterial);
+  elements.deleteDialog.addEventListener("click", (event) => {
+    if (event.target === elements.deleteDialog) closeDeleteDialog();
+  });
+  elements.deleteDialog.addEventListener("close", () => {
+    pendingDeleteId = "";
+    if (lastDeleteTrigger && document.contains(lastDeleteTrigger)) lastDeleteTrigger.focus();
+    lastDeleteTrigger = null;
+  });
   elements.category.addEventListener("change", updateDestinationPreview);
   elements.materialType.addEventListener("change", updateFileAccept);
   elements.materialFile.addEventListener("change", updateFileLabels);
@@ -460,6 +736,8 @@
     if (!verifiedToken || elements.token.value.trim() === verifiedToken) return;
     verifiedToken = "";
     elements.fields.disabled = true;
+    elements.inventorySection.hidden = true;
+    closeDeleteDialog();
     setConnectionStatus("토큰이 변경되었습니다. 연결을 다시 확인해 주세요.");
   });
   window.addEventListener("beforeunload", () => {

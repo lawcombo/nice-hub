@@ -542,10 +542,29 @@ button.button {
   gap: 18px;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-admin-button {
   color: var(--blue-700);
   font-weight: 700;
   text-underline-offset: 3px;
+}
+
+.footer-admin-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footer-admin-button:hover {
+  text-decoration: underline;
+}
+
+.footer-admin-button:focus-visible {
+  outline: none;
+  border-radius: 4px;
+  box-shadow: var(--focus);
 }
 
 .modal {
@@ -559,6 +578,77 @@ button.button {
 
 .modal[hidden] {
   display: none;
+}
+
+.access-dialog {
+  position: relative;
+  width: min(440px, 100%);
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+}
+
+.access-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 20px 16px 24px;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.access-dialog-header h2 {
+  margin: 0;
+  font-size: 1.22rem;
+  letter-spacing: -0.03em;
+}
+
+.access-form {
+  padding: 23px 24px 24px;
+}
+
+.access-form > p:first-child {
+  margin: 0 0 17px;
+  color: var(--slate-700);
+  font-size: 0.9rem;
+}
+
+.access-form label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.access-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 13px;
+  border: 1px solid var(--slate-300);
+  border-radius: 10px;
+  font: inherit;
+  letter-spacing: 0.18em;
+}
+
+.access-form input:focus-visible {
+  outline: none;
+  border-color: var(--blue-600);
+  box-shadow: var(--focus);
+}
+
+.access-error {
+  min-height: 24px;
+  margin: 7px 0 10px;
+  color: #b42318;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.access-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .modal-backdrop {
@@ -826,6 +916,23 @@ button.button {
 
   .modal {
     padding: 0;
+  }
+
+  .access-modal {
+    padding: 18px;
+  }
+
+  .access-dialog {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .access-dialog-header {
+    padding: 16px 14px 13px 18px;
+  }
+
+  .access-form {
+    padding: 19px 18px 20px;
   }
 
   .modal-dialog {
