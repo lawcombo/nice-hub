@@ -83,6 +83,19 @@
       "thumbnail": "assets/thumbnails/20261103-125427-main2.png",
       "updatedAt": "2026-11-03",
       "order": 100
+    },
+    {
+      "id": "school-safety-video-mw0b5xc7",
+      "category": "school-safety",
+      "type": "video",
+      "format": "video",
+      "title": "학생안전통합솔루션 홍보 영상",
+      "description": "영상 자료",
+      "file": "https://youtu.be/EVSTk2U4-5w?si=MQrVsHW1OAabraUa",
+      "thumbnail": "assets/thumbnails/20261103-152955-main.png",
+      "updatedAt": "2026-11-03",
+      "order": 100,
+      "sourceType": "youtube"
     }
   ]
 }
