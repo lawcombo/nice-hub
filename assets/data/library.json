@@ -78,6 +78,23 @@
         ".mp4",
         ".webm"
       ]
+    },
+    {
+      "id": "type-mw0gavti",
+      "label": "홍보물",
+      "folder": "type-mw0gavti",
+      "format": "document",
+      "accept": [
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        ".pdf",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp"
+      ]
     }
   ],
   "materials": [
