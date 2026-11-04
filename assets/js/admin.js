@@ -13,10 +13,18 @@
 
   const documentAccept = [
     "application/pdf",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "image/png",
     "image/jpeg",
     "image/webp",
     ".pdf",
+    ".ppt",
+    ".pptx",
+    ".doc",
+    ".docx",
     ".png",
     ".jpg",
     ".jpeg",
@@ -215,6 +223,8 @@
     const lowerMime = String(file?.type || "").toLowerCase();
     if (lowerMime === "application/pdf" || lowerName.endsWith(".pdf")) return "pdf";
     if (lowerMime.startsWith("image/") || /\.(?:png|jpe?g|webp)$/.test(lowerName)) return "image";
+    const officeExtension = lowerName.match(/\.(pptx?|docx?)$/)?.[1];
+    if (officeExtension) return officeExtension;
     return type?.format || "file";
   }
 
@@ -281,7 +291,8 @@
     } else if (isYoutube) {
       elements.fileHelp.textContent = "";
     } else {
-      elements.fileHelp.textContent = "PDF, PNG, JPG, JPEG 또는 WebP 자료를 선택하세요. 최대 20MB입니다.";
+      elements.fileHelp.textContent =
+        "PDF, PNG, JPG, JPEG, WebP, PPT, PPTX, DOC 또는 DOCX 자료를 선택하세요. 최대 20MB입니다.";
     }
     updateDestinationPreview();
   }

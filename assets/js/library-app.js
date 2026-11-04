@@ -244,6 +244,7 @@
   function getMaterialFileKindLabel(material) {
     const format = String(material?.format || "").toLowerCase();
     if (format === "pdf") return "PDF";
+    if (["ppt", "pptx", "doc", "docx"].includes(format)) return format.toUpperCase();
     if (isImageMaterial(material)) return "이미지";
     if (format === "video" || material?.type === "video" || isYouTubeMaterial(material)) return "동영상";
     return "파일";
@@ -475,11 +476,10 @@
       downloadLink.textContent = "다운로드";
       actions.appendChild(downloadLink);
     } else {
-      const openLink = createElement("a", "button button-primary", "자료 열기");
-      openLink.href = resolveUrl(material.file);
-      openLink.target = "_blank";
-      openLink.rel = "noopener";
-      actions.appendChild(openLink);
+      const downloadLink = createDownloadLink(material);
+      downloadLink.className = "button button-primary";
+      downloadLink.textContent = "다운로드";
+      actions.appendChild(downloadLink);
     }
 
     actions.appendChild(createShareButton(material));
