@@ -59,6 +59,14 @@
     deleteDialogMessage: document.querySelector("#deleteDialogMessage"),
     cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
     confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
+    openCategoryDialog: document.querySelector("#openCategoryDialog"),
+    categoryDialog: document.querySelector("#categoryDialog"),
+    categoryForm: document.querySelector("#categoryForm"),
+    newCategoryName: document.querySelector("#newCategoryName"),
+    categoryDialogStatus: document.querySelector("#categoryDialogStatus"),
+    saveCategoryButton: document.querySelector("#saveCategoryButton"),
+    closeCategoryDialog: document.querySelector("#closeCategoryDialog"),
+    cancelCategoryDialog: document.querySelector("#cancelCategoryDialog"),
     openMaterialTypeDialog: document.querySelector("#openMaterialTypeDialog"),
     materialTypeDialog: document.querySelector("#materialTypeDialog"),
     materialTypeForm: document.querySelector("#materialTypeForm"),
@@ -73,9 +81,11 @@
   let verifiedToken = "";
   let isUploading = false;
   let isDeleting = false;
+  let isAddingCategory = false;
   let isAddingMaterialType = false;
   let pendingDeleteId = "";
   let lastDeleteTrigger = null;
+  let lastCategoryTrigger = null;
   let lastMaterialTypeTrigger = null;
   let pdfJsModulePromise = null;
 
@@ -863,13 +873,150 @@
     }
   }
 
+  function setCategoryDialogStatus(message = "", type = "") {
+    elements.categoryDialogStatus.textContent = message;
+    elements.categoryDialogStatus.className = `dialog-status${type ? ` status-${type}` : ""}`;
+  }
+
+  function openCategoryDialog() {
+    if (!verifiedToken || isAddingCategory || isAddingMaterialType) return;
+    lastCategoryTrigger = document.activeElement;
+    elements.categoryForm.reset();
+    setCategoryDialogStatus();
+    elements.categoryDialog.showModal();
+    window.requestAnimationFrame(() => elements.newCategoryName.focus());
+  }
+
+  function closeCategoryDialog() {
+    if (isAddingCategory || !elements.categoryDialog.open) return;
+    elements.categoryDialog.close();
+  }
+
+  function createCategorySetting(label, sourceLibrary) {
+    const categories = Array.isArray(sourceLibrary.categories) ? sourceLibrary.categories : [];
+    const existingLabels = new Set(
+      categories.map((category) => String(category.label || "").trim().toLocaleLowerCase("ko")),
+    );
+    if (existingLabels.has(label.toLocaleLowerCase("ko"))) {
+      throw new Error("같은 이름의 사업 카테고리가 이미 등록되어 있습니다.");
+    }
+
+    let suffix = Date.now().toString(36);
+    const existingIds = new Set(categories.map((category) => category.id));
+    const existingFolders = new Set(categories.map((category) => category.folder || category.id));
+    while (existingIds.has(`category-${suffix}`) || existingFolders.has(`category-${suffix}`)) {
+      suffix = `${suffix}-${Math.random().toString(36).slice(2, 6)}`;
+    }
+    const orders = categories.map((category) => Number(category.order)).filter(Number.isFinite);
+    const nextOrder = (orders.length ? Math.max(...orders) : 0) + 10;
+    return {
+      id: `category-${suffix}`,
+      label,
+      folder: `category-${suffix}`,
+      description: `${label} 사업의 홍보·운영자료`,
+      order: nextOrder,
+    };
+  }
+
+  async function addCategory(event) {
+    event.preventDefault();
+    if (isAddingCategory) return;
+    if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
+      setCategoryDialogStatus("토큰 연결을 다시 확인한 뒤 추가해 주세요.", "error");
+      return;
+    }
+
+    const label = elements.newCategoryName.value.trim().replace(/\s+/g, " ");
+    if (!label) {
+      setCategoryDialogStatus("사업 카테고리명을 입력해 주세요.", "error");
+      elements.newCategoryName.focus();
+      return;
+    }
+
+    isAddingCategory = true;
+    elements.saveCategoryButton.disabled = true;
+    elements.closeCategoryDialog.disabled = true;
+    elements.cancelCategoryDialog.disabled = true;
+    setCategoryDialogStatus("GitHub에 사업 카테고리와 자료 유형별 폴더를 만들고 있습니다.", "progress");
+
+    try {
+      const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
+      latestLibrary.categories = Array.isArray(latestLibrary.categories) ? latestLibrary.categories : [];
+      const category = createCategorySetting(label, latestLibrary);
+      latestLibrary.categories.push(category);
+
+      const materialTypes = Array.isArray(latestLibrary.materialTypes) ? latestLibrary.materialTypes : [];
+      if (!materialTypes.length) throw new Error("폴더를 만들 자료 유형이 없습니다.");
+
+      const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
+      const emptyBlob = await createBlob(verifiedToken, "");
+      const parentCommit = await githubApi(
+        `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
+        verifiedToken,
+      );
+      const categoryFolder = validateFolderSegment(category.folder, "사업 카테고리");
+      const treeEntries = [{ path: config.dataPath, mode: "100644", type: "blob", sha: dataBlob.sha }];
+      materialTypes.forEach((materialType) => {
+        const typeFolder = validateFolderSegment(materialType.folder, "자료 유형");
+        treeEntries.push({
+          path: `assets/materials/${categoryFolder}/${typeFolder}/.gitkeep`,
+          mode: "100644",
+          type: "blob",
+          sha: emptyBlob.sha,
+        });
+      });
+
+      const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {
+        method: "POST",
+        body: JSON.stringify({ base_tree: parentCommit.tree.sha, tree: treeEntries }),
+      });
+      const commit = await githubApi(`/repos/${config.owner}/${config.repo}/git/commits`, verifiedToken, {
+        method: "POST",
+        body: JSON.stringify({
+          message: `Add category: ${category.label}`,
+          tree: tree.sha,
+          parents: [reference.object.sha],
+        }),
+      });
+      await githubApi(`/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, verifiedToken, {
+        method: "PATCH",
+        body: JSON.stringify({ sha: commit.sha, force: false }),
+      });
+
+      library = latestLibrary;
+      populateSelect(elements.category, library.categories || []);
+      populateSelect(elements.materialType, library.materialTypes || []);
+      elements.category.value = category.id;
+      updateFileAccept();
+      updateDestinationPreview();
+      renderInventory(library);
+      elements.categoryDialog.close();
+      clearResult();
+      showResult(
+        "success",
+        "사업 카테고리가 추가되었습니다.",
+        `‘${category.label}’ 사업과 ${materialTypes.length}개 자료 유형 폴더를 GitHub에 만들었습니다.`,
+        commit.sha,
+      );
+      setConnectionStatus(`‘${category.label}’ 사업 카테고리가 추가되었습니다.`, "success");
+      window.requestAnimationFrame(() => elements.category.focus());
+    } catch (error) {
+      setCategoryDialogStatus(userFriendlyError(error), "error");
+    } finally {
+      isAddingCategory = false;
+      elements.saveCategoryButton.disabled = false;
+      elements.closeCategoryDialog.disabled = false;
+      elements.cancelCategoryDialog.disabled = false;
+    }
+  }
+
   function setMaterialTypeDialogStatus(message = "", type = "") {
     elements.materialTypeDialogStatus.textContent = message;
     elements.materialTypeDialogStatus.className = `dialog-status${type ? ` status-${type}` : ""}`;
   }
 
   function openMaterialTypeDialog() {
-    if (!verifiedToken || isAddingMaterialType) return;
+    if (!verifiedToken || isAddingCategory || isAddingMaterialType) return;
     lastMaterialTypeTrigger = document.activeElement;
     elements.materialTypeForm.reset();
     setMaterialTypeDialogStatus();
@@ -1012,6 +1159,19 @@
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
   elements.cancelDeleteButton.addEventListener("click", closeDeleteDialog);
   elements.confirmDeleteButton.addEventListener("click", deleteSelectedMaterial);
+  elements.openCategoryDialog.addEventListener("click", openCategoryDialog);
+  elements.categoryForm.addEventListener("submit", addCategory);
+  elements.closeCategoryDialog.addEventListener("click", closeCategoryDialog);
+  elements.cancelCategoryDialog.addEventListener("click", closeCategoryDialog);
+  elements.categoryDialog.addEventListener("cancel", (event) => {
+    if (isAddingCategory) event.preventDefault();
+  });
+  elements.categoryDialog.addEventListener("close", () => {
+    elements.categoryForm.reset();
+    setCategoryDialogStatus();
+    if (lastCategoryTrigger && document.contains(lastCategoryTrigger)) lastCategoryTrigger.focus();
+    lastCategoryTrigger = null;
+  });
   elements.openMaterialTypeDialog.addEventListener("click", openMaterialTypeDialog);
   elements.materialTypeForm.addEventListener("submit", addMaterialType);
   elements.closeMaterialTypeDialog.addEventListener("click", closeMaterialTypeDialog);

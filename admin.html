@@ -96,7 +96,12 @@
 
               <div class="form-grid form-grid-two">
                 <div class="field-group">
-                  <label for="category">사업 카테고리 <span aria-hidden="true">*</span></label>
+                  <div class="field-label-row">
+                    <label for="category">사업 카테고리 <span aria-hidden="true">*</span></label>
+                    <button id="openCategoryDialog" class="inline-add-button" type="button">
+                      + 사업 카테고리 추가
+                    </button>
+                  </div>
                   <select id="category" name="category" required></select>
                 </div>
                 <div class="field-group">
@@ -256,6 +261,40 @@
         </div>
       </div>
     </footer>
+
+    <dialog id="categoryDialog" class="material-type-dialog" aria-labelledby="categoryDialogTitle">
+      <form id="categoryForm" method="dialog" autocomplete="off">
+        <div class="dialog-heading-row">
+          <div>
+            <p class="section-kicker">사업 분류 설정</p>
+            <h2 id="categoryDialogTitle">사업 카테고리 추가</h2>
+          </div>
+          <button id="closeCategoryDialog" class="icon-button" type="button" aria-label="사업 카테고리 추가 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <p class="material-type-dialog-description">
+          새 사업을 추가하면 현재 등록된 모든 자료 유형의 전용 폴더가 함께 생성됩니다.
+        </p>
+        <div class="field-group">
+          <label for="newCategoryName">사업 카테고리명 <span aria-hidden="true">*</span></label>
+          <input
+            id="newCategoryName"
+            name="newCategoryName"
+            type="text"
+            maxlength="30"
+            placeholder="예: 발권"
+            required
+          />
+          <p class="field-help">메인 자료허브의 사업 선택 탭과 업로드 목록에 자동으로 추가됩니다.</p>
+        </div>
+        <p id="categoryDialogStatus" class="dialog-status" aria-live="polite"></p>
+        <div class="material-type-dialog-actions">
+          <button id="cancelCategoryDialog" class="button button-secondary" type="button">취소</button>
+          <button id="saveCategoryButton" class="button button-primary" type="submit">GitHub에 저장</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="materialTypeDialog" class="material-type-dialog" aria-labelledby="materialTypeDialogTitle">
       <form id="materialTypeForm" method="dialog" autocomplete="off">
