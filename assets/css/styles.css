@@ -783,7 +783,42 @@ button.button {
   gap: 18px;
 }
 
-.footer-links a,
+.footer-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footer-external-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border: 1px solid var(--slate-300);
+  border-radius: 8px;
+  color: var(--navy-900);
+  background: #fff;
+  font-weight: 750;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.footer-external-button:hover {
+  color: var(--blue-700);
+  border-color: var(--blue-600);
+  background: var(--blue-50);
+}
+
+.footer-external-button:focus-visible,
+.footer-admin-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
 .footer-admin-button {
   color: var(--blue-700);
   font-weight: 700;
@@ -1290,8 +1325,12 @@ button.button {
   .footer-links {
     align-items: flex-start;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 4px;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .footer-actions {
+    width: 100%;
   }
 
   .modal {
