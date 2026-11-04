@@ -790,7 +790,8 @@ button.button {
   gap: 8px;
 }
 
-.footer-external-button {
+.footer-external-button,
+.footer-admin-button {
   display: inline-flex;
   min-height: 36px;
   align-items: center;
@@ -807,10 +808,12 @@ button.button {
   white-space: nowrap;
 }
 
-.footer-external-button:hover {
+.footer-external-button:hover,
+.footer-admin-button:hover {
   color: var(--blue-700);
   border-color: var(--blue-600);
   background: var(--blue-50);
+  text-decoration: none;
 }
 
 .footer-external-button:focus-visible,
@@ -820,21 +823,9 @@ button.button {
 }
 
 .footer-admin-button {
-  color: var(--blue-700);
-  font-weight: 700;
-  text-underline-offset: 3px;
-}
-
-.footer-admin-button {
-  padding: 0;
-  border: 0;
-  background: transparent;
   font: inherit;
+  font-weight: 750;
   cursor: pointer;
-}
-
-.footer-admin-button:hover {
-  text-decoration: underline;
 }
 
 .footer-admin-button:focus-visible {
