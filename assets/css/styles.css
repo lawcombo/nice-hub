@@ -599,6 +599,13 @@ a {
   white-space: nowrap;
 }
 
+.material-preview-note {
+  margin: -7px 0 13px;
+  color: var(--slate-500);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
 .card-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

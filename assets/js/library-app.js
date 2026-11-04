@@ -241,10 +241,17 @@
     return /\.(?:png|jpe?g|webp)(?:[?#].*)?$/i.test(String(material?.file || ""));
   }
 
+  function getOfficeFormat(material) {
+    const format = String(material?.format || "").toLowerCase();
+    if (["ppt", "pptx", "doc", "docx"].includes(format)) return format;
+    return String(material?.file || "").match(/\.(pptx?|docx?)(?:[?#].*)?$/i)?.[1]?.toLowerCase() || "";
+  }
+
   function getMaterialFileKindLabel(material) {
     const format = String(material?.format || "").toLowerCase();
+    const officeFormat = getOfficeFormat(material);
     if (format === "pdf") return "PDF";
-    if (["ppt", "pptx", "doc", "docx"].includes(format)) return format.toUpperCase();
+    if (officeFormat) return officeFormat.toUpperCase();
     if (isImageMaterial(material)) return "이미지";
     if (format === "video" || material?.type === "video" || isYouTubeMaterial(material)) return "동영상";
     return "파일";
@@ -447,6 +454,9 @@
     date.setAttribute("aria-label", `업데이트 날짜 ${material.updatedAt || "미등록"}`);
     const detailRow = createElement("div", "material-detail-row");
     detailRow.append(fileInfo, date);
+    const previewNotice = getOfficeFormat(material)
+      ? createElement("p", "material-preview-note", "PPT · Word 파일은 미리보기 제공 불가")
+      : null;
     const actions = createElement("div", "card-actions");
 
     if (String(material.format).toLowerCase() === "pdf" || isImageMaterial(material)) {
@@ -485,7 +495,9 @@
     actions.appendChild(createShareButton(material));
     if (actions.childElementCount === 3) actions.classList.add("card-actions-three");
 
-    body.append(meta, title, description, detailRow, actions);
+    body.append(meta, title, description, detailRow);
+    if (previewNotice) body.appendChild(previewNotice);
+    body.appendChild(actions);
     card.append(thumbnail, body);
     return card;
   }
