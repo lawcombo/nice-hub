@@ -200,21 +200,6 @@
       "fileSizeBytes": 2866648
     },
     {
-      "id": "lodging-proposal-mw32l02m",
-      "category": "lodging",
-      "type": "proposal",
-      "format": "pdf",
-      "title": "통합무인운영솔루션 제안서",
-      "description": "2026ver",
-      "file": "assets/materials/lodging/proposals/20261105-135257-NICE인프라-통합무인운영솔루션-제안서_2026ver.pdf",
-      "thumbnail": "assets/thumbnails/20261105-135257-main3.png",
-      "updatedAt": "2026-11-05",
-      "registeredAt": "2026-11-05T04:52:57.584Z",
-      "mimeType": "application/pdf",
-      "fileSizeBytes": 5519199,
-      "pageCount": 21
-    },
-    {
       "id": "school-safety-proposal-mw32o9ad",
       "category": "school-safety",
       "type": "proposal",
