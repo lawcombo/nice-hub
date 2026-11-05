@@ -228,6 +228,21 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 8708192,
       "pageCount": 4
+    },
+    {
+      "id": "lodging-proposal-mw32viog",
+      "category": "lodging",
+      "type": "proposal",
+      "format": "pdf",
+      "title": "통합무인운영솔루션 제안서",
+      "description": "2026ver",
+      "file": "assets/materials/lodging/proposals/20261105-140106-NICE인프라-통합무인운영솔루션-제안서_2026ver.pdf",
+      "thumbnail": "assets/thumbnails/20261105-140106-main_3_1.png",
+      "updatedAt": "2026-11-05",
+      "registeredAt": "2026-11-05T05:01:06.790Z",
+      "mimeType": "application/pdf",
+      "fileSizeBytes": 5519199,
+      "pageCount": 21
     }
   ]
 }
