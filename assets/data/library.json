@@ -276,6 +276,21 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 700997,
       "pageCount": 4
+    },
+    {
+      "id": "lodging-manual-mw3bz0my",
+      "category": "lodging",
+      "type": "manual",
+      "format": "pdf",
+      "title": "NiceManager 매뉴얼 03 PMS 설정_2026.07",
+      "description": "NiceManager 매뉴얼 03 PMS 설정_2026.07",
+      "file": "assets/materials/lodging/manuals/20261105-181549-02_NiceManager_PMS-설정-매뉴얼_260729.pdf",
+      "thumbnail": "assets/thumbnails/20261105-181549-매뉴얼_03.png",
+      "updatedAt": "2026-11-05",
+      "registeredAt": "2026-11-05T09:15:49.530Z",
+      "mimeType": "application/pdf",
+      "fileSizeBytes": 4259222,
+      "pageCount": 23
     }
   ]
 }
