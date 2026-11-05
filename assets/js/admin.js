@@ -58,9 +58,13 @@
     progressTitle: document.querySelector("#progressTitle"),
     progressMessage: document.querySelector("#progressMessage"),
     result: document.querySelector("#uploadResult"),
+    openUploadDialog: document.querySelector("#openUploadDialog"),
+    uploadDialog: document.querySelector("#uploadDialog"),
+    closeUploadDialog: document.querySelector("#closeUploadDialog"),
     inventorySection: document.querySelector("#inventorySection"),
     inventorySummary: document.querySelector("#inventorySummary"),
-    inventoryStatus: document.querySelector("#inventoryStatus"),
+    inventoryCategoryFilter: document.querySelector("#inventoryCategoryFilter"),
+    inventoryTypeFilter: document.querySelector("#inventoryTypeFilter"),
     materialInventory: document.querySelector("#materialInventory"),
     refreshMaterialsButton: document.querySelector("#refreshMaterialsButton"),
     operationOverlay: document.querySelector("#operationOverlay"),
@@ -189,6 +193,42 @@
       fragment.appendChild(option);
     });
     select.replaceChildren(fragment);
+  }
+
+  function populateInventoryFilter(select, items, allLabel) {
+    const currentValue = select.value || "all";
+    const fragment = document.createDocumentFragment();
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = allLabel;
+    fragment.appendChild(allOption);
+    items.forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.label;
+      fragment.appendChild(option);
+    });
+    select.replaceChildren(fragment);
+    select.value = items.some((item) => item.id === currentValue) ? currentValue : "all";
+  }
+
+  function populateInventoryFilters(sourceLibrary = library) {
+    const categories = Array.isArray(sourceLibrary?.categories) ? sourceLibrary.categories : [];
+    const materialTypes = Array.isArray(sourceLibrary?.materialTypes) ? sourceLibrary.materialTypes : [];
+    populateInventoryFilter(elements.inventoryCategoryFilter, categories, "전체 사업");
+    populateInventoryFilter(elements.inventoryTypeFilter, materialTypes, "전체 유형");
+  }
+
+  function openUploadModal() {
+    if (!verifiedToken || isUploading || elements.uploadDialog.open) return;
+    clearResult();
+    elements.uploadDialog.showModal();
+    window.requestAnimationFrame(() => elements.category.focus());
+  }
+
+  function closeUploadModal(force = false) {
+    if ((!force && isUploading) || !elements.uploadDialog.open) return;
+    elements.uploadDialog.close();
   }
 
   function createElement(tagName, className, text) {
@@ -435,13 +475,7 @@
     showOperationResult(kind, title, message);
   }
 
-  function setInventoryStatus(message = "", type = "") {
-    elements.inventoryStatus.replaceChildren();
-    elements.inventoryStatus.className = `inventory-status${type ? ` status-${type}` : ""}`;
-    if (!message) return;
-
-    elements.inventoryStatus.appendChild(document.createTextNode(message));
-  }
+  function setInventoryStatus() {}
 
   function createInventoryItem(material, sourceLibrary) {
     const item = createElement("article", "inventory-item");
@@ -529,13 +563,25 @@
     const categories = Array.isArray(sourceLibrary?.categories)
       ? [...sourceLibrary.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
       : [];
-    const materials = Array.isArray(sourceLibrary?.materials) ? [...sourceLibrary.materials] : [];
+    const allMaterials = Array.isArray(sourceLibrary?.materials) ? [...sourceLibrary.materials] : [];
+    const selectedCategory = elements.inventoryCategoryFilter.value || "all";
+    const selectedType = elements.inventoryTypeFilter.value || "all";
+    const hasActiveFilter = selectedCategory !== "all" || selectedType !== "all";
+    const materials = allMaterials.filter(
+      (material) =>
+        (selectedCategory === "all" || material.category === selectedCategory) &&
+        (selectedType === "all" || material.type === selectedType),
+    );
     const knownCategoryIds = new Set(categories.map((category) => category.id));
     const unknownMaterials = materials.filter((material) => !knownCategoryIds.has(material.category));
-    const groups = categories.map((category) => ({ id: category.id, label: category.label, category }));
+    const groups = categories
+      .filter((category) => selectedCategory === "all" || category.id === selectedCategory)
+      .map((category) => ({ id: category.id, label: category.label, category }));
     if (unknownMaterials.length) groups.push({ id: "__other__", label: "기타", category: null });
 
-    elements.inventorySummary.textContent = `${categories.length}개 사업 카테고리 · 등록 자료 ${materials.length}건`;
+    elements.inventorySummary.textContent = hasActiveFilter
+      ? `선택 조건 자료 ${materials.length}건 · 전체 ${allMaterials.length}건`
+      : `${categories.length}개 사업 카테고리 · 등록 자료 ${allMaterials.length}건`;
     const fragment = document.createDocumentFragment();
 
     groups.forEach((group) => {
@@ -546,6 +592,7 @@
         const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
         return registrationDifference || String(b.id || "").localeCompare(String(a.id || ""), "ko");
       });
+      if (hasActiveFilter && !groupMaterials.length) return;
 
       const section = createElement("section", "inventory-group");
       const heading = createElement("div", "inventory-group-heading");
@@ -563,7 +610,15 @@
       fragment.appendChild(section);
     });
 
-    if (!groups.length) fragment.appendChild(createElement("p", "inventory-empty", "등록된 카테고리가 없습니다."));
+    if (!fragment.childNodes.length) {
+      fragment.appendChild(
+        createElement(
+          "p",
+          "inventory-empty inventory-filter-empty",
+          hasActiveFilter ? "선택한 조건에 해당하는 자료가 없습니다." : "등록된 카테고리가 없습니다.",
+        ),
+      );
+    }
     elements.materialInventory.replaceChildren(fragment);
   }
 
@@ -738,9 +793,11 @@
       verifiedToken = token;
       library = state.library;
       elements.fields.disabled = false;
+      elements.openUploadDialog.disabled = false;
       elements.inventorySection.hidden = false;
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
+      populateInventoryFilters(library);
       updateFileAccept();
       renderInventory(library);
       setInventoryStatus();
@@ -750,7 +807,9 @@
     } catch (error) {
       verifiedToken = "";
       elements.fields.disabled = true;
+      elements.openUploadDialog.disabled = true;
       elements.inventorySection.hidden = true;
+      closeUploadModal(true);
       setConnectionStatus(userFriendlyError(error), "error");
       return false;
     } finally {
@@ -1260,6 +1319,7 @@
 
       library = latestLibrary;
       elements.progress.hidden = true;
+      closeUploadModal(true);
       showResult(
         "success",
         "업로드가 완료되었습니다.",
@@ -1274,6 +1334,7 @@
       elements.thumbnailFileName.textContent = "선택된 이미지 없음";
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
+      populateInventoryFilters(library);
       updateFileAccept();
       elements.inventorySection.hidden = false;
       if (thumbnail) setLocalThumbnailPreview(material.id, thumbnail);
@@ -1291,15 +1352,16 @@
   async function refreshMaterials() {
     if (!verifiedToken || isUploading || isDeleting || isEditingMaterial) return;
     elements.refreshMaterialsButton.disabled = true;
-    setInventoryStatus("GitHub에서 최신 자료 목록을 불러오고 있습니다.", "progress");
+    showOperationProgress("자료 목록을 새로고침하고 있습니다.", "GitHub에서 최신 자료 목록을 불러오는 중입니다.");
 
     try {
       const state = await fetchRepositoryState(verifiedToken);
       library = state.library;
+      populateInventoryFilters(library);
       renderInventory(library);
-      setInventoryStatus("최신 자료 목록으로 갱신했습니다.", "success");
+      showOperationResult("success", "새로고침이 완료되었습니다.", "최신 자료 목록으로 갱신했습니다.");
     } catch (error) {
-      setInventoryStatus(userFriendlyError(error), "error");
+      showOperationResult("error", "새로고침하지 못했습니다.", userFriendlyError(error));
     } finally {
       elements.refreshMaterialsButton.disabled = false;
     }
@@ -1502,6 +1564,7 @@
       library = latestLibrary;
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
+      populateInventoryFilters(library);
       elements.category.value = category.id;
       updateFileAccept();
       updateDestinationPreview();
@@ -1631,6 +1694,7 @@
       library = latestLibrary;
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
+      populateInventoryFilters(library);
       elements.materialType.value = materialType.id;
       updateFileAccept();
       renderInventory(library);
@@ -1660,6 +1724,7 @@
       library = await response.json();
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
+      populateInventoryFilters(library);
       elements.updatedAt.value = localDateString();
       updateFileAccept();
     } catch (error) {
@@ -1669,8 +1734,18 @@
   }
 
   elements.connectButton.addEventListener("click", verifyConnection);
+  elements.openUploadDialog.addEventListener("click", openUploadModal);
+  elements.closeUploadDialog.addEventListener("click", () => closeUploadModal());
+  elements.uploadDialog.addEventListener("cancel", (event) => {
+    if (isUploading) event.preventDefault();
+  });
+  elements.uploadDialog.addEventListener("click", (event) => {
+    if (event.target === elements.uploadDialog) closeUploadModal();
+  });
   elements.form.addEventListener("submit", handleUpload);
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
+  elements.inventoryCategoryFilter.addEventListener("change", () => renderInventory(library));
+  elements.inventoryTypeFilter.addEventListener("change", () => renderInventory(library));
   elements.closeOperationResult.addEventListener("click", closeOperationResult);
   elements.operationResultDialog.addEventListener("click", (event) => {
     if (event.target === elements.operationResultDialog) closeOperationResult();

@@ -39,10 +39,7 @@
 }
 
 .admin-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  align-items: start;
-  gap: 24px;
+  display: block;
 }
 
 .admin-card {
@@ -70,6 +67,55 @@
   font-size: 1.35rem;
   line-height: 1.35;
   letter-spacing: -0.03em;
+}
+
+.connection-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 21px;
+  padding-top: 21px;
+  border-top: 1px solid var(--slate-200);
+}
+
+.connection-actions .button {
+  min-width: 180px;
+}
+
+.upload-dialog {
+  width: min(860px, calc(100% - 40px));
+  max-height: min(92vh, 940px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 0;
+  border-radius: 20px;
+  color: var(--slate-900);
+  background: transparent;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
+}
+
+.upload-dialog::backdrop {
+  background: rgba(3, 15, 29, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.upload-dialog-card {
+  position: relative;
+  padding: 30px;
+  border: 0;
+  border-radius: 20px;
+  box-shadow: none;
+}
+
+.upload-dialog-close {
+  position: absolute;
+  z-index: 2;
+  top: 22px;
+  right: 22px;
+}
+
+.upload-dialog-card > .admin-card-heading {
+  padding-right: 48px;
 }
 
 .step-number {
@@ -672,6 +718,49 @@ fieldset:disabled {
   font-size: 0.82rem;
 }
 
+.inventory-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+  padding: 15px 16px;
+  border: 1px solid var(--slate-200);
+  border-radius: 12px;
+  background: var(--slate-100);
+}
+
+.inventory-filter-field {
+  display: grid;
+  grid-template-columns: auto minmax(150px, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.inventory-filter-field label {
+  color: var(--slate-700);
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.inventory-filter-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 36px 7px 11px;
+  border: 1px solid var(--slate-300);
+  border-radius: 9px;
+  color: var(--navy-900);
+  background: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.inventory-filter-field select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
 .inventory-summary {
   color: var(--navy-900);
   font-weight: 800;
@@ -1047,8 +1136,9 @@ fieldset:disabled {
 }
 
 @media (max-width: 880px) {
-  .admin-layout {
+  .inventory-filter-field {
     grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
 
@@ -1069,6 +1159,30 @@ fieldset:disabled {
   .admin-card {
     padding: 21px 17px;
     border-radius: 16px;
+  }
+
+  .connection-actions {
+    justify-content: stretch;
+  }
+
+  .connection-actions .button {
+    width: 100%;
+  }
+
+  .upload-dialog {
+    width: calc(100% - 20px);
+    max-height: 94dvh;
+    border-radius: 16px;
+  }
+
+  .upload-dialog-card {
+    padding: 22px 17px;
+    border-radius: 16px;
+  }
+
+  .upload-dialog-close {
+    top: 15px;
+    right: 14px;
   }
 
   .form-grid-two,
@@ -1101,6 +1215,11 @@ fieldset:disabled {
 
   .inventory-delete-note {
     text-align: left;
+  }
+
+  .inventory-filters {
+    grid-template-columns: 1fr;
+    padding: 13px;
   }
 
   .inventory-item {

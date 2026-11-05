@@ -28,7 +28,7 @@
 
     <main id="uploadMain" class="shell admin-main">
       <div class="admin-layout">
-        <section class="admin-card" aria-labelledby="connectionHeading">
+        <section class="admin-card connection-card" aria-labelledby="connectionHeading">
           <div class="admin-card-heading">
             <span class="step-number" aria-hidden="true">1</span>
             <div>
@@ -79,9 +79,18 @@
           </details>
 
           <div id="connectionStatus" class="inline-status" aria-live="polite"></div>
+          <div class="connection-actions">
+            <button id="openUploadDialog" class="button button-primary" type="button" disabled>
+              파일 업로드
+            </button>
+          </div>
         </section>
 
-        <section class="admin-card" aria-labelledby="materialHeading">
+        <dialog id="uploadDialog" class="upload-dialog" aria-labelledby="materialHeading">
+        <section class="admin-card upload-dialog-card" aria-labelledby="materialHeading">
+          <button id="closeUploadDialog" class="icon-button upload-dialog-close" type="button" aria-label="자료 업로드 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
           <div class="admin-card-heading">
             <span class="step-number" aria-hidden="true">2</span>
             <div>
@@ -218,6 +227,7 @@
 
           <div id="uploadResult" class="upload-result" hidden aria-live="polite"></div>
         </section>
+        </dialog>
       </div>
 
       <section id="inventorySection" class="admin-card inventory-card" aria-labelledby="inventoryHeading" hidden>
@@ -238,7 +248,20 @@
           <p id="inventorySummary" class="inventory-summary">GitHub 연결 후 자료 목록을 확인할 수 있습니다.</p>
           <p class="inventory-delete-note">각 자료의 표지·원본 파일·제목과 설명을 개별 수정할 수 있습니다.</p>
         </div>
-        <div id="inventoryStatus" class="inventory-status" aria-live="polite"></div>
+        <div class="inventory-filters" aria-label="현재 자료 필터">
+          <div class="inventory-filter-field">
+            <label for="inventoryCategoryFilter">사업 카테고리별</label>
+            <select id="inventoryCategoryFilter">
+              <option value="all">전체 사업</option>
+            </select>
+          </div>
+          <div class="inventory-filter-field">
+            <label for="inventoryTypeFilter">자료 유형별</label>
+            <select id="inventoryTypeFilter">
+              <option value="all">전체 유형</option>
+            </select>
+          </div>
+        </div>
         <div id="materialInventory" class="material-inventory"></div>
       </section>
 
