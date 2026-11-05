@@ -143,19 +143,6 @@ body.upload-modal-open {
   flex: 0 0 auto;
 }
 
-.step-number {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  place-items: center;
-  border-radius: 12px;
-  color: #fff;
-  background: var(--navy-900);
-  font-size: 0.92rem;
-  font-weight: 900;
-}
-
 .security-note {
   margin-bottom: 23px;
   padding: 15px 16px;
