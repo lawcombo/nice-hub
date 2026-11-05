@@ -243,6 +243,21 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 8708192,
       "pageCount": 4
+    },
+    {
+      "id": "lodging-brochure-mw33cn8i",
+      "category": "lodging",
+      "type": "brochure",
+      "format": "pdf",
+      "title": "통합무인운영솔루션 브로슈어",
+      "description": "2026. 사업초기 버전\n최신 버전은 추후 업데이트 예정",
+      "file": "assets/materials/lodging/brochures/20261105-141427-NICE인프라-통합무인운영솔루션-브로슈어_2026ver.pdf",
+      "thumbnail": "assets/thumbnails/20261105-141427-mmm.png",
+      "updatedAt": "2026-11-05",
+      "registeredAt": "2026-11-05T05:14:27.515Z",
+      "mimeType": "application/pdf",
+      "fileSizeBytes": 8708192,
+      "pageCount": 4
     }
   ]
 }
