@@ -1080,6 +1080,18 @@ button.button {
   gap: 8px;
 }
 
+.footer-inner-actions,
+.footer-inner-return {
+  display: block;
+}
+
+.footer-actions-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .footer-external-button,
 .footer-admin-button {
   display: inline-flex;
@@ -1098,16 +1110,51 @@ button.button {
   white-space: nowrap;
 }
 
+.footer-actions-grid .footer-external-button,
+.footer-actions-grid .footer-admin-button {
+  width: 100%;
+  min-height: 46px;
+  border-color: #c8d6e7;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff 0%, #f7faff 100%);
+  box-shadow: 0 3px 10px rgba(7, 29, 55, 0.045);
+}
+
+.footer-actions-grid .footer-admin-button {
+  background: var(--blue-50);
+}
+
+.footer-return-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: 1px solid #c8d6e7;
+  border-radius: 10px;
+  color: var(--navy-900);
+  background: linear-gradient(180deg, #fff 0%, #f5f9fe 100%);
+  box-shadow: 0 3px 10px rgba(7, 29, 55, 0.045);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .footer-external-button:hover,
-.footer-admin-button:hover {
+.footer-admin-button:hover,
+.footer-return-button:hover {
   color: var(--blue-700);
   border-color: var(--blue-600);
   background: var(--blue-50);
   text-decoration: none;
+  box-shadow: 0 5px 14px rgba(23, 91, 181, 0.1);
 }
 
 .footer-external-button:focus-visible,
-.footer-admin-button:focus-visible {
+.footer-admin-button:focus-visible,
+.footer-return-button:focus-visible {
   outline: none;
   box-shadow: var(--focus);
 }
@@ -1790,6 +1837,18 @@ button.button {
 
   .footer-actions {
     width: 100%;
+  }
+
+  .footer-actions-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .footer-actions-grid .footer-external-button,
+  .footer-actions-grid .footer-admin-button {
+    min-height: 44px;
+    padding-inline: 5px;
+    font-size: 0.72rem;
   }
 
   .modal {
