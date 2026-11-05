@@ -213,6 +213,21 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 5519199,
       "pageCount": 21
+    },
+    {
+      "id": "school-safety-proposal-mw32o9ad",
+      "category": "school-safety",
+      "type": "proposal",
+      "format": "pdf",
+      "title": "학생통합안전시스템 제안서",
+      "description": "공유용 2026.10",
+      "file": "assets/materials/school-safety/proposals/20261105-135525-학생통합안전시스템-제안서_공유용_2026.10.pdf",
+      "thumbnail": "assets/thumbnails/20261105-135525-main4.png",
+      "updatedAt": "2026-11-05",
+      "registeredAt": "2026-11-05T04:55:25.523Z",
+      "mimeType": "application/pdf",
+      "fileSizeBytes": 16360886,
+      "pageCount": 40
     }
   ]
 }
