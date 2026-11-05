@@ -1373,6 +1373,7 @@ button.button {
 .image-preview-viewer[hidden],
 .image-preview-viewer img[hidden],
 .pdf-preview-status[hidden],
+.pdf-preview-placeholder[hidden],
 .pdf-canvas-viewer canvas[hidden] {
   display: none;
 }
@@ -1385,9 +1386,22 @@ button.button {
 }
 
 .pdf-canvas-stage canvas {
+  grid-area: 1 / 1;
   display: block;
   max-width: 100%;
   height: auto !important;
+  background: #fff;
+  box-shadow: 0 5px 20px rgba(7, 29, 55, 0.18);
+}
+
+.pdf-preview-placeholder {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100vh - 250px);
+  grid-area: 1 / 1;
+  object-fit: contain;
   background: #fff;
   box-shadow: 0 5px 20px rgba(7, 29, 55, 0.18);
 }
@@ -1412,6 +1426,16 @@ button.button {
 
 .pdf-preview-status.is-error {
   color: #8b2d2d;
+}
+
+.pdf-canvas-viewer.has-preview-placeholder .pdf-preview-status:not(.is-error) {
+  top: auto;
+  bottom: 26px;
+  width: auto;
+  max-width: calc(100% - 48px);
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  transform: translateX(-50%);
 }
 
 .preview-help {

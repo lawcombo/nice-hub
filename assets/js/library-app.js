@@ -26,6 +26,7 @@
     closeModal: document.querySelector("#closePreview"),
     pdfCanvasViewer: document.querySelector("#pdfCanvasViewer"),
     pdfPreviewStatus: document.querySelector("#pdfPreviewStatus"),
+    pdfPreviewPlaceholder: document.querySelector("#pdfPreviewPlaceholder"),
     pdfPreviewCanvas: document.querySelector("#pdfPreviewCanvas"),
     previewPagination: document.querySelector("#previewPagination"),
     previousPreviewPage: document.querySelector("#previousPreviewPage"),
@@ -55,6 +56,7 @@
   let activeViewMode = getSavedViewMode();
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
+  let pdfViewerWarmupScheduled = false;
   let pdfDocument = null;
   let pdfLoadingTask = null;
   let pdfRenderTask = null;
@@ -642,12 +644,69 @@
 
   function loadPdfJs() {
     if (!pdfJsModulePromise) {
-      pdfJsModulePromise = import(resolveUrl("assets/vendor/pdfjs/pdf.min.mjs")).then((pdfjs) => {
-        pdfjs.GlobalWorkerOptions.workerSrc = resolveUrl("assets/vendor/pdfjs/pdf.worker.min.mjs");
-        return pdfjs;
-      });
+      pdfJsModulePromise = import(resolveUrl("assets/vendor/pdfjs/pdf.min.mjs"))
+        .then((pdfjs) => {
+          pdfjs.GlobalWorkerOptions.workerSrc = resolveUrl("assets/vendor/pdfjs/pdf.worker.min.mjs");
+          return pdfjs;
+        })
+        .catch((error) => {
+          pdfJsModulePromise = null;
+          throw error;
+        });
     }
     return pdfJsModulePromise;
+  }
+
+  function schedulePdfViewerWarmup() {
+    if (pdfViewerWarmupScheduled || !materials.some((material) => String(material?.format).toLowerCase() === "pdf")) {
+      return;
+    }
+    pdfViewerWarmupScheduled = true;
+
+    const warmup = () => {
+      void loadPdfJs().catch((error) => console.warn("PDF 뷰어를 미리 준비하지 못했습니다.", error));
+      if (navigator.connection?.saveData) return;
+      void fetch(resolveUrl("assets/vendor/pdfjs/pdf.worker.min.mjs"), { cache: "force-cache" }).catch((error) =>
+        console.warn("PDF 작업 파일을 미리 준비하지 못했습니다.", error),
+      );
+    };
+
+    const schedule = () => {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(warmup, { timeout: 3500 });
+      } else {
+        window.setTimeout(warmup, 1200);
+      }
+    };
+
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+  }
+
+  function showPdfPreviewPlaceholder(material, session) {
+    const thumbnailUrl = resolveUrl(material.thumbnail);
+    const placeholder = elements.pdfPreviewPlaceholder;
+    placeholder.onload = null;
+    placeholder.onerror = null;
+    placeholder.hidden = true;
+    placeholder.removeAttribute("src");
+    placeholder.removeAttribute("alt");
+    elements.pdfCanvasViewer.classList.remove("has-preview-placeholder");
+    if (!thumbnailUrl) return;
+
+    placeholder.alt = `${material.title} 표지 미리보기`;
+    placeholder.hidden = false;
+    elements.pdfCanvasViewer.classList.add("has-preview-placeholder");
+    placeholder.onload = () => {
+      if (session !== previewSession) return;
+      placeholder.hidden = false;
+    };
+    placeholder.onerror = () => {
+      if (session !== previewSession) return;
+      placeholder.hidden = true;
+      elements.pdfCanvasViewer.classList.remove("has-preview-placeholder");
+    };
+    placeholder.src = thumbnailUrl;
   }
 
   function setCanvasPreviewStatus(message, isError) {
@@ -703,6 +762,8 @@
       if (session !== previewSession || request !== renderRequest) return;
 
       elements.pdfPreviewStatus.hidden = true;
+      elements.pdfPreviewPlaceholder.hidden = true;
+      elements.pdfCanvasViewer.classList.remove("has-preview-placeholder");
       canvas.hidden = false;
       canvas.setAttribute("aria-label", `PDF ${currentPdfPage}페이지, 전체 ${pdfDocument.numPages}페이지`);
       elements.pdfCanvasViewer.scrollTo({ top: 0, behavior: "auto" });
@@ -715,18 +776,24 @@
     }
   }
 
-  async function openCanvasPreview(fileUrl, session) {
+  async function openCanvasPreview(material, fileUrl, session) {
     elements.pdfCanvasViewer.hidden = false;
     elements.previewPagination.hidden = false;
     currentPdfPage = 1;
     updatePagination();
-    setCanvasPreviewStatus("PDF를 불러오고 있습니다.", false);
+    showPdfPreviewPlaceholder(material, session);
+    setCanvasPreviewStatus("PDF 첫 페이지를 준비하고 있습니다.", false);
 
     try {
       const pdfjs = await loadPdfJs();
       if (session !== previewSession) return;
 
-      pdfLoadingTask = pdfjs.getDocument({ url: fileUrl });
+      pdfLoadingTask = pdfjs.getDocument({
+        url: fileUrl,
+        disableStream: true,
+        disableAutoFetch: true,
+        rangeChunkSize: 262144,
+      });
       pdfDocument = await pdfLoadingTask.promise;
       if (session !== previewSession) return;
       await renderPdfPage(1, session);
@@ -784,7 +851,7 @@
       openImagePreview(material, fileUrl, session);
     } else {
       elements.imagePreviewViewer.hidden = true;
-      openCanvasPreview(fileUrl, session);
+      openCanvasPreview(material, fileUrl, session);
     }
   }
 
@@ -803,6 +870,12 @@
     elements.imagePreview.removeAttribute("alt");
     elements.previewPagination.hidden = true;
     elements.pdfPreviewCanvas.hidden = true;
+    elements.pdfPreviewPlaceholder.hidden = true;
+    elements.pdfPreviewPlaceholder.onload = null;
+    elements.pdfPreviewPlaceholder.onerror = null;
+    elements.pdfPreviewPlaceholder.removeAttribute("src");
+    elements.pdfPreviewPlaceholder.removeAttribute("alt");
+    elements.pdfCanvasViewer.classList.remove("has-preview-placeholder");
     elements.downloadPreview.removeAttribute("href");
     elements.openPreviewNewTab.removeAttribute("href");
     document.body.classList.remove("modal-open");
@@ -976,6 +1049,7 @@
       renderTabs();
       renderMaterialTypeTabs();
       renderMaterials();
+      schedulePdfViewerWarmup();
     } catch (error) {
       console.error("자료 목록을 불러오지 못했습니다.", error);
       renderTabs();

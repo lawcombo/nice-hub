@@ -1,12 +1,14 @@
 "use strict";
 
-const CACHE_NAME = "nice-hub-shell-v16";
+const CACHE_NAME = "nice-hub-shell-v17";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./assets/css/styles.css",
   "./assets/js/library-app.js",
   "./assets/js/pwa-install.js",
+  "./assets/vendor/pdfjs/pdf.min.mjs",
+  "./assets/vendor/pdfjs/pdf.worker.min.mjs",
   "./assets/data/library.json",
   "./manifest.webmanifest",
   "./assets/icons/app-icon-192.png",
@@ -68,5 +70,6 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.includes("/assets/materials/")) return;
 
   const isIcon = url.pathname.includes("/assets/icons/");
-  event.respondWith(isIcon ? cacheFirst(request) : networkFirst(request));
+  const isPdfViewer = url.pathname.includes("/assets/vendor/pdfjs/");
+  event.respondWith(isIcon || isPdfViewer ? cacheFirst(request) : networkFirst(request));
 });

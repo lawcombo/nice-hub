@@ -56,9 +56,41 @@ const server = http.createServer((request, response) => {
     }
 
     const type = mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream";
+    const rangeHeader = request.headers.range;
+    const rangeMatch = rangeHeader?.match(/^bytes=(\d*)-(\d*)$/);
+    if (rangeHeader && !rangeMatch) {
+      response.writeHead(416, { "Content-Range": `bytes */${stats.size}` });
+      response.end();
+      return;
+    }
+
+    if (rangeMatch) {
+      const requestedStart = rangeMatch[1] ? Number(rangeMatch[1]) : 0;
+      const requestedEnd = rangeMatch[2] ? Number(rangeMatch[2]) : stats.size - 1;
+      const start = Math.max(0, requestedStart);
+      const end = Math.min(requestedEnd, stats.size - 1);
+      if (!Number.isInteger(start) || !Number.isInteger(end) || start > end || start >= stats.size) {
+        response.writeHead(416, { "Content-Range": `bytes */${stats.size}` });
+        response.end();
+        return;
+      }
+
+      response.writeHead(206, {
+        "Content-Type": type,
+        "Content-Length": end - start + 1,
+        "Content-Range": `bytes ${start}-${end}/${stats.size}`,
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+      });
+      fs.createReadStream(filePath, { start, end }).pipe(response);
+      return;
+    }
+
     response.writeHead(200, {
       "Content-Type": type,
       "Content-Length": stats.size,
+      "Accept-Ranges": "bytes",
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
     });
