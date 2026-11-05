@@ -488,15 +488,22 @@
     const actions = createElement("div", "card-actions");
 
     if (String(material.format).toLowerCase() === "pdf" || isImageMaterial(material)) {
-      const previewButton = createElement("button", "button button-primary", "미리보기");
+      const previewButton = createElement("button", "button button-primary mobile-preview-action", "미리보기");
       previewButton.type = "button";
       previewButton.addEventListener("click", () => openPreview(material, previewButton));
       actions.appendChild(previewButton);
+
+      const openLink = createElement("a", "button button-primary desktop-open-action", "문서보기");
+      openLink.href = resolveUrl(material.file);
+      openLink.target = "_blank";
+      openLink.rel = "noopener";
+      actions.appendChild(openLink);
 
       const downloadLink = createDownloadLink(material);
       downloadLink.className = "button button-secondary";
       downloadLink.textContent = "다운로드";
       actions.appendChild(downloadLink);
+      actions.classList.add("card-actions-three", "responsive-preview-actions");
     } else if (material.type === "video" && isYouTubeMaterial(material)) {
       const openLink = createElement("a", "button button-primary", "YouTube에서 보기");
       openLink.href = resolveUrl(material.file);

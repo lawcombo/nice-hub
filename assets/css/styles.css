@@ -713,6 +713,14 @@ a {
   white-space: nowrap;
 }
 
+.button.mobile-preview-action {
+  display: none;
+}
+
+.button.desktop-open-action {
+  display: inline-flex;
+}
+
 .materials-grid.is-list-view {
   grid-template-columns: 1fr;
   gap: 12px;
@@ -1547,6 +1555,14 @@ button.button {
 
   .materials-grid {
     grid-template-columns: 1fr;
+  }
+
+  .button.mobile-preview-action {
+    display: inline-flex;
+  }
+
+  .button.desktop-open-action {
+    display: none;
   }
 
   .is-list-view .material-card {
