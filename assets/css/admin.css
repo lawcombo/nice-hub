@@ -306,6 +306,10 @@
   color: #b42318;
 }
 
+.status-progress {
+  color: var(--blue-700);
+}
+
 fieldset {
   min-width: 0;
   margin: 0;
@@ -716,6 +720,22 @@ fieldset:disabled {
   flex: 0 0 auto;
 }
 
+.inventory-item-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.inventory-action-button {
+  min-height: 38px;
+  padding: 7px 11px;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.inventory-action-button:disabled,
 .inventory-delete-button:disabled {
   opacity: 0.55;
   cursor: wait;
@@ -879,6 +899,11 @@ fieldset:disabled {
   gap: 9px;
 }
 
+.edit-content-dialog textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -950,6 +975,21 @@ fieldset:disabled {
 
   .inventory-delete-button {
     width: 100%;
+  }
+
+  .inventory-item-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .inventory-action-button,
+  .inventory-delete-button {
+    min-width: 0;
+    width: 100%;
+    padding-inline: 7px;
+    white-space: normal;
   }
 
   .delete-dialog {

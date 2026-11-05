@@ -67,6 +67,15 @@
     deleteDialogMessage: document.querySelector("#deleteDialogMessage"),
     cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
     confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
+    editContentDialog: document.querySelector("#editContentDialog"),
+    editContentForm: document.querySelector("#editContentForm"),
+    editMaterialTitle: document.querySelector("#editMaterialTitle"),
+    editMaterialDescription: document.querySelector("#editMaterialDescription"),
+    editDescriptionCount: document.querySelector("#editDescriptionCount"),
+    editContentDialogStatus: document.querySelector("#editContentDialogStatus"),
+    saveEditContentButton: document.querySelector("#saveEditContentButton"),
+    closeEditContentDialog: document.querySelector("#closeEditContentDialog"),
+    cancelEditContentDialog: document.querySelector("#cancelEditContentDialog"),
     openCategoryDialog: document.querySelector("#openCategoryDialog"),
     categoryDialog: document.querySelector("#categoryDialog"),
     categoryForm: document.querySelector("#categoryForm"),
@@ -89,10 +98,13 @@
   let verifiedToken = "";
   let isUploading = false;
   let isDeleting = false;
+  let isEditingMaterial = false;
   let isAddingCategory = false;
   let isAddingMaterialType = false;
   let pendingDeleteId = "";
   let lastDeleteTrigger = null;
+  let pendingContentEditId = "";
+  let lastContentEditTrigger = null;
   let lastCategoryTrigger = null;
   let lastMaterialTypeTrigger = null;
   let pdfJsModulePromise = null;
@@ -413,11 +425,38 @@
     copy.append(meta, title, fileName);
     main.append(thumbnail, copy);
 
-    const deleteButton = createElement("button", "button button-danger inventory-delete-button", "삭제");
+    const actions = createElement("div", "inventory-item-actions");
+    const actionsDisabled =
+      !verifiedToken || isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType;
+    const thumbnailButton = createElement(
+      "button",
+      "button button-secondary inventory-action-button",
+      "썸네일 이미지 변경",
+    );
+    thumbnailButton.type = "button";
+    thumbnailButton.disabled = actionsDisabled;
+    thumbnailButton.addEventListener("click", () => openReplacementFilePicker(material.id, "thumbnail", thumbnailButton));
+
+    const fileButton = createElement("button", "button button-secondary inventory-action-button", "업로드 파일 변경");
+    fileButton.type = "button";
+    fileButton.disabled = actionsDisabled;
+    fileButton.addEventListener("click", () => openReplacementFilePicker(material.id, "material", fileButton));
+
+    const contentButton = createElement("button", "button button-secondary inventory-action-button", "내용 변경");
+    contentButton.type = "button";
+    contentButton.disabled = actionsDisabled;
+    contentButton.addEventListener("click", () => openEditContentDialog(material.id, contentButton));
+
+    const deleteButton = createElement(
+      "button",
+      "button button-danger inventory-delete-button inventory-action-button",
+      "삭제",
+    );
     deleteButton.type = "button";
-    deleteButton.disabled = isDeleting || !verifiedToken;
+    deleteButton.disabled = actionsDisabled;
     deleteButton.addEventListener("click", () => openDeleteDialog(material.id, deleteButton));
-    item.append(main, deleteButton);
+    actions.append(thumbnailButton, fileButton, contentButton, deleteButton);
+    item.append(main, actions);
     return item;
   }
 
@@ -465,7 +504,7 @@
 
   function openDeleteDialog(materialId, trigger) {
     const material = library?.materials?.find((item) => item.id === materialId);
-    if (!material || isDeleting) return;
+    if (!material || isUploading || isDeleting || isEditingMaterial) return;
     pendingDeleteId = materialId;
     lastDeleteTrigger = trigger;
     elements.deleteDialogMessage.textContent = `‘${material.title}’ 자료를 삭제합니다.`;
@@ -662,9 +701,257 @@
     });
   }
 
+  async function commitLibraryUpdate(reference, latestLibrary, treeEntries, message) {
+    const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
+    const parentCommit = await githubApi(
+      `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
+      verifiedToken,
+    );
+    const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {
+      method: "POST",
+      body: JSON.stringify({
+        base_tree: parentCommit.tree.sha,
+        tree: [{ path: config.dataPath, mode: "100644", type: "blob", sha: dataBlob.sha }, ...treeEntries],
+      }),
+    });
+    const commit = await githubApi(`/repos/${config.owner}/${config.repo}/git/commits`, verifiedToken, {
+      method: "POST",
+      body: JSON.stringify({ message, tree: tree.sha, parents: [reference.object.sha] }),
+    });
+    await githubApi(`/repos/${config.owner}/${config.repo}/git/refs/heads/${config.branch}`, verifiedToken, {
+      method: "PATCH",
+      body: JSON.stringify({ sha: commit.sha, force: false }),
+    });
+    return commit;
+  }
+
+  async function runMaterialUpdate(materialId, progressMessage, updater) {
+    if (isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType) return false;
+    if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
+      setInventoryStatus("토큰 연결을 다시 확인한 뒤 자료를 수정해 주세요.", "error");
+      return false;
+    }
+
+    isEditingMaterial = true;
+    elements.fields.disabled = true;
+    elements.refreshMaterialsButton.disabled = true;
+    renderInventory(library);
+    setInventoryStatus(progressMessage, "progress");
+
+    try {
+      const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
+      latestLibrary.materials = Array.isArray(latestLibrary.materials) ? latestLibrary.materials : [];
+      const material = latestLibrary.materials.find((item) => item.id === materialId);
+      if (!material) throw new Error("수정할 자료를 최신 목록에서 찾지 못했습니다. 목록을 새로고침해 주세요.");
+
+      const update = await updater(material, latestLibrary);
+      const commit = await commitLibraryUpdate(reference, latestLibrary, update.treeEntries || [], update.commitMessage);
+      library = latestLibrary;
+      setInventoryStatus(update.successMessage, "success", commit.sha);
+      return true;
+    } catch (error) {
+      setInventoryStatus(userFriendlyError(error), "error");
+      return false;
+    } finally {
+      isEditingMaterial = false;
+      elements.fields.disabled = !verifiedToken;
+      elements.refreshMaterialsButton.disabled = false;
+      renderInventory(library);
+    }
+  }
+
+  function openReplacementFilePicker(materialId, replacementType, trigger) {
+    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial) return;
+    const material = library?.materials?.find((item) => item.id === materialId);
+    if (!material) return;
+    const type = library?.materialTypes?.find((item) => item.id === material.type);
+    if (replacementType === "material" && !type) {
+      setInventoryStatus("자료 유형 설정을 찾지 못했습니다. 목록을 새로고침해 주세요.", "error");
+      return;
+    }
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.className = "native-file-input";
+    input.accept =
+      replacementType === "thumbnail"
+        ? "image/webp,image/jpeg,image/png,.webp,.jpg,.jpeg,.png"
+        : Array.isArray(type.accept)
+          ? type.accept.join(",")
+          : documentAccept.join(",");
+    document.body.appendChild(input);
+
+    let selectionHandled = false;
+    input.addEventListener(
+      "change",
+      () => {
+        selectionHandled = true;
+        const file = input.files?.[0];
+        input.remove();
+        if (!file) return;
+        if (replacementType === "thumbnail") void replaceMaterialThumbnail(materialId, file);
+        else void replaceMaterialFile(materialId, file);
+      },
+      { once: true },
+    );
+    window.addEventListener(
+      "focus",
+      () => {
+        window.setTimeout(() => {
+          if (!selectionHandled) {
+            input.remove();
+            if (trigger && document.contains(trigger)) trigger.focus();
+          }
+        }, 500);
+      },
+      { once: true },
+    );
+    input.click();
+  }
+
+  async function replaceMaterialThumbnail(materialId, file) {
+    const validMimeTypes = ["image/webp", "image/jpeg", "image/png"];
+    const validExtension = /\.(?:webp|jpe?g|png)$/i.test(file.name);
+    if ((!validMimeTypes.includes(file.type) && !validExtension) || file.size > config.maxThumbnailBytes) {
+      setInventoryStatus(
+        file.size > config.maxThumbnailBytes
+          ? "표지 이미지는 5MB 이하만 사용할 수 있습니다."
+          : "표지는 WebP, JPG 또는 PNG 파일만 사용할 수 있습니다.",
+        "error",
+      );
+      return;
+    }
+
+    await runMaterialUpdate(materialId, "새 썸네일 이미지를 GitHub에 반영하고 있습니다.", async (material, latestLibrary) => {
+      const newPath = `assets/thumbnails/${timestampString()}-${sanitizeFileName(file.name)}`;
+      const thumbnailBlob = await createBlob(verifiedToken, bytesToBase64(await file.arrayBuffer()));
+      const oldPath = getDeletableRepositoryPath(material.thumbnail, "assets/thumbnails/");
+      material.thumbnail = newPath;
+      material.updatedAt = localDateString();
+
+      const treeEntries = [{ path: newPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha }];
+      const oldPathIsShared = latestLibrary.materials.some(
+        (item) => item.id !== material.id && item.thumbnail === oldPath,
+      );
+      if (oldPath && oldPath !== newPath && !oldPathIsShared) {
+        treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });
+      }
+
+      return {
+        treeEntries,
+        commitMessage: `Update thumbnail: ${material.title}`,
+        successMessage: `‘${material.title}’ 자료의 썸네일 이미지를 변경했습니다.`,
+      };
+    });
+  }
+
+  async function replaceMaterialFile(materialId, file) {
+    await runMaterialUpdate(materialId, "새 자료 파일을 확인하고 GitHub에 반영하고 있습니다.", async (material, latestLibrary) => {
+      const type = latestLibrary.materialTypes?.find((item) => item.id === material.type);
+      const category = latestLibrary.categories?.find((item) => item.id === material.category);
+      if (!type || !category) throw new Error("자료의 사업 카테고리 또는 자료 유형 설정을 찾지 못했습니다.");
+
+      const maximumBytes = isVideoType(type) ? config.maxVideoBytes : config.maxDocumentBytes;
+      const maximumLabel = isVideoType(type) ? "90MB" : "20MB";
+      if (file.size > maximumBytes) throw new Error(`자료 파일은 ${maximumLabel} 이하만 업로드할 수 있습니다.`);
+      if (!fileMatchesType(file, type)) throw new Error(`${type.label}에 허용되지 않는 파일 형식입니다.`);
+
+      const categoryFolder = validateFolderSegment(category.folder || category.id, "사업 카테고리");
+      const typeFolder = validateFolderSegment(type.folder, "자료 유형");
+      const newPath = `assets/materials/${categoryFolder}/${typeFolder}/${timestampString()}-${sanitizeFileName(file.name)}`;
+      const uploadedFormat = getUploadedFormat(file, type);
+      const fileBuffer = await file.arrayBuffer();
+      const pageCount = uploadedFormat === "pdf" ? await getPdfPageCount(fileBuffer) : null;
+      const fileBlob = await createBlob(verifiedToken, bytesToBase64(fileBuffer));
+      const oldPath = getDeletableRepositoryPath(material.file, "assets/materials/");
+
+      material.file = newPath;
+      material.format = uploadedFormat;
+      material.fileSizeBytes = file.size;
+      material.updatedAt = localDateString();
+      if (file.type) material.mimeType = file.type;
+      else delete material.mimeType;
+      if (Number.isInteger(pageCount) && pageCount > 0) material.pageCount = pageCount;
+      else delete material.pageCount;
+      if (isVideoType(type)) material.sourceType = "file";
+
+      const treeEntries = [{ path: newPath, mode: "100644", type: "blob", sha: fileBlob.sha }];
+      const oldPathIsShared = latestLibrary.materials.some((item) => item.id !== material.id && item.file === oldPath);
+      if (oldPath && oldPath !== newPath && !oldPathIsShared) {
+        treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });
+      }
+
+      return {
+        treeEntries,
+        commitMessage: `Update file: ${material.title}`,
+        successMessage: `‘${material.title}’ 자료의 업로드 파일을 변경했습니다.`,
+      };
+    });
+  }
+
+  function setEditContentDialogStatus(message = "", type = "") {
+    elements.editContentDialogStatus.textContent = message;
+    elements.editContentDialogStatus.className = `dialog-status${type ? ` status-${type}` : ""}`;
+  }
+
+  function openEditContentDialog(materialId, trigger) {
+    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial) return;
+    const material = library?.materials?.find((item) => item.id === materialId);
+    if (!material) return;
+    pendingContentEditId = materialId;
+    lastContentEditTrigger = trigger;
+    elements.editMaterialTitle.value = material.title || "";
+    elements.editMaterialDescription.value = material.description || "";
+    elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
+    setEditContentDialogStatus();
+    elements.editContentDialog.showModal();
+    window.requestAnimationFrame(() => elements.editMaterialTitle.focus());
+  }
+
+  function closeEditContentDialog() {
+    if (isEditingMaterial || !elements.editContentDialog.open) return;
+    elements.editContentDialog.close();
+  }
+
+  async function saveMaterialContent(event) {
+    event.preventDefault();
+    const materialId = pendingContentEditId;
+    const title = elements.editMaterialTitle.value.trim();
+    const description = elements.editMaterialDescription.value.trim();
+    if (!materialId || isEditingMaterial) return;
+    if (!title || !description) {
+      setEditContentDialogStatus("자료명과 짧은 설명을 모두 입력해 주세요.", "error");
+      return;
+    }
+
+    elements.saveEditContentButton.disabled = true;
+    elements.cancelEditContentDialog.disabled = true;
+    elements.closeEditContentDialog.disabled = true;
+    setEditContentDialogStatus("변경 내용을 GitHub에 저장하고 있습니다.", "progress");
+    const saved = await runMaterialUpdate(
+      materialId,
+      "자료명과 짧은 설명을 GitHub에 반영하고 있습니다.",
+      async (material) => {
+        material.title = title;
+        material.description = description;
+        material.updatedAt = localDateString();
+        return {
+          treeEntries: [],
+          commitMessage: `Update material details: ${title}`,
+          successMessage: `‘${title}’ 자료의 자료명과 짧은 설명을 변경했습니다.`,
+        };
+      },
+    );
+    elements.saveEditContentButton.disabled = false;
+    elements.cancelEditContentDialog.disabled = false;
+    elements.closeEditContentDialog.disabled = false;
+    if (saved && elements.editContentDialog.open) elements.editContentDialog.close();
+    else if (!saved) setEditContentDialogStatus("변경 내용을 저장하지 못했습니다. 목록의 오류 안내를 확인해 주세요.", "error");
+  }
+
   async function handleUpload(event) {
     event.preventDefault();
-    if (isUploading) return;
+    if (isUploading || isDeleting || isEditingMaterial) return;
     clearResult();
 
     if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
@@ -794,7 +1081,7 @@
   }
 
   async function refreshMaterials() {
-    if (!verifiedToken || isUploading || isDeleting) return;
+    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial) return;
     elements.refreshMaterialsButton.disabled = true;
     setInventoryStatus("GitHub에서 최신 자료 목록을 불러오고 있습니다.", "progress");
 
@@ -812,7 +1099,7 @@
 
   async function deleteSelectedMaterial() {
     const materialId = pendingDeleteId;
-    if (!materialId || isDeleting) return;
+    if (!materialId || isDeleting || isEditingMaterial) return;
     closeDeleteDialog();
 
     if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
@@ -890,7 +1177,7 @@
   }
 
   function openCategoryDialog() {
-    if (!verifiedToken || isAddingCategory || isAddingMaterialType) return;
+    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType) return;
     lastCategoryTrigger = document.activeElement;
     elements.categoryForm.reset();
     setCategoryDialogStatus();
@@ -1027,7 +1314,7 @@
   }
 
   function openMaterialTypeDialog() {
-    if (!verifiedToken || isAddingCategory || isAddingMaterialType) return;
+    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType) return;
     lastMaterialTypeTrigger = document.activeElement;
     elements.materialTypeForm.reset();
     setMaterialTypeDialogStatus();
@@ -1170,6 +1457,26 @@
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
   elements.cancelDeleteButton.addEventListener("click", closeDeleteDialog);
   elements.confirmDeleteButton.addEventListener("click", deleteSelectedMaterial);
+  elements.editContentForm.addEventListener("submit", saveMaterialContent);
+  elements.closeEditContentDialog.addEventListener("click", closeEditContentDialog);
+  elements.cancelEditContentDialog.addEventListener("click", closeEditContentDialog);
+  elements.editMaterialDescription.addEventListener("input", () => {
+    elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
+  });
+  elements.editContentDialog.addEventListener("cancel", (event) => {
+    if (isEditingMaterial) event.preventDefault();
+  });
+  elements.editContentDialog.addEventListener("click", (event) => {
+    if (event.target === elements.editContentDialog) closeEditContentDialog();
+  });
+  elements.editContentDialog.addEventListener("close", () => {
+    elements.editContentForm.reset();
+    elements.editDescriptionCount.textContent = "0";
+    setEditContentDialogStatus();
+    pendingContentEditId = "";
+    if (lastContentEditTrigger && document.contains(lastContentEditTrigger)) lastContentEditTrigger.focus();
+    lastContentEditTrigger = null;
+  });
   elements.openCategoryDialog.addEventListener("click", openCategoryDialog);
   elements.categoryForm.addEventListener("submit", addCategory);
   elements.closeCategoryDialog.addEventListener("click", closeCategoryDialog);
@@ -1219,6 +1526,7 @@
     elements.fields.disabled = true;
     elements.inventorySection.hidden = true;
     closeDeleteDialog();
+    closeEditContentDialog();
     setConnectionStatus("토큰이 변경되었습니다. 연결을 다시 확인해 주세요.");
   });
   window.addEventListener("beforeunload", () => {
