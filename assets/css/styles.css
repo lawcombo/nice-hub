@@ -808,6 +808,11 @@ a {
   border-radius: 9px;
 }
 
+.is-list-view .thumbnail img {
+  object-fit: contain;
+  background: #f7f9fc;
+}
+
 .is-list-view .thumbnail-fallback {
   gap: 5px;
   padding: 12px;

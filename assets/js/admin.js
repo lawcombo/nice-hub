@@ -222,6 +222,7 @@
   function openUploadModal() {
     if (!verifiedToken || isUploading || elements.uploadDialog.open) return;
     clearResult();
+    document.body.classList.add("upload-modal-open");
     elements.uploadDialog.showModal();
     window.requestAnimationFrame(() => elements.category.focus());
   }
@@ -1739,8 +1740,8 @@
   elements.uploadDialog.addEventListener("cancel", (event) => {
     if (isUploading) event.preventDefault();
   });
-  elements.uploadDialog.addEventListener("click", (event) => {
-    if (event.target === elements.uploadDialog) closeUploadModal();
+  elements.uploadDialog.addEventListener("close", () => {
+    document.body.classList.remove("upload-modal-open");
   });
   elements.form.addEventListener("submit", handleUpload);
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);

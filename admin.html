@@ -88,15 +88,17 @@
 
         <dialog id="uploadDialog" class="upload-dialog" aria-labelledby="materialHeading">
         <section class="admin-card upload-dialog-card" aria-labelledby="materialHeading">
-          <button id="closeUploadDialog" class="icon-button upload-dialog-close" type="button" aria-label="자료 업로드 창 닫기">
-            <span aria-hidden="true">×</span>
-          </button>
-          <div class="admin-card-heading">
-            <span class="step-number" aria-hidden="true">2</span>
-            <div>
-              <p class="section-kicker">자료 정보</p>
-              <h2 id="materialHeading">업로드할 자료 입력</h2>
+          <div class="upload-dialog-sticky-header">
+            <div class="admin-card-heading">
+              <span class="step-number" aria-hidden="true">2</span>
+              <div>
+                <p class="section-kicker">자료 정보</p>
+                <h2 id="materialHeading">업로드할 자료 입력</h2>
+              </div>
             </div>
+            <button id="closeUploadDialog" class="icon-button upload-dialog-close" type="button" aria-label="자료 업로드 창 닫기">
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
 
           <form id="uploadForm" autocomplete="off">
