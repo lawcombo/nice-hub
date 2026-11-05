@@ -262,6 +262,24 @@
       </div>
     </footer>
 
+    <div id="operationOverlay" class="operation-overlay" hidden role="status" aria-live="polite" aria-atomic="true">
+      <div class="operation-progress-card">
+        <span class="operation-spinner" aria-hidden="true"></span>
+        <div class="operation-progress-copy">
+          <strong id="operationProgressTitle">GitHub에 반영하고 있습니다.</strong>
+          <p id="operationProgressMessage">작업이 끝날 때까지 이 화면을 닫지 마세요.</p>
+        </div>
+        <span class="operation-progress-bar" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <dialog id="operationResultDialog" class="operation-result-dialog" aria-labelledby="operationResultTitle">
+      <div id="operationResultIcon" class="operation-result-icon" aria-hidden="true">✓</div>
+      <h2 id="operationResultTitle">작업이 완료되었습니다.</h2>
+      <p id="operationResultMessage"></p>
+      <button id="closeOperationResult" class="button button-primary" type="button">확인</button>
+    </dialog>
+
     <dialog id="categoryDialog" class="material-type-dialog" aria-labelledby="categoryDialogTitle">
       <form id="categoryForm" method="dialog" autocomplete="off">
         <div class="dialog-heading-row">

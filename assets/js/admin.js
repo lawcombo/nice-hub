@@ -63,6 +63,14 @@
     inventoryStatus: document.querySelector("#inventoryStatus"),
     materialInventory: document.querySelector("#materialInventory"),
     refreshMaterialsButton: document.querySelector("#refreshMaterialsButton"),
+    operationOverlay: document.querySelector("#operationOverlay"),
+    operationProgressTitle: document.querySelector("#operationProgressTitle"),
+    operationProgressMessage: document.querySelector("#operationProgressMessage"),
+    operationResultDialog: document.querySelector("#operationResultDialog"),
+    operationResultIcon: document.querySelector("#operationResultIcon"),
+    operationResultTitle: document.querySelector("#operationResultTitle"),
+    operationResultMessage: document.querySelector("#operationResultMessage"),
+    closeOperationResult: document.querySelector("#closeOperationResult"),
     deleteDialog: document.querySelector("#deleteDialog"),
     deleteDialogMessage: document.querySelector("#deleteDialogMessage"),
     cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
@@ -122,6 +130,7 @@
   let lastCategoryTrigger = null;
   let lastMaterialTypeTrigger = null;
   let pdfJsModulePromise = null;
+  const localThumbnailPreviews = new Map();
 
   class GitHubApiError extends Error {
     constructor(status, message) {
@@ -375,10 +384,36 @@
     elements.connectionStatus.className = `inline-status${type ? ` status-${type}` : ""}`;
   }
 
+  function showOperationProgress(title, message) {
+    elements.operationProgressTitle.textContent = title;
+    elements.operationProgressMessage.textContent = message;
+    elements.operationOverlay.hidden = false;
+  }
+
+  function hideOperationProgress() {
+    elements.operationOverlay.hidden = true;
+  }
+
+  function closeOperationResult() {
+    if (elements.operationResultDialog.open) elements.operationResultDialog.close();
+  }
+
+  function showOperationResult(kind, title, message) {
+    hideOperationProgress();
+    elements.operationResultDialog.dataset.kind = kind;
+    elements.operationResultIcon.textContent = kind === "error" ? "!" : "✓";
+    elements.operationResultTitle.textContent = title;
+    elements.operationResultMessage.textContent = message;
+    if (elements.operationResultDialog.open) elements.operationResultDialog.close();
+    elements.operationResultDialog.showModal();
+    window.requestAnimationFrame(() => elements.closeOperationResult.focus());
+  }
+
   function setProgress(title, message) {
     elements.progressTitle.textContent = title;
     elements.progressMessage.textContent = message;
     elements.progress.hidden = false;
+    showOperationProgress(title, message);
   }
 
   function clearResult() {
@@ -386,7 +421,7 @@
     elements.result.replaceChildren();
   }
 
-  function showResult(kind, title, message, commitSha = "") {
+  function showResult(kind, title, message) {
     const heading = document.createElement("strong");
     const description = document.createElement("p");
     heading.textContent = title;
@@ -394,50 +429,30 @@
     elements.result.replaceChildren(heading, description);
     elements.result.className = `upload-result upload-result-${kind}`;
 
-    if (commitSha) {
-      const links = document.createElement("div");
-      const commitLink = document.createElement("a");
-      const siteLink = document.createElement("a");
-      links.className = "result-links";
-      commitLink.href = `https://github.com/${config.owner}/${config.repo}/commit/${commitSha}`;
-      commitLink.target = "_blank";
-      commitLink.rel = "noopener";
-      commitLink.textContent = "GitHub 커밋 확인";
-      siteLink.href = "./index.html";
-      siteLink.textContent = "자료허브 확인";
-      links.append(commitLink, siteLink);
-      elements.result.appendChild(links);
-    }
-
     elements.result.hidden = false;
     elements.result.tabIndex = -1;
     elements.result.focus({ preventScroll: true });
+    showOperationResult(kind, title, message);
   }
 
-  function setInventoryStatus(message = "", type = "", commitSha = "") {
+  function setInventoryStatus(message = "", type = "") {
     elements.inventoryStatus.replaceChildren();
     elements.inventoryStatus.className = `inventory-status${type ? ` status-${type}` : ""}`;
     if (!message) return;
 
     elements.inventoryStatus.appendChild(document.createTextNode(message));
-    if (commitSha) {
-      const link = document.createElement("a");
-      link.href = `https://github.com/${config.owner}/${config.repo}/commit/${commitSha}`;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "커밋 확인";
-      elements.inventoryStatus.appendChild(link);
-    }
   }
 
   function createInventoryItem(material, sourceLibrary) {
     const item = createElement("article", "inventory-item");
+    item.dataset.materialId = material.id;
     const main = createElement("div", "inventory-item-main");
     const thumbnail = createElement("div", "inventory-thumbnail", String(material.format || "FILE").toUpperCase());
 
-    if (material.thumbnail) {
+    const localThumbnail = localThumbnailPreviews.get(material.id);
+    if (localThumbnail || material.thumbnail) {
       const image = document.createElement("img");
-      image.src = new URL(material.thumbnail, document.baseURI).href;
+      image.src = localThumbnail || new URL(material.thumbnail, document.baseURI).href;
       image.alt = "";
       image.loading = "lazy";
       image.addEventListener("error", () => image.remove());
@@ -497,6 +512,17 @@
     actions.append(thumbnailButton, fileButton, contentButton, deleteButton);
     item.append(main, actions);
     return item;
+  }
+
+  function setLocalThumbnailPreview(materialId, file) {
+    const currentPreview = localThumbnailPreviews.get(materialId);
+    if (currentPreview) URL.revokeObjectURL(currentPreview);
+    localThumbnailPreviews.set(materialId, URL.createObjectURL(file));
+  }
+
+  function clearLocalThumbnailPreviews() {
+    localThumbnailPreviews.forEach((url) => URL.revokeObjectURL(url));
+    localThumbnailPreviews.clear();
   }
 
   function renderInventory(sourceLibrary = library) {
@@ -767,7 +793,9 @@
   async function runMaterialUpdate(materialId, progressMessage, updater) {
     if (isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType) return false;
     if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
-      setInventoryStatus("토큰 연결을 다시 확인한 뒤 자료를 수정해 주세요.", "error");
+      const message = "토큰 연결을 다시 확인한 뒤 자료를 수정해 주세요.";
+      setInventoryStatus(message, "error");
+      showOperationResult("error", "변경하지 못했습니다.", message);
       return false;
     }
 
@@ -776,6 +804,7 @@
     elements.refreshMaterialsButton.disabled = true;
     renderInventory(library);
     setInventoryStatus(progressMessage, "progress");
+    showOperationProgress("변경사항을 저장하고 있습니다.", progressMessage);
 
     try {
       const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
@@ -786,10 +815,16 @@
       const update = await updater(material, latestLibrary);
       const commit = await commitLibraryUpdate(reference, latestLibrary, update.treeEntries || [], update.commitMessage);
       library = latestLibrary;
-      setInventoryStatus(update.successMessage, "success", commit.sha);
+      setInventoryStatus(update.successMessage, "success");
+      renderInventory(library);
+      hideOperationProgress();
+      window.setTimeout(() => showOperationResult("success", "변경이 완료되었습니다.", update.successMessage), 0);
       return true;
     } catch (error) {
-      setInventoryStatus(userFriendlyError(error), "error");
+      const message = userFriendlyError(error);
+      setInventoryStatus(message, "error");
+      hideOperationProgress();
+      window.setTimeout(() => showOperationResult("error", "변경하지 못했습니다.", message), 0);
       return false;
     } finally {
       isEditingMaterial = false;
@@ -805,7 +840,9 @@
     if (!material) return;
     const type = library?.materialTypes?.find((item) => item.id === material.type);
     if (replacementType === "material" && !type) {
-      setInventoryStatus("자료 유형 설정을 찾지 못했습니다. 목록을 새로고침해 주세요.", "error");
+      const message = "자료 유형 설정을 찾지 못했습니다. 목록을 새로고침해 주세요.";
+      setInventoryStatus(message, "error");
+      showOperationResult("error", "파일을 변경하지 못했습니다.", message);
       return;
     }
 
@@ -852,36 +889,44 @@
     const validMimeTypes = ["image/webp", "image/jpeg", "image/png"];
     const validExtension = /\.(?:webp|jpe?g|png)$/i.test(file.name);
     if ((!validMimeTypes.includes(file.type) && !validExtension) || file.size > config.maxThumbnailBytes) {
-      setInventoryStatus(
+      const message =
         file.size > config.maxThumbnailBytes
           ? "표지 이미지는 5MB 이하만 사용할 수 있습니다."
-          : "표지는 WebP, JPG 또는 PNG 파일만 사용할 수 있습니다.",
-        "error",
-      );
+          : "표지는 WebP, JPG 또는 PNG 파일만 사용할 수 있습니다.";
+      setInventoryStatus(message, "error");
+      showOperationResult("error", "썸네일을 변경하지 못했습니다.", message);
       return;
     }
 
-    await runMaterialUpdate(materialId, "새 썸네일 이미지를 GitHub에 반영하고 있습니다.", async (material, latestLibrary) => {
-      const newPath = `assets/thumbnails/${timestampString()}-${sanitizeFileName(file.name)}`;
-      const thumbnailBlob = await createBlob(verifiedToken, bytesToBase64(await file.arrayBuffer()));
-      const oldPath = getDeletableRepositoryPath(material.thumbnail, "assets/thumbnails/");
-      material.thumbnail = newPath;
-      material.updatedAt = localDateString();
+    const saved = await runMaterialUpdate(
+      materialId,
+      "새 썸네일 이미지를 GitHub에 반영하고 있습니다.",
+      async (material, latestLibrary) => {
+        const newPath = `assets/thumbnails/${timestampString()}-${sanitizeFileName(file.name)}`;
+        const thumbnailBlob = await createBlob(verifiedToken, bytesToBase64(await file.arrayBuffer()));
+        const oldPath = getDeletableRepositoryPath(material.thumbnail, "assets/thumbnails/");
+        material.thumbnail = newPath;
+        material.updatedAt = localDateString();
 
-      const treeEntries = [{ path: newPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha }];
-      const oldPathIsShared = latestLibrary.materials.some(
-        (item) => item.id !== material.id && item.thumbnail === oldPath,
-      );
-      if (oldPath && oldPath !== newPath && !oldPathIsShared) {
-        treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });
-      }
+        const treeEntries = [{ path: newPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha }];
+        const oldPathIsShared = latestLibrary.materials.some(
+          (item) => item.id !== material.id && item.thumbnail === oldPath,
+        );
+        if (oldPath && oldPath !== newPath && !oldPathIsShared) {
+          treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });
+        }
 
-      return {
-        treeEntries,
-        commitMessage: `Update thumbnail: ${material.title}`,
-        successMessage: `‘${material.title}’ 자료의 썸네일 이미지를 변경했습니다.`,
-      };
-    });
+        return {
+          treeEntries,
+          commitMessage: `Update thumbnail: ${material.title}`,
+          successMessage: `‘${material.title}’ 자료의 썸네일 이미지를 변경했습니다.`,
+        };
+      },
+    );
+    if (saved) {
+      setLocalThumbnailPreview(materialId, file);
+      renderInventory(library);
+    }
   }
 
   async function replaceMaterialFile(materialId, file) {
@@ -1221,7 +1266,6 @@
         isYoutubeVideo
           ? "YouTube 링크와 자료 정보가 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다."
           : "파일과 자료 목록이 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다.",
-        commit.sha,
       );
       elements.form.reset();
       elements.updatedAt.value = localDateString();
@@ -1232,8 +1276,9 @@
       populateSelect(elements.materialType, library.materialTypes || []);
       updateFileAccept();
       elements.inventorySection.hidden = false;
+      if (thumbnail) setLocalThumbnailPreview(material.id, thumbnail);
       renderInventory(library);
-      setInventoryStatus("새 자료가 목록에 추가되었습니다.", "success", commit.sha);
+      setInventoryStatus("새 자료가 목록에 추가되었습니다.", "success");
     } catch (error) {
       elements.progress.hidden = true;
       showResult("error", "업로드하지 못했습니다.", userFriendlyError(error));
@@ -1266,7 +1311,9 @@
     closeDeleteDialog();
 
     if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
-      setInventoryStatus("토큰 연결을 다시 확인한 뒤 삭제해 주세요.", "error");
+      const message = "토큰 연결을 다시 확인한 뒤 삭제해 주세요.";
+      setInventoryStatus(message, "error");
+      showOperationResult("error", "삭제하지 못했습니다.", message);
       return;
     }
 
@@ -1275,6 +1322,10 @@
     elements.refreshMaterialsButton.disabled = true;
     renderInventory(library);
     setInventoryStatus("GitHub에서 자료 파일과 목록을 삭제하고 있습니다. 이 화면을 닫지 마세요.", "progress");
+    showOperationProgress(
+      "자료를 삭제하고 있습니다.",
+      "GitHub에서 자료 파일과 목록을 삭제하고 있습니다. 이 화면을 닫지 마세요.",
+    );
 
     try {
       const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
@@ -1317,15 +1368,19 @@
       });
 
       library = latestLibrary;
-      setInventoryStatus(
-        materialPath
-          ? `‘${material.title}’ 자료와 원본 파일을 삭제했습니다.`
-          : `‘${material.title}’ 외부 링크 자료를 목록에서 삭제했습니다.`,
-        "success",
-        commit.sha,
-      );
+      const message = materialPath
+        ? `‘${material.title}’ 자료와 원본 파일을 삭제했습니다.`
+        : `‘${material.title}’ 외부 링크 자료를 목록에서 삭제했습니다.`;
+      const localThumbnail = localThumbnailPreviews.get(materialId);
+      if (localThumbnail) URL.revokeObjectURL(localThumbnail);
+      localThumbnailPreviews.delete(materialId);
+      setInventoryStatus(message, "success");
+      renderInventory(library);
+      showOperationResult("success", "삭제가 완료되었습니다.", message);
     } catch (error) {
-      setInventoryStatus(userFriendlyError(error), "error");
+      const message = userFriendlyError(error);
+      setInventoryStatus(message, "error");
+      showOperationResult("error", "삭제하지 못했습니다.", message);
     } finally {
       isDeleting = false;
       elements.fields.disabled = !verifiedToken;
@@ -1457,7 +1512,6 @@
         "success",
         "사업 카테고리가 추가되었습니다.",
         `‘${category.label}’ 사업과 ${materialTypes.length}개 자료 유형 폴더를 GitHub에 만들었습니다.`,
-        commit.sha,
       );
       setConnectionStatus(`‘${category.label}’ 사업 카테고리가 추가되었습니다.`, "success");
       window.requestAnimationFrame(() => elements.category.focus());
@@ -1586,7 +1640,6 @@
         "success",
         "자료 유형이 추가되었습니다.",
         `‘${materialType.label}’ 유형과 ${categories.length}개 사업별 폴더를 GitHub에 만들었습니다.`,
-        commit.sha,
       );
       setConnectionStatus(`‘${materialType.label}’ 자료 유형이 추가되었습니다.`, "success");
       window.requestAnimationFrame(() => elements.materialType.focus());
@@ -1618,6 +1671,10 @@
   elements.connectButton.addEventListener("click", verifyConnection);
   elements.form.addEventListener("submit", handleUpload);
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
+  elements.closeOperationResult.addEventListener("click", closeOperationResult);
+  elements.operationResultDialog.addEventListener("click", (event) => {
+    if (event.target === elements.operationResultDialog) closeOperationResult();
+  });
   elements.cancelDeleteButton.addEventListener("click", closeDeleteDialog);
   elements.confirmDeleteButton.addEventListener("click", deleteSelectedMaterial);
   elements.editContentForm.addEventListener("submit", saveMaterialContent);
@@ -1697,6 +1754,7 @@
     if (lastDeleteTrigger && document.contains(lastDeleteTrigger)) lastDeleteTrigger.focus();
     lastDeleteTrigger = null;
   });
+  window.addEventListener("beforeunload", clearLocalThumbnailPreviews);
   elements.category.addEventListener("change", updateDestinationPreview);
   elements.materialType.addEventListener("change", updateFileAccept);
   elements.videoSourceInputs.forEach((input) => input.addEventListener("change", updateFileAccept));
