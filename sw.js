@@ -1,14 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "nice-hub-shell-v18";
+const CACHE_NAME = "nice-hub-shell-v19";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./assets/css/styles.css",
   "./assets/js/library-app.js",
   "./assets/js/pwa-install.js",
-  "./assets/vendor/pdfjs/pdf.min.mjs",
-  "./assets/vendor/pdfjs/pdf.worker.min.mjs",
   "./assets/data/library.json",
   "./manifest.webmanifest",
   "./assets/icons/app-icon-192.png",

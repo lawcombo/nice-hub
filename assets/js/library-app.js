@@ -451,17 +451,27 @@
     card.dataset.materialId = material.id;
 
     const thumbnail = createElement("div", "thumbnail");
-    const fallback = createThumbnailFallback(material);
-    thumbnail.appendChild(fallback);
 
     if (material.thumbnail) {
+      const loading = createThumbnailLoading();
       const image = document.createElement("img");
-      image.src = resolveUrl(material.thumbnail);
+      image.className = "thumbnail-image";
       image.alt = `${material.title} 표지`;
       image.loading = "lazy";
-      image.addEventListener("load", () => fallback.remove());
-      image.addEventListener("error", () => image.remove());
-      thumbnail.prepend(image);
+      image.decoding = "async";
+      image.addEventListener("load", () => {
+        loading.remove();
+        image.classList.add("is-loaded");
+      });
+      image.addEventListener("error", () => {
+        loading.remove();
+        image.remove();
+        thumbnail.appendChild(createThumbnailFallback(material));
+      });
+      thumbnail.append(loading, image);
+      image.src = resolveUrl(material.thumbnail);
+    } else {
+      thumbnail.appendChild(createThumbnailFallback(material));
     }
 
     const body = createElement("div", "card-body");
@@ -545,6 +555,16 @@
     mark.setAttribute("aria-hidden", "true");
     fallback.append(mark, createElement("span", "thumbnail-type", getTypeLabel(material.type)));
     return fallback;
+  }
+
+  function createThumbnailLoading() {
+    const loading = createElement("div", "thumbnail-loading");
+    loading.setAttribute("role", "status");
+    loading.append(
+      createElement("span", "thumbnail-loading-spinner"),
+      createElement("span", "thumbnail-loading-text", "썸네일 이미지 로딩중"),
+    );
+    return loading;
   }
 
   function createDownloadLink(material) {
@@ -665,7 +685,11 @@
   }
 
   function schedulePdfViewerWarmup() {
-    if (pdfViewerWarmupScheduled || !materials.some((material) => String(material?.format).toLowerCase() === "pdf")) {
+    if (
+      pdfViewerWarmupScheduled ||
+      !isMobileDevice() ||
+      !materials.some((material) => String(material?.format).toLowerCase() === "pdf")
+    ) {
       return;
     }
     pdfViewerWarmupScheduled = true;
