@@ -369,5 +369,66 @@
         </div>
       </form>
     </dialog>
+
+    <dialog id="editVideoDialog" class="material-type-dialog edit-video-dialog" aria-labelledby="editVideoDialogTitle">
+      <form id="editVideoForm" method="dialog" autocomplete="off">
+        <div class="dialog-heading-row">
+          <div>
+            <p class="section-kicker">영상 자료 수정</p>
+            <h2 id="editVideoDialogTitle">영상 변경</h2>
+          </div>
+          <button id="closeEditVideoDialog" class="icon-button" type="button" aria-label="영상 변경 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <p class="material-type-dialog-description">
+          직접 업로드와 YouTube 링크 중 원하는 방식으로 영상을 변경할 수 있습니다.
+        </p>
+        <fieldset class="video-source-fields edit-video-source-fields">
+          <legend>변경할 영상 방식 <span aria-hidden="true">*</span></legend>
+          <div class="video-source-options">
+            <label class="video-source-option">
+              <input type="radio" name="editVideoSource" value="file" />
+              <span>
+                <strong>직접 파일 업로드</strong>
+                <small>MP4 또는 WebM 파일을 GitHub에 저장합니다.</small>
+              </span>
+            </label>
+            <label class="video-source-option">
+              <input type="radio" name="editVideoSource" value="youtube" />
+              <span>
+                <strong>YouTube 링크</strong>
+                <small>YouTube 주소로 바로 이동하도록 변경합니다.</small>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+        <div id="editVideoFileGroup" class="field-group">
+          <label for="editVideoFile">새 영상 파일 <span aria-hidden="true">*</span></label>
+          <label class="file-picker" for="editVideoFile">
+            <span class="file-picker-title">영상 선택</span>
+            <span id="editVideoFileName" class="file-picker-name">선택된 파일 없음</span>
+          </label>
+          <input
+            id="editVideoFile"
+            name="editVideoFile"
+            class="native-file-input"
+            type="file"
+            accept="video/mp4,video/webm,.mp4,.webm"
+          />
+          <p class="field-help">MP4 또는 WebM 형식이며 최대 90MB입니다.</p>
+        </div>
+        <div id="editVideoUrlGroup" class="field-group" hidden>
+          <label for="editVideoUrl">YouTube 영상 링크 <span aria-hidden="true">*</span></label>
+          <input id="editVideoUrl" name="editVideoUrl" type="url" inputmode="url" autocomplete="url" />
+          <p class="field-help">YouTube 또는 youtu.be 주소를 입력하세요.</p>
+        </div>
+        <p id="editVideoDialogStatus" class="dialog-status" aria-live="polite"></p>
+        <div class="material-type-dialog-actions">
+          <button id="cancelEditVideoDialog" class="button button-secondary" type="button">취소</button>
+          <button id="saveEditVideoButton" class="button button-primary" type="submit">영상 변경 저장</button>
+        </div>
+      </form>
+    </dialog>
   </body>
 </html>

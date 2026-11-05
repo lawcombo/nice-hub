@@ -76,6 +76,18 @@
     saveEditContentButton: document.querySelector("#saveEditContentButton"),
     closeEditContentDialog: document.querySelector("#closeEditContentDialog"),
     cancelEditContentDialog: document.querySelector("#cancelEditContentDialog"),
+    editVideoDialog: document.querySelector("#editVideoDialog"),
+    editVideoForm: document.querySelector("#editVideoForm"),
+    editVideoSourceInputs: [...document.querySelectorAll('input[name="editVideoSource"]')],
+    editVideoFileGroup: document.querySelector("#editVideoFileGroup"),
+    editVideoFile: document.querySelector("#editVideoFile"),
+    editVideoFileName: document.querySelector("#editVideoFileName"),
+    editVideoUrlGroup: document.querySelector("#editVideoUrlGroup"),
+    editVideoUrl: document.querySelector("#editVideoUrl"),
+    editVideoDialogStatus: document.querySelector("#editVideoDialogStatus"),
+    saveEditVideoButton: document.querySelector("#saveEditVideoButton"),
+    closeEditVideoDialog: document.querySelector("#closeEditVideoDialog"),
+    cancelEditVideoDialog: document.querySelector("#cancelEditVideoDialog"),
     openCategoryDialog: document.querySelector("#openCategoryDialog"),
     categoryDialog: document.querySelector("#categoryDialog"),
     categoryForm: document.querySelector("#categoryForm"),
@@ -105,6 +117,8 @@
   let lastDeleteTrigger = null;
   let pendingContentEditId = "";
   let lastContentEditTrigger = null;
+  let pendingVideoEditId = "";
+  let lastVideoEditTrigger = null;
   let lastCategoryTrigger = null;
   let lastMaterialTypeTrigger = null;
   let pdfJsModulePromise = null;
@@ -227,6 +241,22 @@
 
   function isVideoType(type) {
     return type?.id === "video" || type?.format === "video";
+  }
+
+  function isYouTubeMaterial(material) {
+    if (material?.sourceType === "youtube") return true;
+    if (!material?.file || typeof material.file !== "string") return false;
+    try {
+      const hostname = new URL(material.file, document.baseURI).hostname.toLowerCase();
+      return (
+        hostname === "youtu.be" ||
+        hostname.endsWith(".youtu.be") ||
+        hostname === "youtube.com" ||
+        hostname.endsWith(".youtube.com")
+      );
+    } catch (error) {
+      return false;
+    }
   }
 
   function getUploadedFormat(file, type) {
@@ -437,10 +467,19 @@
     thumbnailButton.disabled = actionsDisabled;
     thumbnailButton.addEventListener("click", () => openReplacementFilePicker(material.id, "thumbnail", thumbnailButton));
 
-    const fileButton = createElement("button", "button button-secondary inventory-action-button", "업로드 파일 변경");
+    const materialType = sourceLibrary?.materialTypes?.find((type) => type.id === material.type);
+    const videoMaterial = isVideoType(materialType);
+    const fileButton = createElement(
+      "button",
+      "button button-secondary inventory-action-button",
+      videoMaterial ? "영상 변경" : "업로드 파일 변경",
+    );
     fileButton.type = "button";
     fileButton.disabled = actionsDisabled;
-    fileButton.addEventListener("click", () => openReplacementFilePicker(material.id, "material", fileButton));
+    fileButton.addEventListener("click", () => {
+      if (videoMaterial) openEditVideoDialog(material.id, fileButton);
+      else openReplacementFilePicker(material.id, "material", fileButton);
+    });
 
     const contentButton = createElement("button", "button button-secondary inventory-action-button", "내용 변경");
     contentButton.type = "button";
@@ -947,6 +986,130 @@
     elements.closeEditContentDialog.disabled = false;
     if (saved && elements.editContentDialog.open) elements.editContentDialog.close();
     else if (!saved) setEditContentDialogStatus("변경 내용을 저장하지 못했습니다. 목록의 오류 안내를 확인해 주세요.", "error");
+  }
+
+  function getEditVideoSourceMethod() {
+    return elements.editVideoSourceInputs.find((input) => input.checked)?.value || "file";
+  }
+
+  function setEditVideoDialogStatus(message = "", type = "") {
+    elements.editVideoDialogStatus.textContent = message;
+    elements.editVideoDialogStatus.className = `dialog-status${type ? ` status-${type}` : ""}`;
+  }
+
+  function updateEditVideoFields() {
+    const source = getEditVideoSourceMethod();
+    const youtube = source === "youtube";
+    elements.editVideoFileGroup.hidden = youtube;
+    elements.editVideoUrlGroup.hidden = !youtube;
+    setEditVideoDialogStatus();
+  }
+
+  function openEditVideoDialog(materialId, trigger) {
+    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial) return;
+    const material = library?.materials?.find((item) => item.id === materialId);
+    const type = library?.materialTypes?.find((item) => item.id === material?.type);
+    if (!material || !isVideoType(type)) return;
+
+    pendingVideoEditId = materialId;
+    lastVideoEditTrigger = trigger;
+    elements.editVideoForm.reset();
+    const currentSource = isYouTubeMaterial(material) ? "youtube" : "file";
+    const sourceInput = elements.editVideoSourceInputs.find((input) => input.value === currentSource);
+    if (sourceInput) sourceInput.checked = true;
+    elements.editVideoUrl.value = currentSource === "youtube" ? material.file : "";
+    elements.editVideoFileName.textContent =
+      currentSource === "file" ? `새 파일을 선택해 주세요 (현재: ${getFileName(material.file)})` : "선택된 파일 없음";
+    updateEditVideoFields();
+    elements.editVideoDialog.showModal();
+    window.requestAnimationFrame(() => sourceInput?.focus());
+  }
+
+  function closeEditVideoDialog() {
+    if (isEditingMaterial || !elements.editVideoDialog.open) return;
+    elements.editVideoDialog.close();
+  }
+
+  async function saveVideoChange(event) {
+    event.preventDefault();
+    const materialId = pendingVideoEditId;
+    const source = getEditVideoSourceMethod();
+    const file = elements.editVideoFile.files?.[0] || null;
+    let youtubeUrl = "";
+    if (!materialId || isEditingMaterial) return;
+
+    try {
+      if (source === "youtube") youtubeUrl = normalizeYouTubeUrl(elements.editVideoUrl.value);
+      else if (!file) throw new Error("새로 업로드할 MP4 또는 WebM 영상 파일을 선택해 주세요.");
+    } catch (error) {
+      setEditVideoDialogStatus(error.message, "error");
+      return;
+    }
+
+    elements.saveEditVideoButton.disabled = true;
+    elements.cancelEditVideoDialog.disabled = true;
+    elements.closeEditVideoDialog.disabled = true;
+    elements.editVideoSourceInputs.forEach((input) => {
+      input.disabled = true;
+    });
+    setEditVideoDialogStatus("변경할 영상을 GitHub에 저장하고 있습니다.", "progress");
+
+    const saved = await runMaterialUpdate(materialId, "영상 자료를 GitHub에 반영하고 있습니다.", async (material, latestLibrary) => {
+      const type = latestLibrary.materialTypes?.find((item) => item.id === material.type);
+      const category = latestLibrary.categories?.find((item) => item.id === material.category);
+      if (!isVideoType(type) || !category) throw new Error("영상의 사업 카테고리 또는 자료 유형 설정을 찾지 못했습니다.");
+
+      const oldPath = getDeletableRepositoryPath(material.file, "assets/materials/");
+      const treeEntries = [];
+
+      if (source === "youtube") {
+        material.file = youtubeUrl;
+        material.sourceType = "youtube";
+        material.format = "video";
+        delete material.mimeType;
+        delete material.fileSizeBytes;
+        delete material.pageCount;
+      } else {
+        if (file.size > config.maxVideoBytes) throw new Error("영상 파일은 90MB 이하만 업로드할 수 있습니다.");
+        if (!fileMatchesType(file, type)) throw new Error("동영상 자료에는 MP4 또는 WebM 파일만 사용할 수 있습니다.");
+        const categoryFolder = validateFolderSegment(category.folder || category.id, "사업 카테고리");
+        const typeFolder = validateFolderSegment(type.folder, "자료 유형");
+        const newPath = `assets/materials/${categoryFolder}/${typeFolder}/${timestampString()}-${sanitizeFileName(file.name)}`;
+        const fileBlob = await createBlob(verifiedToken, bytesToBase64(await file.arrayBuffer()));
+        treeEntries.push({ path: newPath, mode: "100644", type: "blob", sha: fileBlob.sha });
+        material.file = newPath;
+        material.sourceType = "file";
+        material.format = "video";
+        material.fileSizeBytes = file.size;
+        if (file.type) material.mimeType = file.type;
+        else delete material.mimeType;
+        delete material.pageCount;
+      }
+
+      material.updatedAt = localDateString();
+      const oldPathIsShared = latestLibrary.materials.some((item) => item.id !== material.id && item.file === oldPath);
+      if (oldPath && oldPath !== material.file && !oldPathIsShared) {
+        treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });
+      }
+
+      return {
+        treeEntries,
+        commitMessage: `Update video source: ${material.title}`,
+        successMessage:
+          source === "youtube"
+            ? `‘${material.title}’ 영상을 YouTube 링크로 변경했습니다.`
+            : `‘${material.title}’ 영상을 직접 업로드 파일로 변경했습니다.`,
+      };
+    });
+
+    elements.saveEditVideoButton.disabled = false;
+    elements.cancelEditVideoDialog.disabled = false;
+    elements.closeEditVideoDialog.disabled = false;
+    elements.editVideoSourceInputs.forEach((input) => {
+      input.disabled = false;
+    });
+    if (saved && elements.editVideoDialog.open) elements.editVideoDialog.close();
+    else if (!saved) setEditVideoDialogStatus("영상을 변경하지 못했습니다. 목록의 오류 안내를 확인해 주세요.", "error");
   }
 
   async function handleUpload(event) {
@@ -1477,6 +1640,29 @@
     if (lastContentEditTrigger && document.contains(lastContentEditTrigger)) lastContentEditTrigger.focus();
     lastContentEditTrigger = null;
   });
+  elements.editVideoForm.addEventListener("submit", saveVideoChange);
+  elements.closeEditVideoDialog.addEventListener("click", closeEditVideoDialog);
+  elements.cancelEditVideoDialog.addEventListener("click", closeEditVideoDialog);
+  elements.editVideoSourceInputs.forEach((input) => input.addEventListener("change", updateEditVideoFields));
+  elements.editVideoFile.addEventListener("change", () => {
+    elements.editVideoFileName.textContent = elements.editVideoFile.files?.[0]?.name || "선택된 파일 없음";
+    setEditVideoDialogStatus();
+  });
+  elements.editVideoUrl.addEventListener("input", () => setEditVideoDialogStatus());
+  elements.editVideoDialog.addEventListener("cancel", (event) => {
+    if (isEditingMaterial) event.preventDefault();
+  });
+  elements.editVideoDialog.addEventListener("click", (event) => {
+    if (event.target === elements.editVideoDialog) closeEditVideoDialog();
+  });
+  elements.editVideoDialog.addEventListener("close", () => {
+    elements.editVideoForm.reset();
+    elements.editVideoFileName.textContent = "선택된 파일 없음";
+    setEditVideoDialogStatus();
+    pendingVideoEditId = "";
+    if (lastVideoEditTrigger && document.contains(lastVideoEditTrigger)) lastVideoEditTrigger.focus();
+    lastVideoEditTrigger = null;
+  });
   elements.openCategoryDialog.addEventListener("click", openCategoryDialog);
   elements.categoryForm.addEventListener("submit", addCategory);
   elements.closeCategoryDialog.addEventListener("click", closeCategoryDialog);
@@ -1527,6 +1713,7 @@
     elements.inventorySection.hidden = true;
     closeDeleteDialog();
     closeEditContentDialog();
+    closeEditVideoDialog();
     setConnectionStatus("토큰이 변경되었습니다. 연결을 다시 확인해 주세요.");
   });
   window.addEventListener("beforeunload", () => {
