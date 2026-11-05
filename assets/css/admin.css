@@ -297,6 +297,45 @@ body.upload-modal-open {
   color: var(--slate-700);
 }
 
+.thumbnail-upload-guide {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 1px solid #d7e3f1;
+  border-radius: 10px;
+  color: var(--slate-600);
+  background: #f7faff;
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
+.thumbnail-upload-guide p {
+  margin: 0 0 9px;
+}
+
+.thumbnail-upload-guide dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+  margin: 0;
+}
+
+.thumbnail-upload-guide dl div {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+}
+
+.thumbnail-upload-guide dt {
+  flex: 0 0 auto;
+  color: var(--navy-900);
+  font-weight: 800;
+}
+
+.thumbnail-upload-guide dd {
+  min-width: 0;
+  margin: 0;
+}
+
 .form-grid {
   display: grid;
   gap: 14px;
@@ -1204,6 +1243,10 @@ fieldset:disabled {
   .form-grid-two,
   .admin-help ul,
   .video-source-options {
+    grid-template-columns: 1fr;
+  }
+
+  .thumbnail-upload-guide dl {
     grid-template-columns: 1fr;
   }
 
