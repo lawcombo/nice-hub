@@ -49,7 +49,7 @@ NICE 자료허브/
 │  ├─ data/library.json               # 사업 카테고리, 자료 유형, 자료 목록
 │  ├─ icons/                          # PWA 설치 아이콘
 │  ├─ js/
-│  │  ├─ library-app.js               # 탭, 카드, PDF·동영상 미리보기 기능
+│  │  ├─ library-app.js               # 탭, 카드·목록 보기, PDF·동영상 미리보기 기능
 │  │  ├─ pwa-install.js               # 설치 버튼·설치 상태·카카오톡 안내
 │  │  └─ admin.js                     # GitHub 업로드 및 커밋 기능
 │  ├─ vendor/pdfjs/                    # 모바일 PDF 미리보기용 PDF.js

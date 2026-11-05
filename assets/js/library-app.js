@@ -4,6 +4,7 @@
   const elements = {
     tabs: document.querySelector("#categoryTabs"),
     typeTabs: document.querySelector("#materialTypeTabs"),
+    viewModeButtons: document.querySelectorAll("[data-view-mode]"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
     empty: document.querySelector("#emptyState"),
@@ -51,6 +52,7 @@
   let activeCategory = "all";
   let activeMaterialType = "all";
   let activeSearch = "";
+  let activeViewMode = getSavedViewMode();
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
   let pdfDocument = null;
@@ -69,6 +71,30 @@
   const modalHistoryKey = "niceHubModal";
   const exitGuardHistoryKey = "niceHubExitGuard";
   const exitBaseHistoryKey = "niceHubExitBase";
+  const viewModeStorageKey = "niceHubViewMode";
+
+  function getSavedViewMode() {
+    try {
+      return window.localStorage.getItem("niceHubViewMode") === "list" ? "list" : "card";
+    } catch (error) {
+      return "card";
+    }
+  }
+
+  function setViewMode(viewMode, persist = true) {
+    activeViewMode = viewMode === "list" ? "list" : "card";
+    elements.grid.classList.toggle("is-list-view", activeViewMode === "list");
+    elements.viewModeButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", button.dataset.viewMode === activeViewMode ? "true" : "false");
+    });
+
+    if (!persist) return;
+    try {
+      window.localStorage.setItem(viewModeStorageKey, activeViewMode);
+    } catch (error) {
+      console.warn("보기 방식을 저장하지 못했습니다.", error);
+    }
+  }
 
   function resolveUrl(path) {
     if (!path || typeof path !== "string") return "";
@@ -495,9 +521,10 @@
     actions.appendChild(createShareButton(material));
     if (actions.childElementCount === 3) actions.classList.add("card-actions-three");
 
-    body.append(meta, title, description, detailRow);
-    if (previewNotice) body.appendChild(previewNotice);
-    body.appendChild(actions);
+    const content = createElement("div", "card-content");
+    content.append(meta, title, description, detailRow);
+    if (previewNotice) content.appendChild(previewNotice);
+    body.append(content, actions);
     card.append(thumbnail, body);
     return card;
   }
@@ -981,11 +1008,15 @@
   elements.searchInput.addEventListener("input", updateSearch);
   elements.searchInput.addEventListener("search", updateSearch);
   elements.clearSearch.addEventListener("click", clearSearch);
+  elements.viewModeButtons.forEach((button) => {
+    button.addEventListener("click", () => setViewMode(button.dataset.viewMode));
+  });
   window.addEventListener("resize", () => {
     if (elements.modal.hidden || elements.pdfCanvasViewer.hidden || !pdfDocument) return;
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => renderPdfPage(currentPdfPage), 180);
   });
   initializeBackNavigation();
+  setViewMode(activeViewMode, false);
   initialize();
 })();
