@@ -261,6 +261,21 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 540564,
       "pageCount": 8
+    },
+    {
+      "id": "lodging-manual-mw3bwduk",
+      "category": "lodging",
+      "type": "manual",
+      "format": "pdf",
+      "title": "NiceManager 매뉴얼 02 KIOSK 설정_2026.07",
+      "description": "NiceManager 매뉴얼 02 KIOSK 설정_2026.07",
+      "file": "assets/materials/lodging/manuals/20261105-181348-02_NiceManager_KIOSK-설정-매뉴얼_260729.pdf",
+      "thumbnail": "assets/thumbnails/20261105-181348-매뉴얼_02.png",
+      "updatedAt": "2026-11-05",
+      "registeredAt": "2026-11-05T09:13:48.152Z",
+      "mimeType": "application/pdf",
+      "fileSizeBytes": 700997,
+      "pageCount": 4
     }
   ]
 }
