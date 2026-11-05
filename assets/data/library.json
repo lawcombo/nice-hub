@@ -246,6 +246,21 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 8708192,
       "pageCount": 4
+    },
+    {
+      "id": "lodging-manual-mw3bqik9",
+      "category": "lodging",
+      "type": "manual",
+      "format": "pdf",
+      "title": "NiceManager 매뉴얼 01 회원가입_2026.07",
+      "description": "NiceManager 매뉴얼 01 회원가입_2026.07 기준",
+      "file": "assets/materials/lodging/manuals/20261105-180912-01_NiceManager_회원가입_260729.pdf",
+      "thumbnail": "assets/thumbnails/20261105-180912-매뉴얼_01.png",
+      "updatedAt": "2026-11-05",
+      "registeredAt": "2026-11-05T09:09:12.792Z",
+      "mimeType": "application/pdf",
+      "fileSizeBytes": 540564,
+      "pageCount": 8
     }
   ]
 }
