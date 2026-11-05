@@ -152,12 +152,13 @@
       "format": "pdf",
       "title": "무인숙박 제품 카탈로그",
       "description": "무인숙박 전용 키오스크 스펙",
-      "file": "assets/materials/lodging/brochures/20261103-125427-무인숙박_제품_카탈로그_2026.10_압축본.pdf",
+      "file": "assets/materials/lodging/brochures/20261105-163301-NICE인프라-무인숙박-키오스크-제품-카탈로그_2026ver.pdf",
       "thumbnail": "assets/thumbnails/20261103-125427-main2.png",
-      "updatedAt": "2026-11-03",
+      "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-03T12:54:27+09:00",
-      "fileSizeBytes": 17657715,
-      "pageCount": 12
+      "fileSizeBytes": 8193574,
+      "pageCount": 12,
+      "mimeType": "application/pdf"
     },
     {
       "id": "school-safety-video-mw0b5xc7",
