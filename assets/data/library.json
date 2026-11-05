@@ -137,12 +137,13 @@
       "format": "pdf",
       "title": "학생통합안전시스템 브로셔",
       "description": "온라인 공유용 (저해상도)",
-      "file": "assets/materials/school-safety/brochures/20261103-122152-학생통합안전시스템_브로셔_온라인_압축본.pdf",
+      "file": "assets/materials/school-safety/brochures/20261105-161914-학생통합안전시스템-브로셔_2026ver.pdf",
       "thumbnail": "assets/thumbnails/20261103-122152-main.png",
-      "updatedAt": "2026-11-03",
+      "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-03T12:21:52+09:00",
-      "fileSizeBytes": 18290452,
-      "pageCount": 8
+      "fileSizeBytes": 1877066,
+      "pageCount": 8,
+      "mimeType": "application/pdf"
     },
     {
       "id": "lodging-brochure-mw05mb6b",
