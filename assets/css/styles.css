@@ -1498,8 +1498,8 @@ button.button {
   .material-controls {
     align-items: stretch;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 18px;
   }
 
   .material-type-scroll {
@@ -1516,8 +1516,9 @@ button.button {
   }
 
   .view-mode-button {
-    min-height: 36px;
-    padding-inline: 11px;
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
   }
 
   .materials-grid {
@@ -1527,15 +1528,32 @@ button.button {
   .is-list-view .material-card {
     display: grid;
     min-height: 0;
-    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-columns: 96px minmax(0, 1fr);
+    border-radius: 14px;
   }
 
   .is-list-view .thumbnail {
-    width: auto;
-    min-height: 70px;
+    width: 82px;
+    height: 64px;
+    min-height: 0;
     align-self: start;
-    aspect-ratio: 4 / 3;
-    margin: 14px 0 0 14px;
+    aspect-ratio: auto;
+    margin: 12px 0 0 12px;
+    border-radius: 8px;
+  }
+
+  .is-list-view .thumbnail-fallback {
+    gap: 0;
+    padding: 7px;
+  }
+
+  .is-list-view .file-mark {
+    width: 32px;
+    height: 40px;
+  }
+
+  .is-list-view .thumbnail-type {
+    display: none;
   }
 
   .is-list-view .card-body {
@@ -1544,26 +1562,49 @@ button.button {
 
   .is-list-view .card-content {
     grid-column: 2;
-    padding: 14px;
+    justify-content: center;
+    padding: 11px 12px 8px;
   }
 
   .is-list-view .card-meta {
-    margin-bottom: 5px;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .is-list-view .badge {
+    min-height: 20px;
+    padding: 1px 6px;
+    font-size: 0.64rem;
+  }
+
+  .is-list-view .material-title {
+    font-size: 0.92rem;
+    line-height: 1.38;
   }
 
   .is-list-view .material-description {
-    -webkit-line-clamp: 2;
+    display: none;
   }
 
   .is-list-view .material-detail-row {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 2px;
-    margin-top: 2px;
+    align-items: baseline;
+    flex-flow: row wrap;
+    gap: 2px 9px;
+    margin-top: 5px;
+  }
+
+  .is-list-view .material-file-info,
+  .is-list-view .material-date {
+    font-size: 0.69rem;
   }
 
   .is-list-view .material-date {
     text-align: left;
+  }
+
+  .is-list-view .material-preview-note {
+    margin-top: 4px;
+    font-size: 0.67rem;
   }
 
   .is-list-view .card-actions,
@@ -1573,7 +1614,10 @@ button.button {
     grid-column: 1 / -1;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     flex-direction: initial;
-    margin: 0 14px 14px;
+    gap: 6px;
+    margin: 7px 12px 12px;
+    padding-top: 9px;
+    border-top: 1px solid var(--slate-200);
   }
 
   .is-list-view .card-actions-three {
@@ -1581,9 +1625,11 @@ button.button {
   }
 
   .is-list-view .card-actions .button {
+    min-height: 38px;
     min-width: 0;
-    padding-inline: 6px;
-    font-size: 0.78rem;
+    padding: 7px 4px;
+    border-radius: 9px;
+    font-size: 0.74rem;
   }
 
   .card-actions-three .button {
