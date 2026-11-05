@@ -7,6 +7,9 @@
     viewModeButtons: document.querySelectorAll("[data-view-mode]"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
+    pagination: document.querySelector("#materialsPagination"),
+    loadMore: document.querySelector("#loadMoreMaterials"),
+    endMessage: document.querySelector("#materialsEndMessage"),
     empty: document.querySelector("#emptyState"),
     emptyTitle: document.querySelector("#emptyState h3"),
     emptyMessage: document.querySelector("#emptyState p"),
@@ -54,6 +57,7 @@
   let activeMaterialType = "all";
   let activeSearch = "";
   let activeViewMode = getSavedViewMode();
+  let visibleMaterialCount = 12;
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
   let pdfViewerWarmupScheduled = false;
@@ -74,6 +78,7 @@
   const exitGuardHistoryKey = "niceHubExitGuard";
   const exitBaseHistoryKey = "niceHubExitBase";
   const viewModeStorageKey = "niceHubViewMode";
+  const materialsPageSize = 12;
 
   function getSavedViewMode() {
     try {
@@ -361,6 +366,7 @@
 
   function selectCategory(categoryId) {
     activeCategory = categoryId;
+    visibleMaterialCount = materialsPageSize;
 
     elements.tabs.querySelectorAll('[role="tab"]').forEach((tab) => {
       const selected = tab.dataset.category === categoryId;
@@ -375,6 +381,7 @@
 
   function selectMaterialType(typeId) {
     activeMaterialType = typeId;
+    visibleMaterialCount = materialsPageSize;
     elements.typeTabs.querySelectorAll("[data-material-type]").forEach((button) => {
       button.setAttribute("aria-pressed", button.dataset.materialType === typeId ? "true" : "false");
     });
@@ -415,13 +422,19 @@
   }
 
   function renderMaterials() {
-    const visibleMaterials = getVisibleMaterials();
+    const filteredMaterials = getVisibleMaterials();
+    const visibleMaterials = filteredMaterials.slice(0, visibleMaterialCount);
     const fragment = document.createDocumentFragment();
 
     visibleMaterials.forEach((material) => fragment.appendChild(createMaterialCard(material)));
     elements.grid.replaceChildren(fragment);
-    elements.grid.hidden = visibleMaterials.length === 0;
-    elements.empty.hidden = visibleMaterials.length !== 0;
+    const hasMaterials = filteredMaterials.length !== 0;
+    const hasMoreMaterials = visibleMaterials.length < filteredMaterials.length;
+    elements.grid.hidden = !hasMaterials;
+    elements.empty.hidden = hasMaterials;
+    elements.pagination.hidden = !hasMaterials;
+    elements.loadMore.hidden = !hasMoreMaterials;
+    elements.endMessage.hidden = hasMoreMaterials;
     elements.emptyTitle.textContent = activeSearch ? "검색 결과가 없습니다." : "등록된 자료가 없습니다.";
     elements.emptyMessage.textContent = activeSearch
       ? "다른 검색어를 입력하거나 사업·자료 유형을 변경해 보세요."
@@ -430,13 +443,19 @@
     const categoryLabel = activeCategory === "all" ? "전체" : getCategoryLabel(activeCategory);
     const typeLabel = activeMaterialType === "all" ? "전체 유형" : getTypeLabel(activeMaterialType);
     elements.summary.textContent = activeSearch
-      ? `‘${elements.searchInput.value.trim()}’ 검색 결과 ${visibleMaterials.length}건`
-      : `${categoryLabel} · ${typeLabel} 자료 ${visibleMaterials.length}건`;
+      ? `‘${elements.searchInput.value.trim()}’ 검색 결과 ${filteredMaterials.length}건`
+      : `${categoryLabel} · ${typeLabel} 자료 ${filteredMaterials.length}건`;
   }
 
   function updateSearch() {
     activeSearch = elements.searchInput.value.trim().toLocaleLowerCase("ko");
+    visibleMaterialCount = materialsPageSize;
     elements.clearSearch.hidden = !elements.searchInput.value;
+    renderMaterials();
+  }
+
+  function loadMoreMaterials() {
+    visibleMaterialCount += materialsPageSize;
     renderMaterials();
   }
 
@@ -1113,6 +1132,7 @@
   elements.searchInput.addEventListener("input", updateSearch);
   elements.searchInput.addEventListener("search", updateSearch);
   elements.clearSearch.addEventListener("click", clearSearch);
+  elements.loadMore.addEventListener("click", loadMoreMaterials);
   elements.viewModeButtons.forEach((button) => {
     button.addEventListener("click", () => setViewMode(button.dataset.viewMode));
   });

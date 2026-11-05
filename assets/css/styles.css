@@ -501,6 +501,36 @@ a {
   gap: 24px;
 }
 
+.materials-pagination {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.materials-pagination[hidden],
+.materials-more-button[hidden],
+.materials-end-message[hidden] {
+  display: none;
+}
+
+.materials-more-button {
+  width: min(100%, 280px);
+  min-height: 46px;
+  border-color: #b9cce2;
+  background: #fff;
+  font-weight: 800;
+}
+
+.materials-end-message {
+  margin: 0;
+  padding: 8px 12px;
+  color: var(--slate-500);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .material-card {
   display: flex;
   min-width: 0;

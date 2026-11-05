@@ -82,6 +82,15 @@
         <div id="materialsPanel" role="tabpanel" tabindex="0" aria-labelledby="tab-all">
           <div id="materialsGrid" class="materials-grid"></div>
 
+          <div id="materialsPagination" class="materials-pagination" hidden>
+            <button id="loadMoreMaterials" class="button button-secondary materials-more-button" type="button">
+              더보기
+            </button>
+            <p id="materialsEndMessage" class="materials-end-message" aria-live="polite" hidden>
+              마지막 데이터입니다.
+            </p>
+          </div>
+
           <div id="emptyState" class="empty-state" hidden>
             <div class="empty-icon" aria-hidden="true">
               <span></span>
