@@ -91,6 +91,9 @@
     editSecurityPasswordGroup: document.querySelector("#editSecurityPasswordGroup"),
     editSecurityPassword: document.querySelector("#editSecurityPassword"),
     editContentDialogStatus: document.querySelector("#editContentDialogStatus"),
+    editContentProgress: document.querySelector("#editContentProgress"),
+    editContentProgressTitle: document.querySelector("#editContentProgressTitle"),
+    editContentProgressMessage: document.querySelector("#editContentProgressMessage"),
     saveEditContentButton: document.querySelector("#saveEditContentButton"),
     closeEditContentDialog: document.querySelector("#closeEditContentDialog"),
     cancelEditContentDialog: document.querySelector("#cancelEditContentDialog"),
@@ -492,7 +495,24 @@
     elements.progressTitle.textContent = title;
     elements.progressMessage.textContent = message;
     elements.progress.hidden = false;
-    showOperationProgress(title, message);
+    elements.uploadDialog.setAttribute("aria-busy", "true");
+  }
+
+  function hideUploadProgress() {
+    elements.progress.hidden = true;
+    elements.uploadDialog.removeAttribute("aria-busy");
+  }
+
+  function showEditContentProgress(title, message) {
+    elements.editContentProgressTitle.textContent = title;
+    elements.editContentProgressMessage.textContent = message;
+    elements.editContentProgress.hidden = false;
+    elements.editContentDialog.setAttribute("aria-busy", "true");
+  }
+
+  function hideEditContentProgress() {
+    elements.editContentProgress.hidden = true;
+    elements.editContentDialog.removeAttribute("aria-busy");
   }
 
   function clearResult() {
@@ -1092,6 +1112,7 @@
     updateEditSecurityFields();
     elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
     setEditContentDialogStatus();
+    hideEditContentProgress();
     elements.editContentDialog.showModal();
     window.requestAnimationFrame(() => elements.editMaterialTitle.focus());
   }
@@ -1116,25 +1137,34 @@
     elements.saveEditContentButton.disabled = true;
     elements.cancelEditContentDialog.disabled = true;
     elements.closeEditContentDialog.disabled = true;
-    setEditContentDialogStatus("변경 내용을 GitHub에 저장하고 있습니다.", "progress");
-    const saved = await runMaterialUpdate(
-      materialId,
-      "자료명과 짧은 설명을 GitHub에 반영하고 있습니다.",
-      async (material) => {
-        material.title = title;
-        material.description = description;
-        material.isSecure = isSecure;
-        markMaterialUpdated(material);
-        return {
-          treeEntries: [],
-          commitMessage: `Update material details: ${title}`,
-          successMessage: `‘${title}’ 자료의 자료명과 짧은 설명을 변경했습니다.`,
-        };
-      },
+    setEditContentDialogStatus();
+    showEditContentProgress(
+      "변경 내용을 저장하고 있습니다.",
+      "자료명, 설명과 보안 설정을 GitHub에 반영하는 중입니다.",
     );
-    elements.saveEditContentButton.disabled = false;
-    elements.cancelEditContentDialog.disabled = false;
-    elements.closeEditContentDialog.disabled = false;
+    let saved = false;
+    try {
+      saved = await runMaterialUpdate(
+        materialId,
+        "자료명과 짧은 설명을 GitHub에 반영하고 있습니다.",
+        async (material) => {
+          material.title = title;
+          material.description = description;
+          material.isSecure = isSecure;
+          markMaterialUpdated(material);
+          return {
+            treeEntries: [],
+            commitMessage: `Update material details: ${title}`,
+            successMessage: `‘${title}’ 자료의 자료명과 짧은 설명을 변경했습니다.`,
+          };
+        },
+      );
+    } finally {
+      hideEditContentProgress();
+      elements.saveEditContentButton.disabled = false;
+      elements.cancelEditContentDialog.disabled = false;
+      elements.closeEditContentDialog.disabled = false;
+    }
     if (saved && elements.editContentDialog.open) elements.editContentDialog.close();
     else if (!saved) setEditContentDialogStatus("변경 내용을 저장하지 못했습니다. 목록의 오류 안내를 확인해 주세요.", "error");
   }
@@ -1366,7 +1396,7 @@
       });
 
       library = latestLibrary;
-      elements.progress.hidden = true;
+      hideUploadProgress();
       closeUploadModal(true);
       showResult(
         "success",
@@ -1390,7 +1420,7 @@
       renderInventory(library);
       setInventoryStatus("새 자료가 목록에 추가되었습니다.", "success");
     } catch (error) {
-      elements.progress.hidden = true;
+      hideUploadProgress();
       showResult("error", "업로드하지 못했습니다.", userFriendlyError(error));
     } finally {
       isUploading = false;

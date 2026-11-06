@@ -269,11 +269,21 @@
             </fieldset>
           </form>
 
-          <div id="uploadProgress" class="upload-progress" hidden aria-live="polite">
-            <span class="spinner" aria-hidden="true"></span>
-            <div>
-              <strong id="progressTitle">업로드를 준비하고 있습니다.</strong>
-              <p id="progressMessage">이 화면을 닫지 마세요.</p>
+          <div
+            id="uploadProgress"
+            class="dialog-progress-overlay"
+            hidden
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div class="dialog-progress-card">
+              <span class="operation-spinner" aria-hidden="true"></span>
+              <div class="operation-progress-copy">
+                <strong id="progressTitle">업로드를 준비하고 있습니다.</strong>
+                <p id="progressMessage">이 화면을 닫지 마세요.</p>
+              </div>
+              <span class="operation-progress-bar" aria-hidden="true"></span>
             </div>
           </div>
 
@@ -489,6 +499,23 @@
           <button id="saveEditContentButton" class="button button-primary" type="submit">변경 내용 저장</button>
         </div>
       </form>
+      <div
+        id="editContentProgress"
+        class="dialog-progress-overlay"
+        hidden
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div class="dialog-progress-card">
+          <span class="operation-spinner" aria-hidden="true"></span>
+          <div class="operation-progress-copy">
+            <strong id="editContentProgressTitle">변경 내용을 저장하고 있습니다.</strong>
+            <p id="editContentProgressMessage">GitHub에 안전하게 반영하는 중입니다. 잠시만 기다려 주세요.</p>
+          </div>
+          <span class="operation-progress-bar" aria-hidden="true"></span>
+        </div>
+      </div>
     </dialog>
 
     <dialog id="editVideoDialog" class="material-type-dialog edit-video-dialog" aria-labelledby="editVideoDialogTitle">

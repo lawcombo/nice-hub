@@ -526,7 +526,6 @@ fieldset:disabled {
   font-size: 0.94rem;
 }
 
-.upload-progress,
 .upload-result {
   margin-top: 22px;
   padding: 16px;
@@ -537,35 +536,14 @@ fieldset:disabled {
   outline: none;
 }
 
-.upload-progress {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  border: 1px solid #bdd6f2;
-  color: var(--navy-900);
-  background: var(--blue-50);
-}
-
-.upload-progress[hidden],
 .upload-result[hidden] {
   display: none;
 }
 
-.upload-progress p,
 .upload-result p {
   margin: 2px 0 0;
   color: var(--slate-700);
   font-size: 0.82rem;
-}
-
-.spinner {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
-  border: 3px solid #bad4f1;
-  border-top-color: var(--blue-700);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
 }
 
 .upload-result-success {
@@ -625,6 +603,41 @@ fieldset:disabled {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.dialog-progress-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 15, 29, 0.62);
+  backdrop-filter: blur(3px);
+}
+
+.dialog-progress-overlay[hidden] {
+  display: none;
+}
+
+.dialog-progress-card {
+  position: relative;
+  display: grid;
+  width: min(430px, 100%);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  padding: 24px 24px 29px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+  animation: dialog-progress-in 0.24s ease-out both;
+}
+
+.dialog-progress-card .operation-spinner {
+  animation: spin 0.78s linear infinite, progress-pulse 1.5s ease-in-out infinite;
 }
 
 .operation-spinner {
@@ -1202,6 +1215,29 @@ fieldset:disabled {
   }
 }
 
+@keyframes dialog-progress-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes progress-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(31, 105, 197, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px rgba(31, 105, 197, 0.12);
+  }
+}
+
 @media (max-width: 880px) {
   .inventory-filter-field {
     grid-template-columns: 1fr;
@@ -1250,6 +1286,16 @@ fieldset:disabled {
   .upload-dialog-sticky-header {
     margin: 0 -17px 22px;
     padding: 18px 17px 14px;
+  }
+
+  .dialog-progress-overlay {
+    padding: 18px;
+  }
+
+  .dialog-progress-card {
+    gap: 13px;
+    padding: 21px 18px 26px;
+    border-radius: 16px;
   }
 
   .form-grid-two,
