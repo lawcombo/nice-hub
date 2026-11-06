@@ -151,6 +151,11 @@
     return `${year}-${month}-${day}`;
   }
 
+  function markMaterialUpdated(material, date = new Date()) {
+    material.updatedAt = localDateString(date);
+    material.modifiedAt = date.toISOString();
+  }
+
   function timestampString(date = new Date()) {
     return [
       date.getFullYear(),
@@ -966,7 +971,7 @@
         const thumbnailBlob = await createBlob(verifiedToken, bytesToBase64(await file.arrayBuffer()));
         const oldPath = getDeletableRepositoryPath(material.thumbnail, "assets/thumbnails/");
         material.thumbnail = newPath;
-        material.updatedAt = localDateString();
+        markMaterialUpdated(material);
 
         const treeEntries = [{ path: newPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha }];
         const oldPathIsShared = latestLibrary.materials.some(
@@ -1012,7 +1017,7 @@
       material.file = newPath;
       material.format = uploadedFormat;
       material.fileSizeBytes = file.size;
-      material.updatedAt = localDateString();
+      markMaterialUpdated(material);
       if (file.type) material.mimeType = file.type;
       else delete material.mimeType;
       if (Number.isInteger(pageCount) && pageCount > 0) material.pageCount = pageCount;
@@ -1078,7 +1083,7 @@
       async (material) => {
         material.title = title;
         material.description = description;
-        material.updatedAt = localDateString();
+        markMaterialUpdated(material);
         return {
           treeEntries: [],
           commitMessage: `Update material details: ${title}`,
@@ -1191,7 +1196,7 @@
         delete material.pageCount;
       }
 
-      material.updatedAt = localDateString();
+      markMaterialUpdated(material);
       const oldPathIsShared = latestLibrary.materials.some((item) => item.id !== material.id && item.file === oldPath);
       if (oldPath && oldPath !== material.file && !oldPathIsShared) {
         treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });

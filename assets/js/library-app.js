@@ -9,7 +9,8 @@
     grid: document.querySelector("#materialsGrid"),
     pagination: document.querySelector("#materialsPagination"),
     loadMore: document.querySelector("#loadMoreMaterials"),
-    endMessage: document.querySelector("#materialsEndMessage"),
+    endSentinel: document.querySelector("#materialsEndSentinel"),
+    endToast: document.querySelector("#materialsEndToast"),
     empty: document.querySelector("#emptyState"),
     emptyTitle: document.querySelector("#emptyState h3"),
     emptyMessage: document.querySelector("#emptyState p"),
@@ -58,6 +59,9 @@
   let activeSearch = "";
   let activeViewMode = getSavedViewMode();
   let visibleMaterialCount = 12;
+  let hasMoreMaterialsAvailable = false;
+  let hasAnnouncedMaterialEnd = false;
+  let endToastTimer = 0;
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
   let pdfViewerWarmupScheduled = false;
@@ -366,7 +370,7 @@
 
   function selectCategory(categoryId) {
     activeCategory = categoryId;
-    visibleMaterialCount = materialsPageSize;
+    resetMaterialPagination();
 
     elements.tabs.querySelectorAll('[role="tab"]').forEach((tab) => {
       const selected = tab.dataset.category === categoryId;
@@ -381,7 +385,7 @@
 
   function selectMaterialType(typeId) {
     activeMaterialType = typeId;
-    visibleMaterialCount = materialsPageSize;
+    resetMaterialPagination();
     elements.typeTabs.querySelectorAll("[data-material-type]").forEach((button) => {
       button.setAttribute("aria-pressed", button.dataset.materialType === typeId ? "true" : "false");
     });
@@ -430,11 +434,12 @@
     elements.grid.replaceChildren(fragment);
     const hasMaterials = filteredMaterials.length !== 0;
     const hasMoreMaterials = visibleMaterials.length < filteredMaterials.length;
+    hasMoreMaterialsAvailable = hasMoreMaterials;
     elements.grid.hidden = !hasMaterials;
     elements.empty.hidden = hasMaterials;
     elements.pagination.hidden = !hasMaterials;
     elements.loadMore.hidden = !hasMoreMaterials;
-    elements.endMessage.hidden = hasMoreMaterials;
+    elements.endSentinel.hidden = hasMoreMaterials;
     elements.emptyTitle.textContent = activeSearch ? "검색 결과가 없습니다." : "등록된 자료가 없습니다.";
     elements.emptyMessage.textContent = activeSearch
       ? "다른 검색어를 입력하거나 사업·자료 유형을 변경해 보세요."
@@ -449,14 +454,58 @@
 
   function updateSearch() {
     activeSearch = elements.searchInput.value.trim().toLocaleLowerCase("ko");
-    visibleMaterialCount = materialsPageSize;
+    resetMaterialPagination();
     elements.clearSearch.hidden = !elements.searchInput.value;
     renderMaterials();
+  }
+
+  function resetMaterialPagination() {
+    visibleMaterialCount = materialsPageSize;
+    hasAnnouncedMaterialEnd = false;
+    hideMaterialEndToast();
   }
 
   function loadMoreMaterials() {
     visibleMaterialCount += materialsPageSize;
     renderMaterials();
+  }
+
+  function showMaterialEndToast() {
+    if (hasAnnouncedMaterialEnd || hasMoreMaterialsAvailable || elements.endSentinel.hidden || window.scrollY <= 0) return;
+    hasAnnouncedMaterialEnd = true;
+    window.clearTimeout(endToastTimer);
+    elements.endToast.hidden = false;
+    window.requestAnimationFrame(() => elements.endToast.classList.add("is-visible"));
+    endToastTimer = window.setTimeout(hideMaterialEndToast, 2200);
+  }
+
+  function hideMaterialEndToast() {
+    window.clearTimeout(endToastTimer);
+    elements.endToast.classList.remove("is-visible");
+    endToastTimer = window.setTimeout(() => {
+      if (!elements.endToast.classList.contains("is-visible")) elements.endToast.hidden = true;
+    }, 220);
+  }
+
+  function initializeMaterialEndObserver() {
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) showMaterialEndToast();
+        },
+        { rootMargin: "0px 0px 80px" },
+      );
+      observer.observe(elements.endSentinel);
+      return;
+    }
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (elements.endSentinel.getBoundingClientRect().top <= window.innerHeight + 80) showMaterialEndToast();
+      },
+      { passive: true },
+    );
   }
 
   function clearSearch() {
@@ -507,8 +556,9 @@
       material.description || "자료의 자세한 내용은 파일에서 확인해 주세요.",
     );
     const fileInfo = createElement("p", "material-file-info", getMaterialFileInfo(material));
-    const date = createElement("p", "material-date", formatUpdatedDate(material.updatedAt));
-    date.setAttribute("aria-label", `업데이트 날짜 ${material.updatedAt || "미등록"}`);
+    const dateInfo = getMaterialDateInfo(material);
+    const date = createElement("p", "material-date", `${dateInfo.label} ${dateInfo.text}`);
+    date.setAttribute("aria-label", `${dateInfo.label} 일시 ${dateInfo.text}`);
     const detailRow = createElement("div", "material-detail-row");
     detailRow.append(fileInfo, date);
     const previewNotice = getOfficeFormat(material)
@@ -615,7 +665,7 @@
   }
 
   async function shareMaterialLink(material, button) {
-    const url = resolveUrl(material.file);
+    const url = getMaterialShareUrl(material);
     if (!url) return;
 
     if (isMobileDevice() && typeof navigator.share === "function") {
@@ -639,6 +689,13 @@
       console.error("자료 링크를 복사하지 못했습니다.", error);
       showShareFeedback(button, "복사 실패");
     }
+  }
+
+  function getMaterialShareUrl(material) {
+    if (!material?.id) return "";
+    const url = new URL("open.html", document.baseURI);
+    url.searchParams.set("id", material.id);
+    return url.href;
   }
 
   async function copyText(value) {
@@ -681,11 +738,53 @@
     }
   }
 
-  function formatUpdatedDate(value) {
-    if (!value) return "날짜 미등록";
-    const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!match) return String(value);
-    return `${match[1]}.${match[2]}.${match[3]}`;
+  function formatDateOnly(value) {
+    const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[1]}. ${Number(match[2])}. ${Number(match[3])}.` : "날짜 미등록";
+  }
+
+  function formatDateTime(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return formatDateOnly(value);
+    return new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+  }
+
+  function getSeoulDateKey(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "";
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+    const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+  }
+
+  function getMaterialDateInfo(material) {
+    if (material?.modifiedAt) {
+      return { label: "업데이트", text: formatDateTime(material.modifiedAt) };
+    }
+
+    const registeredDateKey = getSeoulDateKey(material?.registeredAt);
+    if (material?.updatedAt && registeredDateKey && material.updatedAt !== registeredDateKey) {
+      return { label: "업데이트", text: formatDateOnly(material.updatedAt) };
+    }
+
+    if (material?.registeredAt) {
+      return { label: "등록", text: formatDateTime(material.registeredAt) };
+    }
+
+    return { label: "등록", text: formatDateOnly(material?.updatedAt) };
   }
 
   function loadPdfJs() {
@@ -1142,6 +1241,7 @@
     resizeTimer = window.setTimeout(() => renderPdfPage(currentPdfPage), 180);
   });
   initializeBackNavigation();
+  initializeMaterialEndObserver();
   setViewMode(activeViewMode, false);
   initialize();
 })();

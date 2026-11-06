@@ -510,7 +510,8 @@ a {
 
 .materials-pagination[hidden],
 .materials-more-button[hidden],
-.materials-end-message[hidden] {
+.materials-end-sentinel[hidden],
+.materials-end-toast[hidden] {
   display: none;
 }
 
@@ -522,13 +523,97 @@ a {
   font-weight: 800;
 }
 
-.materials-end-message {
-  margin: 0;
-  padding: 8px 12px;
-  color: var(--slate-500);
+.materials-end-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.materials-end-toast {
+  position: fixed;
+  z-index: 80;
+  right: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 12px 19px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(7, 31, 61, 0.94);
+  box-shadow: 0 14px 34px rgba(7, 31, 61, 0.24);
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 800;
+  opacity: 0;
+  transform: translate(50%, 12px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+  pointer-events: none;
+}
+
+.materials-end-toast.is-visible {
+  opacity: 1;
+  transform: translate(50%, 0);
+}
+
+.share-redirect-page {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background: var(--slate-50);
+}
+
+.share-redirect-card {
+  width: min(100%, 520px);
+  padding: 42px 32px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: var(--shadow-md);
   text-align: center;
+}
+
+.share-redirect-spinner {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 22px;
+  border: 4px solid var(--blue-100);
+  border-top-color: var(--blue-600);
+  border-radius: 50%;
+  animation: share-redirect-spin 800ms linear infinite;
+}
+
+.share-redirect-kicker {
+  margin: 0 0 8px;
+  color: var(--blue-700);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.share-redirect-card h1 {
+  margin: 0;
+  color: var(--navy-900);
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  letter-spacing: -0.035em;
+}
+
+.share-redirect-message {
+  margin: 12px 0 0;
+  color: var(--slate-500);
+  line-height: 1.65;
+}
+
+.share-redirect-return {
+  width: 100%;
+  margin-top: 24px;
+}
+
+@keyframes share-redirect-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .material-card {

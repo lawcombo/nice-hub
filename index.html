@@ -86,9 +86,7 @@
             <button id="loadMoreMaterials" class="button button-secondary materials-more-button" type="button">
               더보기
             </button>
-            <p id="materialsEndMessage" class="materials-end-message" aria-live="polite" hidden>
-              마지막 데이터입니다.
-            </p>
+            <div id="materialsEndSentinel" class="materials-end-sentinel" aria-hidden="true" hidden></div>
           </div>
 
           <div id="emptyState" class="empty-state" hidden>
@@ -107,6 +105,10 @@
         </noscript>
       </section>
     </main>
+
+    <div id="materialsEndToast" class="materials-end-toast" role="status" aria-live="polite" hidden>
+      마지막 데이터입니다.
+    </div>
 
     <footer class="site-footer">
       <div class="shell footer-inner footer-inner-actions">

@@ -141,6 +141,7 @@
       "thumbnail": "assets/thumbnails/20261106-000738-안전한-학교로-달려요.png",
       "updatedAt": "2026-11-06",
       "registeredAt": "2026-11-03T12:21:52+09:00",
+      "modifiedAt": "2026-11-06T00:05:28+09:00",
       "fileSizeBytes": 1877066,
       "pageCount": 8,
       "mimeType": "application/pdf"
@@ -156,6 +157,7 @@
       "thumbnail": "assets/thumbnails/20261103-125427-main2.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-03T12:54:27+09:00",
+      "modifiedAt": "2026-11-05T17:28:45+09:00",
       "fileSizeBytes": 8175497,
       "pageCount": 12,
       "mimeType": "application/pdf"
@@ -171,6 +173,7 @@
       "thumbnail": "assets/thumbnails/20261106-000305-안전한-학교로-달려요.png",
       "updatedAt": "2026-11-06",
       "registeredAt": "2026-11-03T15:27:45+09:00",
+      "modifiedAt": "2026-11-06T00:00:55+09:00",
       "sourceType": "youtube"
     },
     {
@@ -184,6 +187,7 @@
       "thumbnail": "assets/thumbnails/20261105-223628-호텔-관제-점주-추천-100만원-혜택.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-03T08:55:52.964Z",
+      "modifiedAt": "2026-11-05T22:34:18+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 2123046,
       "pageCount": 1
@@ -199,6 +203,7 @@
       "thumbnail": "assets/thumbnails/20261105-224001-무인숙박-신규-계약-300만원-혜택.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-03T08:58:01.098Z",
+      "modifiedAt": "2026-11-05T22:37:50+09:00",
       "mimeType": "image/png",
       "fileSizeBytes": 2866640
     },
@@ -213,6 +218,7 @@
       "thumbnail": "assets/thumbnails/20261105-135525-main4.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T04:55:25.523Z",
+      "modifiedAt": "2026-11-05T16:42:50+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 16360886,
       "pageCount": 40
@@ -228,6 +234,7 @@
       "thumbnail": "assets/thumbnails/20261105-140106-main_3_1.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T05:01:06.790Z",
+      "modifiedAt": "2026-11-05T17:50:46+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 5533140,
       "pageCount": 21
@@ -243,6 +250,7 @@
       "thumbnail": "assets/thumbnails/20261105-141427-mmm.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T05:14:27.515Z",
+      "modifiedAt": "2026-11-05T16:46:51+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 8708192,
       "pageCount": 4
@@ -258,6 +266,7 @@
       "thumbnail": "assets/thumbnails/20261105-233325-01-회원가입-매뉴얼-3.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T09:09:12.792Z",
+      "modifiedAt": "2026-11-05T23:31:15+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 540564,
       "pageCount": 8
@@ -273,6 +282,7 @@
       "thumbnail": "assets/thumbnails/20261105-233341-KIOSK-설정-매뉴얼-02-2.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T09:13:48.152Z",
+      "modifiedAt": "2026-11-05T23:31:31+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 700997,
       "pageCount": 4
@@ -288,6 +298,7 @@
       "thumbnail": "assets/thumbnails/20261105-233357-03-PMS-설정-매뉴얼-1.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T09:15:49.530Z",
+      "modifiedAt": "2026-11-05T23:31:47+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 4259222,
       "pageCount": 23
@@ -303,6 +314,7 @@
       "thumbnail": "assets/thumbnails/20261105-233412-미니PC-및-APP-현장-설치-4.png",
       "updatedAt": "2026-11-05",
       "registeredAt": "2026-11-05T09:16:49.679Z",
+      "modifiedAt": "2026-11-05T23:32:01+09:00",
       "mimeType": "application/pdf",
       "fileSizeBytes": 732601,
       "pageCount": 8
