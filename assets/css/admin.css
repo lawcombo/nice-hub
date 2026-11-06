@@ -946,6 +946,18 @@ fieldset:disabled {
   font-weight: 700;
 }
 
+.inventory-secure-label {
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #8a3b00;
+  background: #fff0dc;
+  font-weight: 850;
+}
+
+.inventory-secure-label::before {
+  content: "🔒 ";
+}
+
 .inventory-item-title {
   overflow: hidden;
   margin: 0;

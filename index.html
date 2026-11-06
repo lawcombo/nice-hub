@@ -175,6 +175,46 @@
       </section>
     </div>
 
+    <div id="materialSecurityModal" class="modal access-modal" hidden>
+      <div class="modal-backdrop" data-close-material-security></div>
+      <section
+        class="access-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="materialSecurityTitle"
+        aria-describedby="materialSecurityDescription"
+      >
+        <header class="access-dialog-header">
+          <div>
+            <span class="modal-label">SECURE DOCUMENT</span>
+            <h2 id="materialSecurityTitle">보안 문서입니다.</h2>
+          </div>
+          <button id="closeMaterialSecurity" class="icon-button" type="button" aria-label="보안 문서 확인 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <form id="materialSecurityForm" class="access-form" autocomplete="off">
+          <p id="materialSecurityDescription">이 자료를 이용하려면 비밀번호를 입력해 주세요.</p>
+          <p id="materialSecurityName" class="security-document-name"></p>
+          <label for="materialSecurityPassword">비밀번호</label>
+          <input
+            id="materialSecurityPassword"
+            type="password"
+            inputmode="numeric"
+            maxlength="4"
+            autocomplete="off"
+            aria-describedby="materialSecurityError"
+            required
+          />
+          <p id="materialSecurityError" class="access-error" aria-live="polite"></p>
+          <div class="access-actions">
+            <button id="cancelMaterialSecurity" class="button button-secondary" type="button">취소</button>
+            <button class="button button-primary" type="submit">확인</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
     <div id="pwaInstallModal" class="modal install-modal" hidden>
       <div class="modal-backdrop" data-close-pwa-install></div>
       <section

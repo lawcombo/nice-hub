@@ -610,6 +610,52 @@ a {
   margin-top: 24px;
 }
 
+.share-security-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 23px;
+  text-align: left;
+}
+
+.share-security-form[hidden] {
+  display: none;
+}
+
+.share-security-form label {
+  color: var(--navy-900);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.share-security-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 13px;
+  border: 1px solid var(--slate-300);
+  border-radius: 10px;
+  font: inherit;
+  letter-spacing: 0.18em;
+}
+
+.share-security-form input:focus-visible {
+  outline: none;
+  border-color: var(--blue-600);
+  box-shadow: var(--focus);
+}
+
+.share-security-form .button {
+  width: 100%;
+  margin-top: 2px;
+}
+
+.share-security-error {
+  min-height: 21px;
+  margin: 0;
+  color: #b42318;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 @keyframes share-redirect-spin {
   to {
     transform: rotate(360deg);
@@ -803,6 +849,17 @@ a {
 .badge-subtle {
   color: var(--slate-700);
   background: var(--slate-100);
+}
+
+.badge-secure {
+  color: #8a3b00;
+  background: #fff0dc;
+}
+
+.badge-secure::before {
+  content: "🔒";
+  margin-right: 4px;
+  font-size: 0.82em;
 }
 
 .material-title {
@@ -1401,6 +1458,17 @@ button.button {
   color: #b42318;
   font-size: 0.8rem;
   font-weight: 700;
+}
+
+.security-document-name {
+  margin: -7px 0 16px !important;
+  padding: 10px 12px;
+  border-radius: 9px;
+  color: var(--navy-900) !important;
+  background: var(--blue-50);
+  font-size: 0.82rem !important;
+  font-weight: 800;
+  line-height: 1.5;
 }
 
 .access-actions {

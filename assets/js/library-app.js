@@ -24,6 +24,13 @@
     adminAccessError: document.querySelector("#adminAccessError"),
     closeAdminAccess: document.querySelector("#closeAdminAccess"),
     cancelAdminAccess: document.querySelector("#cancelAdminAccess"),
+    materialSecurityModal: document.querySelector("#materialSecurityModal"),
+    materialSecurityForm: document.querySelector("#materialSecurityForm"),
+    materialSecurityName: document.querySelector("#materialSecurityName"),
+    materialSecurityPassword: document.querySelector("#materialSecurityPassword"),
+    materialSecurityError: document.querySelector("#materialSecurityError"),
+    closeMaterialSecurity: document.querySelector("#closeMaterialSecurity"),
+    cancelMaterialSecurity: document.querySelector("#cancelMaterialSecurity"),
     modal: document.querySelector("#previewModal"),
     previewTypeLabel: document.querySelector("#previewTypeLabel"),
     modalTitle: document.querySelector("#previewTitle"),
@@ -73,11 +80,14 @@
   let renderRequest = 0;
   let resizeTimer = null;
   let lastAccessFocusedElement = null;
+  let lastSecurityFocusedElement = null;
+  let pendingSecurityAction = null;
   let lastVideoFocusedElement = null;
   let pendingHistoryModalClose = "";
   let exitGuardEnabled = false;
 
   const adminAccessPassword = "5959";
+  const materialSecurityPassword = "1004";
   const modalHistoryKey = "niceHubModal";
   const exitGuardHistoryKey = "niceHubExitGuard";
   const exitBaseHistoryKey = "niceHubExitBase";
@@ -222,6 +232,10 @@
       closeAdminAccess();
       return true;
     }
+    if (!elements.materialSecurityModal.hidden) {
+      closeMaterialSecurity();
+      return true;
+    }
     return false;
   }
 
@@ -276,6 +290,10 @@
   function isImageMaterial(material) {
     if (String(material?.format || "").toLowerCase() === "image") return true;
     return /\.(?:png|jpe?g|webp)(?:[?#].*)?$/i.test(String(material?.file || ""));
+  }
+
+  function isSecureMaterial(material) {
+    return material?.isSecure === true;
   }
 
   function getOfficeFormat(material) {
@@ -548,6 +566,7 @@
       createElement("span", "badge", getCategoryLabel(material.category)),
       createElement("span", "badge badge-subtle", getTypeLabel(material.type)),
     );
+    if (isSecureMaterial(material)) meta.appendChild(createElement("span", "badge badge-secure", "보안 문서"));
 
     const title = createElement("h3", "material-title", material.title);
     const description = createElement(
@@ -569,18 +588,22 @@
     if (String(material.format).toLowerCase() === "pdf" || isImageMaterial(material)) {
       const previewButton = createElement("button", "button button-primary mobile-preview-action", "미리보기");
       previewButton.type = "button";
-      previewButton.addEventListener("click", () => openPreview(material, previewButton));
+      previewButton.addEventListener("click", () =>
+        runMaterialAction(material, previewButton, () => openPreview(material, previewButton)),
+      );
       actions.appendChild(previewButton);
 
       const openLink = createElement("a", "button button-primary desktop-open-action", "문서보기");
       openLink.href = resolveUrl(material.file);
       openLink.target = "_blank";
       openLink.rel = "noopener";
+      protectOpenLink(openLink, material);
       actions.appendChild(openLink);
 
       const downloadLink = createDownloadLink(material);
       downloadLink.className = "button button-secondary";
       downloadLink.textContent = "다운로드";
+      protectDownloadLink(downloadLink, material);
       actions.appendChild(downloadLink);
       actions.classList.add("card-actions-three", "responsive-preview-actions");
     } else if (material.type === "video" && isYouTubeMaterial(material)) {
@@ -588,21 +611,26 @@
       openLink.href = resolveUrl(material.file);
       openLink.target = "_blank";
       openLink.rel = "noopener";
+      protectOpenLink(openLink, material);
       actions.appendChild(openLink);
     } else if (material.type === "video") {
       const playButton = createElement("button", "button button-primary", "바로 재생");
       playButton.type = "button";
-      playButton.addEventListener("click", () => openVideoPreview(material, playButton));
+      playButton.addEventListener("click", () =>
+        runMaterialAction(material, playButton, () => openVideoPreview(material, playButton)),
+      );
       actions.appendChild(playButton);
 
       const downloadLink = createDownloadLink(material);
       downloadLink.className = "button button-secondary";
       downloadLink.textContent = "다운로드";
+      protectDownloadLink(downloadLink, material);
       actions.appendChild(downloadLink);
     } else {
       const downloadLink = createDownloadLink(material);
       downloadLink.className = "button button-primary";
       downloadLink.textContent = "다운로드";
+      protectDownloadLink(downloadLink, material);
       actions.appendChild(downloadLink);
     }
 
@@ -643,6 +671,33 @@
     return link;
   }
 
+  function downloadMaterial(material) {
+    const link = createDownloadLink(material);
+    link.hidden = true;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  function protectDownloadLink(link, material) {
+    if (!isSecureMaterial(material)) return;
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      runMaterialAction(material, link, () => downloadMaterial(material));
+    });
+  }
+
+  function protectOpenLink(link, material) {
+    if (!isSecureMaterial(material)) return;
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      runMaterialAction(material, link, () => {
+        const opened = window.open(link.href, "_blank", "noopener");
+        if (opened) opened.opener = null;
+      });
+    });
+  }
+
   function isMobileDevice() {
     if (navigator.userAgentData?.mobile === true) return true;
     if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return true;
@@ -660,7 +715,9 @@
     button.dataset.defaultLabel = label;
     button.dataset.defaultAriaLabel = `${material.title} ${label}`;
     button.setAttribute("aria-label", button.dataset.defaultAriaLabel);
-    button.addEventListener("click", () => shareMaterialLink(material, button));
+    button.addEventListener("click", () =>
+      runMaterialAction(material, button, () => shareMaterialLink(material, button)),
+    );
     return button;
   }
 
@@ -1157,6 +1214,87 @@
     }
   }
 
+  function runMaterialAction(material, trigger, action) {
+    if (!isSecureMaterial(material)) {
+      try {
+        Promise.resolve(action()).catch((error) => console.error("자료 기능을 실행하지 못했습니다.", error));
+      } catch (error) {
+        console.error("자료 기능을 실행하지 못했습니다.", error);
+      }
+      return;
+    }
+
+    if (!elements.materialSecurityModal.hidden) return;
+    pushModalHistory("material-security");
+    lastSecurityFocusedElement = trigger || document.activeElement;
+    pendingSecurityAction = action;
+    elements.materialSecurityName.textContent = material.title || "이름 없는 자료";
+    elements.materialSecurityPassword.value = "";
+    elements.materialSecurityError.textContent = "";
+    elements.materialSecurityModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleMaterialSecurityKeydown);
+    window.requestAnimationFrame(() => elements.materialSecurityPassword.focus());
+  }
+
+  function closeMaterialSecurity() {
+    if (elements.materialSecurityModal.hidden) return;
+    elements.materialSecurityModal.hidden = true;
+    elements.materialSecurityPassword.value = "";
+    elements.materialSecurityError.textContent = "";
+    elements.materialSecurityName.textContent = "";
+    pendingSecurityAction = null;
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleMaterialSecurityKeydown);
+    if (lastSecurityFocusedElement && document.contains(lastSecurityFocusedElement)) lastSecurityFocusedElement.focus();
+    lastSecurityFocusedElement = null;
+  }
+
+  function handleMaterialSecuritySubmit(event) {
+    event.preventDefault();
+    if (elements.materialSecurityPassword.value !== materialSecurityPassword) {
+      elements.materialSecurityError.textContent = "비밀번호가 올바르지 않습니다.";
+      elements.materialSecurityPassword.select();
+      return;
+    }
+
+    const action = pendingSecurityAction;
+    if (getHistoryState()[modalHistoryKey] === "material-security") {
+      history.replaceState({ ...getHistoryState(), [modalHistoryKey]: "" }, "", window.location.href);
+    }
+    closeMaterialSecurity();
+    if (!action) return;
+    try {
+      Promise.resolve(action()).catch((error) => console.error("보안 문서 기능을 실행하지 못했습니다.", error));
+    } catch (error) {
+      console.error("보안 문서 기능을 실행하지 못했습니다.", error);
+    }
+  }
+
+  function handleMaterialSecurityKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      requestModalClose("material-security", closeMaterialSecurity);
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const focusable = [
+      ...elements.materialSecurityModal.querySelectorAll('button:not([disabled]), input:not([disabled])'),
+    ].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function handleModalKeydown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -1226,6 +1364,16 @@
   elements.adminAccessModal
     .querySelector("[data-close-admin-access]")
     .addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
+  elements.materialSecurityForm.addEventListener("submit", handleMaterialSecuritySubmit);
+  elements.closeMaterialSecurity.addEventListener("click", () =>
+    requestModalClose("material-security", closeMaterialSecurity),
+  );
+  elements.cancelMaterialSecurity.addEventListener("click", () =>
+    requestModalClose("material-security", closeMaterialSecurity),
+  );
+  elements.materialSecurityModal
+    .querySelector("[data-close-material-security]")
+    .addEventListener("click", () => requestModalClose("material-security", closeMaterialSecurity));
   elements.previousPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage - 1));
   elements.nextPreviewPage.addEventListener("click", () => renderPdfPage(currentPdfPage + 1));
   elements.searchInput.addEventListener("input", updateSearch);

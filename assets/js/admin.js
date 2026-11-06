@@ -9,6 +9,7 @@
     maxDocumentBytes: 20 * 1024 * 1024,
     maxVideoBytes: 90 * 1024 * 1024,
     maxThumbnailBytes: 5 * 1024 * 1024,
+    securityPassword: "1004",
   };
 
   const documentAccept = [
@@ -53,6 +54,9 @@
     description: document.querySelector("#description"),
     descriptionCount: document.querySelector("#descriptionCount"),
     updatedAt: document.querySelector("#updatedAt"),
+    uploadSecurityInputs: [...document.querySelectorAll('input[name="uploadSecurityMode"]')],
+    uploadSecurityPasswordGroup: document.querySelector("#uploadSecurityPasswordGroup"),
+    uploadSecurityPassword: document.querySelector("#uploadSecurityPassword"),
     destinationPreview: document.querySelector("#destinationPreview"),
     progress: document.querySelector("#uploadProgress"),
     progressTitle: document.querySelector("#progressTitle"),
@@ -84,6 +88,9 @@
     editMaterialTitle: document.querySelector("#editMaterialTitle"),
     editMaterialDescription: document.querySelector("#editMaterialDescription"),
     editDescriptionCount: document.querySelector("#editDescriptionCount"),
+    editSecurityInputs: [...document.querySelectorAll('input[name="editSecurityMode"]')],
+    editSecurityPasswordGroup: document.querySelector("#editSecurityPasswordGroup"),
+    editSecurityPassword: document.querySelector("#editSecurityPassword"),
     editContentDialogStatus: document.querySelector("#editContentDialogStatus"),
     saveEditContentButton: document.querySelector("#saveEditContentButton"),
     closeEditContentDialog: document.querySelector("#closeEditContentDialog"),
@@ -187,6 +194,33 @@
 
   function getSelectedType(sourceLibrary = library) {
     return sourceLibrary?.materialTypes?.find((type) => type.id === elements.materialType.value);
+  }
+
+  function getSecurityMode(inputs) {
+    return inputs.find((input) => input.checked)?.value === "secure" ? "secure" : "public";
+  }
+
+  function updateSecurityPasswordField(inputs, group, passwordInput) {
+    const secure = getSecurityMode(inputs) === "secure";
+    group.hidden = !secure;
+    passwordInput.required = secure;
+    if (!secure) passwordInput.value = "";
+  }
+
+  function updateUploadSecurityFields() {
+    updateSecurityPasswordField(
+      elements.uploadSecurityInputs,
+      elements.uploadSecurityPasswordGroup,
+      elements.uploadSecurityPassword,
+    );
+  }
+
+  function updateEditSecurityFields() {
+    updateSecurityPasswordField(
+      elements.editSecurityInputs,
+      elements.editSecurityPasswordGroup,
+      elements.editSecurityPassword,
+    );
   }
 
   function populateSelect(select, items) {
@@ -505,6 +539,7 @@
       createElement("span", "", getTypeLabel(material.type, sourceLibrary)),
       createElement("span", "", `업데이트 ${formatDate(material.updatedAt)}`),
     );
+    if (material.isSecure === true) meta.prepend(createElement("span", "inventory-secure-label", "보안 문서"));
     const title = createElement("h4", "inventory-item-title", material.title || "이름 없는 자료");
     const fileName = createElement("p", "inventory-file-name", getFileName(material.file));
     copy.append(meta, title, fileName);
@@ -756,6 +791,10 @@
     if (!elements.title.value.trim()) throw new Error("자료명을 입력해 주세요.");
     if (!elements.description.value.trim()) throw new Error("자료 설명을 입력해 주세요.");
     if (!elements.updatedAt.value) throw new Error("등록·수정일을 선택해 주세요.");
+    const isSecure = getSecurityMode(elements.uploadSecurityInputs) === "secure";
+    if (isSecure && elements.uploadSecurityPassword.value !== config.securityPassword) {
+      throw new Error("보안문서 비밀번호가 올바르지 않습니다.");
+    }
 
     if (thumbnail) {
       const validThumbnailTypes = ["image/webp", "image/jpeg", "image/png"];
@@ -763,7 +802,7 @@
       if (thumbnail.size > config.maxThumbnailBytes) throw new Error("표지 이미지는 5MB 이하만 업로드할 수 있습니다.");
     }
 
-    return { category, type, file, thumbnail, videoSource, youtubeUrl };
+    return { category, type, file, thumbnail, videoSource, youtubeUrl, isSecure };
   }
 
   function userFriendlyError(error) {
@@ -1051,6 +1090,11 @@
     lastContentEditTrigger = trigger;
     elements.editMaterialTitle.value = material.title || "";
     elements.editMaterialDescription.value = material.description || "";
+    const securityMode = material.isSecure === true ? "secure" : "public";
+    const securityInput = elements.editSecurityInputs.find((input) => input.value === securityMode);
+    if (securityInput) securityInput.checked = true;
+    elements.editSecurityPassword.value = "";
+    updateEditSecurityFields();
     elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
     setEditContentDialogStatus();
     elements.editContentDialog.showModal();
@@ -1067,9 +1111,15 @@
     const materialId = pendingContentEditId;
     const title = elements.editMaterialTitle.value.trim();
     const description = elements.editMaterialDescription.value.trim();
+    const isSecure = getSecurityMode(elements.editSecurityInputs) === "secure";
     if (!materialId || isEditingMaterial) return;
     if (!title || !description) {
       setEditContentDialogStatus("자료명과 짧은 설명을 모두 입력해 주세요.", "error");
+      return;
+    }
+    if (isSecure && elements.editSecurityPassword.value !== config.securityPassword) {
+      setEditContentDialogStatus("보안문서 비밀번호가 올바르지 않습니다.", "error");
+      elements.editSecurityPassword.select();
       return;
     }
 
@@ -1083,6 +1133,7 @@
       async (material) => {
         material.title = title;
         material.description = description;
+        material.isSecure = isSecure;
         markMaterialUpdated(material);
         return {
           treeEntries: [],
@@ -1238,7 +1289,7 @@
     try {
       setProgress("최신 자료 목록을 확인하고 있습니다.", "GitHub의 main 브랜치를 읽는 중입니다.");
       const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
-      const { category, type, file, thumbnail, videoSource, youtubeUrl } = validateInputs(latestLibrary);
+      const { category, type, file, thumbnail, videoSource, youtubeUrl, isSecure } = validateInputs(latestLibrary);
       const now = new Date();
       const stamp = timestampString(now);
       const categoryFolder = validateFolderSegment(category.folder || category.id, "사업 카테고리");
@@ -1282,6 +1333,7 @@
         thumbnail: thumbnailPath,
         updatedAt: elements.updatedAt.value,
         registeredAt: now.toISOString(),
+        isSecure,
       };
       if (file?.type) material.mimeType = file.type;
       if (file?.size) material.fileSizeBytes = file.size;
@@ -1335,6 +1387,7 @@
       );
       elements.form.reset();
       elements.updatedAt.value = localDateString();
+      updateUploadSecurityFields();
       elements.descriptionCount.textContent = "0";
       elements.materialFileName.textContent = "선택된 파일 없음";
       elements.thumbnailFileName.textContent = "선택된 이미지 없음";
@@ -1732,6 +1785,7 @@
       populateSelect(elements.materialType, library.materialTypes || []);
       populateInventoryFilters(library);
       elements.updatedAt.value = localDateString();
+      updateUploadSecurityFields();
       updateFileAccept();
     } catch (error) {
       setConnectionStatus("자료 설정을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.", "error");
@@ -1749,6 +1803,7 @@
     document.body.classList.remove("upload-modal-open");
   });
   elements.form.addEventListener("submit", handleUpload);
+  elements.uploadSecurityInputs.forEach((input) => input.addEventListener("change", updateUploadSecurityFields));
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
   elements.inventoryCategoryFilter.addEventListener("change", () => renderInventory(library));
   elements.inventoryTypeFilter.addEventListener("change", () => renderInventory(library));
@@ -1764,6 +1819,7 @@
   elements.editMaterialDescription.addEventListener("input", () => {
     elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
   });
+  elements.editSecurityInputs.forEach((input) => input.addEventListener("change", updateEditSecurityFields));
   elements.editContentDialog.addEventListener("cancel", (event) => {
     if (isEditingMaterial) event.preventDefault();
   });
