@@ -559,6 +559,9 @@
     } else {
       thumbnail.appendChild(createThumbnailFallback(material));
     }
+    if (isSecureMaterial(material)) {
+      thumbnail.appendChild(createElement("span", "material-security-label", "보안 문서"));
+    }
 
     const body = createElement("div", "card-body");
     const meta = createElement("div", "card-meta");
@@ -566,7 +569,6 @@
       createElement("span", "badge", getCategoryLabel(material.category)),
       createElement("span", "badge badge-subtle", getTypeLabel(material.type)),
     );
-    if (isSecureMaterial(material)) meta.appendChild(createElement("span", "badge badge-secure", "보안 문서"));
 
     const title = createElement("h3", "material-title", material.title);
     const description = createElement(

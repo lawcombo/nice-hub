@@ -211,17 +211,15 @@
               </fieldset>
 
               <div id="uploadSecurityPasswordGroup" class="field-group" hidden>
-                <label for="uploadSecurityPassword">보안문서 비밀번호 <span aria-hidden="true">*</span></label>
+                <label for="uploadSecurityPassword">보안문서 공통 비밀번호</label>
                 <input
                   id="uploadSecurityPassword"
                   name="uploadSecurityPassword"
-                  type="password"
-                  inputmode="numeric"
-                  maxlength="4"
-                  autocomplete="off"
-                  placeholder="비밀번호 4자리"
+                  type="text"
+                  value="1004"
+                  disabled
                 />
-                <p class="field-help">보안 문서 등록을 확인하기 위한 공통 비밀번호를 입력해 주세요.</p>
+                <p class="field-help">모든 보안 문서에 적용되는 고정 비밀번호이며 변경할 수 없습니다.</p>
               </div>
 
               <div class="field-group">
@@ -475,17 +473,15 @@
           </div>
         </fieldset>
         <div id="editSecurityPasswordGroup" class="field-group" hidden>
-          <label for="editSecurityPassword">보안문서 비밀번호 <span aria-hidden="true">*</span></label>
+          <label for="editSecurityPassword">보안문서 공통 비밀번호</label>
           <input
             id="editSecurityPassword"
             name="editSecurityPassword"
-            type="password"
-            inputmode="numeric"
-            maxlength="4"
-            autocomplete="off"
-            placeholder="비밀번호 4자리"
+            type="text"
+            value="1004"
+            disabled
           />
-          <p class="field-help">보안 문서로 저장하려면 공통 비밀번호를 입력해 주세요.</p>
+          <p class="field-help">모든 보안 문서에 적용되는 고정 비밀번호이며 변경할 수 없습니다.</p>
         </div>
         <p id="editContentDialogStatus" class="dialog-status" aria-live="polite"></p>
         <div class="material-type-dialog-actions">

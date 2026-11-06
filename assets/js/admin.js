@@ -9,7 +9,6 @@
     maxDocumentBytes: 20 * 1024 * 1024,
     maxVideoBytes: 90 * 1024 * 1024,
     maxThumbnailBytes: 5 * 1024 * 1024,
-    securityPassword: "1004",
   };
 
   const documentAccept = [
@@ -203,8 +202,8 @@
   function updateSecurityPasswordField(inputs, group, passwordInput) {
     const secure = getSecurityMode(inputs) === "secure";
     group.hidden = !secure;
-    passwordInput.required = secure;
-    if (!secure) passwordInput.value = "";
+    passwordInput.value = "1004";
+    passwordInput.disabled = true;
   }
 
   function updateUploadSecurityFields() {
@@ -792,9 +791,6 @@
     if (!elements.description.value.trim()) throw new Error("자료 설명을 입력해 주세요.");
     if (!elements.updatedAt.value) throw new Error("등록·수정일을 선택해 주세요.");
     const isSecure = getSecurityMode(elements.uploadSecurityInputs) === "secure";
-    if (isSecure && elements.uploadSecurityPassword.value !== config.securityPassword) {
-      throw new Error("보안문서 비밀번호가 올바르지 않습니다.");
-    }
 
     if (thumbnail) {
       const validThumbnailTypes = ["image/webp", "image/jpeg", "image/png"];
@@ -1093,7 +1089,6 @@
     const securityMode = material.isSecure === true ? "secure" : "public";
     const securityInput = elements.editSecurityInputs.find((input) => input.value === securityMode);
     if (securityInput) securityInput.checked = true;
-    elements.editSecurityPassword.value = "";
     updateEditSecurityFields();
     elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
     setEditContentDialogStatus();
@@ -1115,11 +1110,6 @@
     if (!materialId || isEditingMaterial) return;
     if (!title || !description) {
       setEditContentDialogStatus("자료명과 짧은 설명을 모두 입력해 주세요.", "error");
-      return;
-    }
-    if (isSecure && elements.editSecurityPassword.value !== config.securityPassword) {
-      setEditContentDialogStatus("보안문서 비밀번호가 올바르지 않습니다.", "error");
-      elements.editSecurityPassword.select();
       return;
     }
 
