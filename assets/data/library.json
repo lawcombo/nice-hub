@@ -280,12 +280,13 @@
       "description": "NiceManager 매뉴얼 02 KIOSK 설정_2026.07",
       "file": "assets/materials/lodging/manuals/20261105-181348-02_NiceManager_KIOSK-설정-매뉴얼_260729.pdf",
       "thumbnail": "assets/thumbnails/20261105-233341-KIOSK-설정-매뉴얼-02-2.png",
-      "updatedAt": "2026-11-05",
+      "updatedAt": "2026-11-06",
       "registeredAt": "2026-11-05T09:13:48.152Z",
-      "modifiedAt": "2026-11-05T23:31:31+09:00",
+      "modifiedAt": "2026-11-06T04:11:29.944Z",
       "mimeType": "application/pdf",
       "fileSizeBytes": 700997,
-      "pageCount": 4
+      "pageCount": 4,
+      "isSecure": true
     },
     {
       "id": "lodging-manual-mw3bz0my",
