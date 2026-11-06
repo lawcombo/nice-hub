@@ -532,7 +532,7 @@ a {
   position: fixed;
   z-index: 80;
   right: 50%;
-  bottom: max(24px, env(safe-area-inset-bottom));
+  bottom: calc(112px + env(safe-area-inset-bottom));
   width: max-content;
   max-width: calc(100% - 32px);
   padding: 12px 19px;
