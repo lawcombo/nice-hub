@@ -721,7 +721,9 @@
     quickFilterVisibilityFrame = 0;
     const controlsRect = elements.materialControls.getBoundingClientRect();
     const footerRect = elements.footer.getBoundingClientRect();
+    const footerLift = Math.max(0, Math.min(footerRect.height, window.innerHeight - footerRect.top));
     elements.openQuickFilter.hidden = controlsRect.bottom >= 12;
+    elements.openQuickFilter.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
     if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
   }
@@ -803,8 +805,7 @@
     hasAnnouncedMaterialEnd = true;
     window.clearTimeout(endToastTimer);
     elements.endToast.hidden = false;
-    elements.openQuickFilter.classList.add("is-toast-visible");
-    if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
+    elements.endToast.classList.add("avoid-quick-filter");
     window.requestAnimationFrame(() => elements.endToast.classList.add("is-visible"));
     endToastTimer = window.setTimeout(hideMaterialEndToast, 2200);
   }
@@ -815,8 +816,7 @@
     endToastTimer = window.setTimeout(() => {
       if (!elements.endToast.classList.contains("is-visible")) {
         elements.endToast.hidden = true;
-        elements.openQuickFilter.classList.remove("is-toast-visible");
-        if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
+        elements.endToast.classList.remove("avoid-quick-filter");
       }
     }, 220);
   }
