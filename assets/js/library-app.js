@@ -4,6 +4,15 @@
   const elements = {
     tabs: document.querySelector("#categoryTabs"),
     typeTabs: document.querySelector("#materialTypeTabs"),
+    categoryTabsShell: document.querySelector("#categoryTabsShell"),
+    categoryTabsScroll: document.querySelector("#categoryTabsScroll"),
+    categoryTabsProgress: document.querySelector("#categoryTabsProgress"),
+    materialTypeTabsShell: document.querySelector("#materialTypeTabsShell"),
+    materialTypeTabsScroll: document.querySelector("#materialTypeTabsScroll"),
+    materialTypeTabsProgress: document.querySelector("#materialTypeTabsProgress"),
+    tabScrollArrows: [...document.querySelectorAll("[data-scroll-target][data-scroll-direction]")],
+    materialControls: document.querySelector(".material-controls"),
+    footer: document.querySelector(".site-footer"),
     viewModeButtons: document.querySelectorAll("[data-view-mode]"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
@@ -17,6 +26,16 @@
     summary: document.querySelector("#resultSummary"),
     searchInput: document.querySelector("#materialSearch"),
     clearSearch: document.querySelector("#clearMaterialSearch"),
+    openQuickFilter: document.querySelector("#openQuickFilter"),
+    quickFilterActiveCount: document.querySelector("#quickFilterActiveCount"),
+    quickFilterModal: document.querySelector("#quickFilterModal"),
+    quickFilterForm: document.querySelector("#quickFilterForm"),
+    quickFilterSearch: document.querySelector("#quickFilterSearch"),
+    quickFilterCategories: document.querySelector("#quickFilterCategories"),
+    quickFilterTypes: document.querySelector("#quickFilterTypes"),
+    quickFilterResult: document.querySelector("#quickFilterResult"),
+    resetQuickFilter: document.querySelector("#resetQuickFilter"),
+    closeQuickFilter: document.querySelector("#closeQuickFilter"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
     adminAccessForm: document.querySelector("#adminAccessForm"),
@@ -85,6 +104,10 @@
   let lastVideoFocusedElement = null;
   let pendingHistoryModalClose = "";
   let exitGuardEnabled = false;
+  let quickFilterDraftCategory = "all";
+  let quickFilterDraftType = "all";
+  let lastQuickFilterFocusedElement = null;
+  let quickFilterVisibilityFrame = 0;
 
   const adminAccessPassword = "5959";
   const materialSecurityPassword = "1004";
@@ -220,6 +243,10 @@
   }
 
   function closeVisibleModal() {
+    if (!elements.quickFilterModal.hidden) {
+      closeQuickFilter();
+      return true;
+    }
     if (!elements.modal.hidden) {
       closePreview();
       return true;
@@ -261,6 +288,47 @@
     if (className) element.className = className;
     if (text !== undefined) element.textContent = text;
     return element;
+  }
+
+  function updateTabScroller(scroller, shell, progress) {
+    if (!scroller || !shell || !progress) return;
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const scrollable = maxScroll > 3;
+    const currentScroll = Math.min(maxScroll, Math.max(0, scroller.scrollLeft));
+    const canScrollLeft = scrollable && currentScroll > 2;
+    const canScrollRight = scrollable && currentScroll < maxScroll - 2;
+    const thumbWidth = scrollable ? Math.max(12, (scroller.clientWidth / scroller.scrollWidth) * 100) : 100;
+    const thumbLeft = scrollable ? (currentScroll / scroller.scrollWidth) * 100 : 0;
+
+    shell.classList.toggle("is-scrollable", scrollable);
+    shell.classList.toggle("can-scroll-left", canScrollLeft);
+    shell.classList.toggle("can-scroll-right", canScrollRight);
+    progress.style.width = `${thumbWidth}%`;
+    progress.style.left = `${thumbLeft}%`;
+
+    shell.querySelectorAll("[data-scroll-direction]").forEach((button) => {
+      const direction = Number(button.dataset.scrollDirection);
+      button.hidden = direction < 0 ? !canScrollLeft : !canScrollRight;
+    });
+  }
+
+  function updateAllTabScrollers() {
+    updateTabScroller(elements.categoryTabsScroll, elements.categoryTabsShell, elements.categoryTabsProgress);
+    updateTabScroller(elements.materialTypeTabsScroll, elements.materialTypeTabsShell, elements.materialTypeTabsProgress);
+  }
+
+  function centerSelectedTab(button, scroller) {
+    if (!button || !scroller) return;
+    const desiredLeft = button.offsetLeft - (scroller.clientWidth - button.offsetWidth) / 2;
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    scroller.scrollTo({ left: Math.min(maxScroll, Math.max(0, desiredLeft)), behavior: "smooth" });
+  }
+
+  function scrollTabStrip(button) {
+    const target = document.querySelector(`#${CSS.escape(button.dataset.scrollTarget || "")}`);
+    if (!target) return;
+    const direction = Number(button.dataset.scrollDirection) || 1;
+    target.scrollBy({ left: direction * Math.max(180, target.clientWidth * 0.68), behavior: "smooth" });
   }
 
   function getCategoryLabel(categoryId) {
@@ -352,6 +420,7 @@
     });
 
     elements.tabs.replaceChildren(fragment);
+    window.requestAnimationFrame(updateAllTabScrollers);
   }
 
   function renderMaterialTypeTabs() {
@@ -368,6 +437,7 @@
     });
 
     elements.typeTabs.replaceChildren(fragment);
+    window.requestAnimationFrame(updateAllTabScrollers);
   }
 
   function handleTabKeydown(event) {
@@ -398,7 +468,9 @@
 
     const selectedTab = elements.tabs.querySelector(`[data-category="${CSS.escape(categoryId)}"]`);
     if (selectedTab) elements.panel.setAttribute("aria-labelledby", selectedTab.id);
+    centerSelectedTab(selectedTab, elements.categoryTabsScroll);
     renderMaterials();
+    updateQuickFilterActiveCount();
   }
 
   function selectMaterialType(typeId) {
@@ -407,7 +479,10 @@
     elements.typeTabs.querySelectorAll("[data-material-type]").forEach((button) => {
       button.setAttribute("aria-pressed", button.dataset.materialType === typeId ? "true" : "false");
     });
+    const selectedType = elements.typeTabs.querySelector(`[data-material-type="${CSS.escape(typeId)}"]`);
+    centerSelectedTab(selectedType, elements.materialTypeTabsScroll);
     renderMaterials();
+    updateQuickFilterActiveCount();
   }
 
   function getVisibleMaterials() {
@@ -420,6 +495,199 @@
         const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
         return registrationDifference || String(b.id || "").localeCompare(String(a.id || ""), "ko");
       });
+  }
+
+  function getQuickFilterMatchCount() {
+    const search = elements.quickFilterSearch.value.trim().toLocaleLowerCase("ko");
+    return materials.filter(
+      (material) =>
+        material &&
+        material.id &&
+        material.title &&
+        material.file &&
+        (quickFilterDraftCategory === "all" || material.category === quickFilterDraftCategory) &&
+        (quickFilterDraftType === "all" || material.type === quickFilterDraftType) &&
+        (!search || String(material.title).toLocaleLowerCase("ko").includes(search)),
+    ).length;
+  }
+
+  function updateQuickFilterResult() {
+    const categoryLabel = quickFilterDraftCategory === "all" ? "전체 사업" : getCategoryLabel(quickFilterDraftCategory);
+    const typeLabel = quickFilterDraftType === "all" ? "전체 자료" : getTypeLabel(quickFilterDraftType);
+    elements.quickFilterResult.textContent = `${categoryLabel} · ${typeLabel} · 검색 결과 ${getQuickFilterMatchCount()}건`;
+  }
+
+  function updateQuickFilterActiveCount() {
+    const activeCount =
+      Number(Boolean(elements.searchInput.value.trim())) +
+      Number(activeCategory !== "all") +
+      Number(activeMaterialType !== "all");
+    elements.quickFilterActiveCount.textContent = String(activeCount);
+    elements.quickFilterActiveCount.hidden = activeCount === 0;
+  }
+
+  function setQuickFilterDraft(group, value) {
+    if (group === "category") quickFilterDraftCategory = value;
+    else quickFilterDraftType = value;
+
+    const container = group === "category" ? elements.quickFilterCategories : elements.quickFilterTypes;
+    container.querySelectorAll("[data-filter-value]").forEach((button) => {
+      button.setAttribute("aria-pressed", button.dataset.filterValue === value ? "true" : "false");
+    });
+    centerQuickFilterOption(container, value);
+    updateQuickFilterResult();
+  }
+
+  function centerQuickFilterOption(container, value) {
+    const selected = container.querySelector(`[data-filter-value="${CSS.escape(value)}"]`);
+    if (!selected) return;
+    const desiredLeft = selected.offsetLeft - (container.clientWidth - selected.offsetWidth) / 2;
+    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+    container.scrollTo({ left: Math.min(maxScroll, Math.max(0, desiredLeft)), behavior: "smooth" });
+  }
+
+  function renderQuickFilterOptions(container, items, selectedValue, group) {
+    const fragment = document.createDocumentFragment();
+    items.forEach((item) => {
+      const button = createElement("button", "quick-filter-option", item.label);
+      button.type = "button";
+      button.dataset.filterValue = item.id;
+      button.setAttribute("aria-pressed", item.id === selectedValue ? "true" : "false");
+      button.addEventListener("click", () => setQuickFilterDraft(group, item.id));
+      fragment.appendChild(button);
+    });
+    container.replaceChildren(fragment);
+    window.requestAnimationFrame(() => centerQuickFilterOption(container, selectedValue));
+  }
+
+  function syncQuickFilterDialog() {
+    quickFilterDraftCategory = activeCategory;
+    quickFilterDraftType = activeMaterialType;
+    elements.quickFilterSearch.value = elements.searchInput.value;
+    renderQuickFilterOptions(
+      elements.quickFilterCategories,
+      [{ id: "all", label: "전체" }, ...categories],
+      quickFilterDraftCategory,
+      "category",
+    );
+    renderQuickFilterOptions(
+      elements.quickFilterTypes,
+      [{ id: "all", label: "전체 자료" }, ...materialTypes],
+      quickFilterDraftType,
+      "type",
+    );
+    updateQuickFilterResult();
+  }
+
+  function openQuickFilter() {
+    if (!elements.quickFilterModal.hidden) return;
+    pushModalHistory("quick-filter");
+    lastQuickFilterFocusedElement = document.activeElement;
+    syncQuickFilterDialog();
+    elements.quickFilterModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleQuickFilterKeydown);
+    window.requestAnimationFrame(() => elements.quickFilterSearch.focus());
+  }
+
+  function closeQuickFilter() {
+    if (elements.quickFilterModal.hidden) return;
+    elements.quickFilterModal.hidden = true;
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleQuickFilterKeydown);
+    if (lastQuickFilterFocusedElement && document.contains(lastQuickFilterFocusedElement)) {
+      lastQuickFilterFocusedElement.focus();
+    }
+    lastQuickFilterFocusedElement = null;
+  }
+
+  function resetQuickFilter() {
+    quickFilterDraftCategory = "all";
+    quickFilterDraftType = "all";
+    elements.quickFilterSearch.value = "";
+    renderQuickFilterOptions(
+      elements.quickFilterCategories,
+      [{ id: "all", label: "전체" }, ...categories],
+      quickFilterDraftCategory,
+      "category",
+    );
+    renderQuickFilterOptions(
+      elements.quickFilterTypes,
+      [{ id: "all", label: "전체 자료" }, ...materialTypes],
+      quickFilterDraftType,
+      "type",
+    );
+    updateQuickFilterResult();
+    elements.quickFilterSearch.focus();
+  }
+
+  function applyQuickFilter(event) {
+    event.preventDefault();
+    activeCategory = quickFilterDraftCategory;
+    activeMaterialType = quickFilterDraftType;
+    elements.searchInput.value = elements.quickFilterSearch.value.trim();
+    activeSearch = elements.searchInput.value.toLocaleLowerCase("ko");
+    elements.clearSearch.hidden = !elements.searchInput.value;
+    resetMaterialPagination();
+
+    elements.tabs.querySelectorAll('[role="tab"]').forEach((tab) => {
+      const selected = tab.dataset.category === activeCategory;
+      tab.setAttribute("aria-selected", selected ? "true" : "false");
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    elements.typeTabs.querySelectorAll("[data-material-type]").forEach((button) => {
+      button.setAttribute("aria-pressed", button.dataset.materialType === activeMaterialType ? "true" : "false");
+    });
+
+    const selectedCategory = elements.tabs.querySelector(`[data-category="${CSS.escape(activeCategory)}"]`);
+    const selectedType = elements.typeTabs.querySelector(`[data-material-type="${CSS.escape(activeMaterialType)}"]`);
+    if (selectedCategory) elements.panel.setAttribute("aria-labelledby", selectedCategory.id);
+    centerSelectedTab(selectedCategory, elements.categoryTabsScroll);
+    centerSelectedTab(selectedType, elements.materialTypeTabsScroll);
+    renderMaterials();
+    updateQuickFilterActiveCount();
+
+    if (getHistoryState()[modalHistoryKey] === "quick-filter") {
+      history.replaceState({ ...getHistoryState(), [modalHistoryKey]: "" }, "", window.location.href);
+    }
+    closeQuickFilter();
+    window.requestAnimationFrame(() => elements.panel.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
+
+  function handleQuickFilterKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      requestModalClose("quick-filter", closeQuickFilter);
+      return;
+    }
+    if (event.key !== "Tab") return;
+
+    const focusable = [
+      ...elements.quickFilterModal.querySelectorAll('button:not([disabled]), input:not([disabled])'),
+    ].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function updateQuickFilterFloatingVisibility() {
+    quickFilterVisibilityFrame = 0;
+    const controlsRect = elements.materialControls.getBoundingClientRect();
+    const footerRect = elements.footer.getBoundingClientRect();
+    elements.openQuickFilter.hidden = controlsRect.bottom >= 12;
+    elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
+  }
+
+  function scheduleQuickFilterFloatingVisibility() {
+    if (quickFilterVisibilityFrame) return;
+    quickFilterVisibilityFrame = window.requestAnimationFrame(updateQuickFilterFloatingVisibility);
   }
 
   function getRegistrationTime(material) {
@@ -475,6 +743,7 @@
     resetMaterialPagination();
     elements.clearSearch.hidden = !elements.searchInput.value;
     renderMaterials();
+    updateQuickFilterActiveCount();
   }
 
   function resetMaterialPagination() {
@@ -493,6 +762,7 @@
     hasAnnouncedMaterialEnd = true;
     window.clearTimeout(endToastTimer);
     elements.endToast.hidden = false;
+    elements.openQuickFilter.classList.add("is-toast-visible");
     window.requestAnimationFrame(() => elements.endToast.classList.add("is-visible"));
     endToastTimer = window.setTimeout(hideMaterialEndToast, 2200);
   }
@@ -501,7 +771,10 @@
     window.clearTimeout(endToastTimer);
     elements.endToast.classList.remove("is-visible");
     endToastTimer = window.setTimeout(() => {
-      if (!elements.endToast.classList.contains("is-visible")) elements.endToast.hidden = true;
+      if (!elements.endToast.classList.contains("is-visible")) {
+        elements.endToast.hidden = true;
+        elements.openQuickFilter.classList.remove("is-toast-visible");
+      }
     }, 220);
   }
 
@@ -1338,6 +1611,11 @@
       renderTabs();
       renderMaterialTypeTabs();
       renderMaterials();
+      updateQuickFilterActiveCount();
+      window.requestAnimationFrame(() => {
+        updateAllTabScrollers();
+        updateQuickFilterFloatingVisibility();
+      });
       schedulePdfViewerWarmup();
     } catch (error) {
       console.error("자료 목록을 불러오지 못했습니다.", error);
@@ -1381,15 +1659,30 @@
   elements.searchInput.addEventListener("input", updateSearch);
   elements.searchInput.addEventListener("search", updateSearch);
   elements.clearSearch.addEventListener("click", clearSearch);
+  elements.openQuickFilter.addEventListener("click", openQuickFilter);
+  elements.closeQuickFilter.addEventListener("click", () => requestModalClose("quick-filter", closeQuickFilter));
+  elements.quickFilterModal
+    .querySelector("[data-close-quick-filter]")
+    .addEventListener("click", () => requestModalClose("quick-filter", closeQuickFilter));
+  elements.quickFilterForm.addEventListener("submit", applyQuickFilter);
+  elements.quickFilterSearch.addEventListener("input", updateQuickFilterResult);
+  elements.quickFilterSearch.addEventListener("search", updateQuickFilterResult);
+  elements.resetQuickFilter.addEventListener("click", resetQuickFilter);
   elements.loadMore.addEventListener("click", loadMoreMaterials);
+  elements.tabScrollArrows.forEach((button) => button.addEventListener("click", () => scrollTabStrip(button)));
+  elements.categoryTabsScroll.addEventListener("scroll", updateAllTabScrollers, { passive: true });
+  elements.materialTypeTabsScroll.addEventListener("scroll", updateAllTabScrollers, { passive: true });
   elements.viewModeButtons.forEach((button) => {
     button.addEventListener("click", () => setViewMode(button.dataset.viewMode));
   });
   window.addEventListener("resize", () => {
+    updateAllTabScrollers();
+    scheduleQuickFilterFloatingVisibility();
     if (elements.modal.hidden || elements.pdfCanvasViewer.hidden || !pdfDocument) return;
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => renderPdfPage(currentPdfPage), 180);
   });
+  window.addEventListener("scroll", scheduleQuickFilterFloatingVisibility, { passive: true });
   initializeBackNavigation();
   initializeMaterialEndObserver();
   setViewMode(activeViewMode, false);

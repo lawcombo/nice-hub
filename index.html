@@ -57,14 +57,60 @@
         <h2 id="materials-heading" class="visually-hidden">사업별 자료</h2>
         <p id="resultSummary" class="visually-hidden" aria-live="polite">자료를 확인하고 있습니다.</p>
 
-        <div class="tabs-scroll category-tabs-scroll" aria-label="사업 구분">
-          <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="사업 선택"></div>
+        <div id="categoryTabsShell" class="tab-scroll-shell category-tabs-shell" aria-label="사업 구분">
+          <button
+            class="tab-scroll-arrow tab-scroll-arrow-left"
+            type="button"
+            data-scroll-target="categoryTabsScroll"
+            data-scroll-direction="-1"
+            aria-label="이전 사업 탭 보기"
+            hidden
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <div id="categoryTabsScroll" class="tabs-scroll category-tabs-scroll">
+            <div id="categoryTabs" class="category-tabs" role="tablist" aria-label="사업 선택"></div>
+          </div>
+          <button
+            class="tab-scroll-arrow tab-scroll-arrow-right"
+            type="button"
+            data-scroll-target="categoryTabsScroll"
+            data-scroll-direction="1"
+            aria-label="다음 사업 탭 보기"
+            hidden
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+          <div class="tab-scroll-progress" aria-hidden="true"><span id="categoryTabsProgress"></span></div>
         </div>
 
         <div class="material-controls">
           <div class="material-type-filter" aria-label="자료 유형 선택">
-            <div class="material-type-scroll">
-              <div id="materialTypeTabs" class="material-type-tabs" role="group" aria-label="자료 유형 선택"></div>
+            <div id="materialTypeTabsShell" class="tab-scroll-shell material-type-tabs-shell">
+              <button
+                class="tab-scroll-arrow tab-scroll-arrow-left"
+                type="button"
+                data-scroll-target="materialTypeTabsScroll"
+                data-scroll-direction="-1"
+                aria-label="이전 자료 유형 보기"
+                hidden
+              >
+                <span aria-hidden="true">‹</span>
+              </button>
+              <div id="materialTypeTabsScroll" class="material-type-scroll">
+                <div id="materialTypeTabs" class="material-type-tabs" role="group" aria-label="자료 유형 선택"></div>
+              </div>
+              <button
+                class="tab-scroll-arrow tab-scroll-arrow-right"
+                type="button"
+                data-scroll-target="materialTypeTabsScroll"
+                data-scroll-direction="1"
+                aria-label="다음 자료 유형 보기"
+                hidden
+              >
+                <span aria-hidden="true">›</span>
+              </button>
+              <div class="tab-scroll-progress" aria-hidden="true"><span id="materialTypeTabsProgress"></span></div>
             </div>
           </div>
           <div class="view-mode-toggle" role="group" aria-label="자료 보기 방식">
@@ -106,6 +152,19 @@
       </section>
     </main>
 
+    <button
+      id="openQuickFilter"
+      class="quick-filter-floating"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="quickFilterModal"
+      hidden
+    >
+      <span class="quick-filter-floating-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>검색·필터</span>
+      <span id="quickFilterActiveCount" class="quick-filter-active-count" hidden></span>
+    </button>
+
     <div id="materialsEndToast" class="materials-end-toast" role="status" aria-live="polite" hidden>
       마지막 데이터입니다.
     </div>
@@ -135,6 +194,56 @@
         </div>
       </div>
     </footer>
+
+    <div id="quickFilterModal" class="modal quick-filter-modal" hidden>
+      <div class="modal-backdrop" data-close-quick-filter></div>
+      <section
+        class="quick-filter-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quickFilterTitle"
+        aria-describedby="quickFilterDescription"
+      >
+        <header class="access-dialog-header">
+          <div>
+            <span class="modal-label">자료 빠르게 찾기</span>
+            <h2 id="quickFilterTitle">검색·필터</h2>
+          </div>
+          <button id="closeQuickFilter" class="icon-button" type="button" aria-label="검색·필터 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <form id="quickFilterForm" class="quick-filter-form" autocomplete="off">
+          <p id="quickFilterDescription" class="quick-filter-description">
+            검색어와 분류를 한 번에 선택해 필요한 자료만 확인하세요.
+          </p>
+
+          <div class="quick-filter-search">
+            <label for="quickFilterSearch">자료명 검색</label>
+            <div class="material-search-control">
+              <span class="material-search-icon" aria-hidden="true"></span>
+              <input id="quickFilterSearch" type="search" placeholder="자료명을 검색해 주세요" maxlength="120" />
+            </div>
+          </div>
+
+          <fieldset class="quick-filter-fieldset">
+            <legend>사업 카테고리</legend>
+            <div id="quickFilterCategories" class="quick-filter-options"></div>
+          </fieldset>
+
+          <fieldset class="quick-filter-fieldset">
+            <legend>자료 유형</legend>
+            <div id="quickFilterTypes" class="quick-filter-options"></div>
+          </fieldset>
+
+          <p id="quickFilterResult" class="quick-filter-result" aria-live="polite"></p>
+          <div class="quick-filter-actions">
+            <button id="resetQuickFilter" class="button button-secondary" type="button">전체 초기화</button>
+            <button class="button button-primary" type="submit">적용하기</button>
+          </div>
+        </form>
+      </section>
+    </div>
 
     <div id="adminAccessModal" class="modal access-modal" hidden>
       <div class="modal-backdrop" data-close-admin-access></div>
