@@ -5,7 +5,6 @@
     title: document.querySelector("#shareRedirectTitle"),
     message: document.querySelector("#shareRedirectMessage"),
     spinner: document.querySelector("#shareRedirectSpinner"),
-    returnLink: document.querySelector("#shareRedirectReturn"),
     securityForm: document.querySelector("#shareSecurityForm"),
     securityPassword: document.querySelector("#shareSecurityPassword"),
     securityError: document.querySelector("#shareSecurityError"),
@@ -18,7 +17,6 @@
     elements.title.textContent = title;
     elements.message.textContent = message;
     elements.securityForm.hidden = true;
-    elements.returnLink.hidden = false;
   }
 
   function openTarget(targetUrl) {

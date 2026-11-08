@@ -807,11 +807,6 @@ a {
   line-height: 1.65;
 }
 
-.share-redirect-return {
-  width: 100%;
-  margin-top: 24px;
-}
-
 .share-security-form {
   display: grid;
   gap: 8px;
