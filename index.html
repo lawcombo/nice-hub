@@ -202,11 +202,9 @@
         role="dialog"
         aria-modal="true"
         aria-labelledby="quickFilterTitle"
-        aria-describedby="quickFilterDescription"
       >
         <header class="access-dialog-header">
           <div>
-            <span class="modal-label">자료 빠르게 찾기</span>
             <h2 id="quickFilterTitle">검색·필터</h2>
           </div>
           <button id="closeQuickFilter" class="icon-button" type="button" aria-label="검색·필터 창 닫기">
@@ -214,10 +212,6 @@
           </button>
         </header>
         <form id="quickFilterForm" class="quick-filter-form" autocomplete="off">
-          <p id="quickFilterDescription" class="quick-filter-description">
-            검색어와 분류를 한 번에 선택해 필요한 자료만 확인하세요.
-          </p>
-
           <div class="quick-filter-search">
             <label for="quickFilterSearch">자료명 검색</label>
             <div class="material-search-control">
@@ -238,8 +232,8 @@
 
           <p id="quickFilterResult" class="quick-filter-result" aria-live="polite"></p>
           <div class="quick-filter-actions">
-            <button id="resetQuickFilter" class="button button-secondary" type="button">전체 초기화</button>
-            <button class="button button-primary" type="submit">적용하기</button>
+            <button id="resetQuickFilter" class="button button-secondary" type="button">초기화</button>
+            <button id="applyQuickFilter" class="button button-primary" type="submit">자료 보기</button>
           </div>
         </form>
       </section>

@@ -1594,39 +1594,66 @@ button.button {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
 }
 
+.quick-filter-modal {
+  place-items: initial;
+  padding: 0;
+}
+
+.quick-filter-modal .modal-backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}
+
 .quick-filter-dialog {
-  position: relative;
-  width: min(570px, 100%);
-  max-height: min(760px, calc(100dvh - 48px));
+  position: fixed;
+  z-index: 1;
+  width: min(420px, calc(100% - 32px));
+  max-height: min(650px, calc(100dvh - 32px));
   overflow: hidden auto;
-  border-radius: 20px;
+  border: 1px solid #c8d7e8;
+  border-radius: 16px;
   background: #fff;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 18px 48px rgba(7, 29, 55, 0.23);
+  animation: quick-filter-popover-in 0.17s ease-out both;
+  transform-origin: bottom right;
+}
+
+.quick-filter-dialog.opens-downward {
+  transform-origin: top right;
+}
+
+.quick-filter-dialog .access-dialog-header {
+  padding: 14px 14px 12px 18px;
+}
+
+.quick-filter-dialog .access-dialog-header h2 {
+  font-size: 1.08rem;
+}
+
+.quick-filter-dialog .icon-button {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  border-radius: 9px;
 }
 
 .quick-filter-form {
   display: grid;
-  gap: 20px;
-  padding: 22px 24px 24px;
-}
-
-.quick-filter-description {
-  margin: 0;
-  color: var(--slate-500);
-  font-size: 0.88rem;
+  gap: 14px;
+  padding: 15px 18px 18px;
 }
 
 .quick-filter-search label,
 .quick-filter-fieldset legend {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--navy-900);
   font-size: 0.86rem;
   font-weight: 850;
 }
 
 .quick-filter-search .material-search-control input {
-  min-height: 48px;
+  min-height: 44px;
   box-shadow: none;
 }
 
@@ -1640,12 +1667,12 @@ button.button {
 .quick-filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .quick-filter-option {
-  min-height: 38px;
-  padding: 7px 14px;
+  min-height: 34px;
+  padding: 6px 12px;
   border: 1px solid var(--slate-300);
   border-radius: 999px;
   color: var(--slate-700);
@@ -1674,21 +1701,25 @@ button.button {
 }
 
 .quick-filter-result {
-  min-height: 43px;
+  min-height: 36px;
   margin: 0;
-  padding: 10px 13px;
-  border-radius: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
   color: var(--navy-900);
   background: var(--blue-50);
   font-size: 0.82rem;
   font-weight: 800;
-  text-align: center;
+  text-align: left;
 }
 
 .quick-filter-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.quick-filter-actions .button {
+  min-height: 42px;
 }
 
 .install-dialog {
@@ -2388,20 +2419,27 @@ button.button {
     align-items: end;
   }
 
+  .quick-filter-modal .modal-backdrop {
+    background: rgba(3, 15, 29, 0.7);
+    backdrop-filter: blur(3px);
+  }
+
   .quick-filter-dialog {
+    position: relative;
     width: 100%;
-    max-height: 88dvh;
+    max-height: 82dvh;
+    border: 0;
     border-radius: 20px 20px 0 0;
     animation: quick-filter-slide-up 0.22s ease-out both;
   }
 
-  .quick-filter-form {
-    gap: 17px;
-    padding: 19px 18px calc(20px + env(safe-area-inset-bottom));
+  .quick-filter-dialog .access-dialog-header {
+    padding: 13px 14px 11px 18px;
   }
 
-  .quick-filter-description {
-    font-size: 0.82rem;
+  .quick-filter-form {
+    gap: 12px;
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
   }
 
   .quick-filter-options {
@@ -2534,6 +2572,18 @@ button.button {
 
   .preview-help {
     display: none;
+  }
+}
+
+@keyframes quick-filter-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

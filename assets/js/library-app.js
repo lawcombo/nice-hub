@@ -29,12 +29,14 @@
     openQuickFilter: document.querySelector("#openQuickFilter"),
     quickFilterActiveCount: document.querySelector("#quickFilterActiveCount"),
     quickFilterModal: document.querySelector("#quickFilterModal"),
+    quickFilterDialog: document.querySelector(".quick-filter-dialog"),
     quickFilterForm: document.querySelector("#quickFilterForm"),
     quickFilterSearch: document.querySelector("#quickFilterSearch"),
     quickFilterCategories: document.querySelector("#quickFilterCategories"),
     quickFilterTypes: document.querySelector("#quickFilterTypes"),
     quickFilterResult: document.querySelector("#quickFilterResult"),
     resetQuickFilter: document.querySelector("#resetQuickFilter"),
+    applyQuickFilter: document.querySelector("#applyQuickFilter"),
     closeQuickFilter: document.querySelector("#closeQuickFilter"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
@@ -514,7 +516,9 @@
   function updateQuickFilterResult() {
     const categoryLabel = quickFilterDraftCategory === "all" ? "전체 사업" : getCategoryLabel(quickFilterDraftCategory);
     const typeLabel = quickFilterDraftType === "all" ? "전체 자료" : getTypeLabel(quickFilterDraftType);
-    elements.quickFilterResult.textContent = `${categoryLabel} · ${typeLabel} · 검색 결과 ${getQuickFilterMatchCount()}건`;
+    const matchCount = getQuickFilterMatchCount();
+    elements.quickFilterResult.textContent = `${categoryLabel} · ${typeLabel} · ${matchCount}건`;
+    elements.applyQuickFilter.textContent = `자료 ${matchCount}건 보기`;
   }
 
   function updateQuickFilterActiveCount() {
@@ -587,18 +591,54 @@
     elements.quickFilterModal.hidden = false;
     document.body.classList.add("modal-open");
     document.addEventListener("keydown", handleQuickFilterKeydown);
-    window.requestAnimationFrame(() => elements.quickFilterSearch.focus());
+    window.requestAnimationFrame(() => {
+      positionQuickFilterDialog();
+      elements.quickFilterSearch.focus();
+    });
   }
 
   function closeQuickFilter() {
     if (elements.quickFilterModal.hidden) return;
     elements.quickFilterModal.hidden = true;
+    resetQuickFilterDialogPosition();
     document.body.classList.remove("modal-open");
     document.removeEventListener("keydown", handleQuickFilterKeydown);
     if (lastQuickFilterFocusedElement && document.contains(lastQuickFilterFocusedElement)) {
       lastQuickFilterFocusedElement.focus();
     }
     lastQuickFilterFocusedElement = null;
+  }
+
+  function resetQuickFilterDialogPosition() {
+    ["top", "right", "bottom", "left", "width", "maxHeight"].forEach((property) => {
+      elements.quickFilterDialog.style[property] = "";
+    });
+    elements.quickFilterDialog.classList.remove("opens-downward");
+  }
+
+  function positionQuickFilterDialog() {
+    resetQuickFilterDialogPosition();
+    if (window.matchMedia("(max-width: 620px)").matches || elements.quickFilterModal.hidden) return;
+
+    const buttonRect = elements.openQuickFilter.getBoundingClientRect();
+    const viewportPadding = 16;
+    const gap = 11;
+    const dialogWidth = Math.min(420, window.innerWidth - viewportPadding * 2);
+    elements.quickFilterDialog.style.width = `${dialogWidth}px`;
+    elements.quickFilterDialog.style.right = `${Math.max(viewportPadding, window.innerWidth - buttonRect.right)}px`;
+
+    const preferredHeight = Math.min(elements.quickFilterDialog.scrollHeight, Math.round(window.innerHeight * 0.76));
+    const spaceAbove = buttonRect.top - gap - viewportPadding;
+    const spaceBelow = window.innerHeight - buttonRect.bottom - gap - viewportPadding;
+    if (spaceAbove >= Math.min(preferredHeight, 420) || spaceAbove >= spaceBelow) {
+      elements.quickFilterDialog.style.bottom = `${window.innerHeight - buttonRect.top + gap}px`;
+      elements.quickFilterDialog.style.maxHeight = `${Math.max(240, spaceAbove)}px`;
+      return;
+    }
+
+    elements.quickFilterDialog.classList.add("opens-downward");
+    elements.quickFilterDialog.style.top = `${buttonRect.bottom + gap}px`;
+    elements.quickFilterDialog.style.maxHeight = `${Math.max(240, spaceBelow)}px`;
   }
 
   function resetQuickFilter() {
@@ -683,6 +723,7 @@
     const footerRect = elements.footer.getBoundingClientRect();
     elements.openQuickFilter.hidden = controlsRect.bottom >= 12;
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
+    if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
   }
 
   function scheduleQuickFilterFloatingVisibility() {
@@ -763,6 +804,7 @@
     window.clearTimeout(endToastTimer);
     elements.endToast.hidden = false;
     elements.openQuickFilter.classList.add("is-toast-visible");
+    if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
     window.requestAnimationFrame(() => elements.endToast.classList.add("is-visible"));
     endToastTimer = window.setTimeout(hideMaterialEndToast, 2200);
   }
@@ -774,6 +816,7 @@
       if (!elements.endToast.classList.contains("is-visible")) {
         elements.endToast.hidden = true;
         elements.openQuickFilter.classList.remove("is-toast-visible");
+        if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
       }
     }, 220);
   }
