@@ -999,20 +999,34 @@
 
   function protectDownloadLink(link, material) {
     if (!isSecureMaterial(material)) return;
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-      runMaterialAction(material, link, () => downloadMaterial(material));
-    });
+    convertSecureLinkToButton(link, material, () => downloadMaterial(material));
   }
 
   function protectOpenLink(link, material) {
     if (!isSecureMaterial(material)) return;
+    const targetUrl = resolveUrl(material.file);
+    convertSecureLinkToButton(link, material, () => {
+      const opened = window.open(targetUrl, "_blank", "noopener");
+      if (opened) opened.opener = null;
+    });
+  }
+
+  function convertSecureLinkToButton(link, material, action) {
+    link.removeAttribute("href");
+    link.removeAttribute("download");
+    link.removeAttribute("target");
+    link.removeAttribute("rel");
+    link.setAttribute("role", "button");
+    link.setAttribute("aria-haspopup", "dialog");
+    link.tabIndex = 0;
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      runMaterialAction(material, link, () => {
-        const opened = window.open(link.href, "_blank", "noopener");
-        if (opened) opened.opener = null;
-      });
+      runMaterialAction(material, link, action);
+    });
+    link.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      link.click();
     });
   }
 
