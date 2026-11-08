@@ -876,7 +876,7 @@
       thumbnail.appendChild(createThumbnailFallback(material));
     }
     if (isSecureMaterial(material)) {
-      thumbnail.appendChild(createElement("span", "material-security-label", "보안 문서"));
+      thumbnail.appendChild(createSecurityLabel());
     }
 
     const body = createElement("div", "card-body");
@@ -961,6 +961,26 @@
     body.append(content, actions);
     card.append(thumbnail, body);
     return card;
+  }
+
+  function createSecurityLabel() {
+    const label = createElement("span", "material-security-label");
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+    icon.classList.add("material-security-icon");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("focusable", "false");
+    path.setAttribute("d", "M7.5 10V7.5a4.5 4.5 0 0 1 9 0V10M6.5 10h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+    icon.appendChild(path);
+    label.append(icon, document.createTextNode("보안 문서"));
+    return label;
   }
 
   function createThumbnailFallback(material) {

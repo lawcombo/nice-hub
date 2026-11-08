@@ -1054,6 +1054,7 @@ a {
   top: 12px;
   right: 12px;
   display: inline-flex;
+  gap: 5px;
   min-height: 28px;
   align-items: center;
   padding: 4px 11px;
@@ -1067,6 +1068,12 @@ a {
   letter-spacing: -0.01em;
   line-height: 1;
   white-space: nowrap;
+}
+
+.material-security-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
 }
 
 .material-title {
@@ -1198,6 +1205,11 @@ a {
   min-height: 22px;
   padding: 3px 7px;
   font-size: 0.62rem;
+}
+
+.is-list-view .material-security-icon {
+  width: 12px;
+  height: 12px;
 }
 
 .is-list-view .thumbnail-fallback {
