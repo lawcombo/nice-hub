@@ -93,7 +93,7 @@ body.upload-modal-open {
 }
 
 .upload-dialog {
-  width: min(860px, calc(100% - 40px));
+  width: min(1120px, calc(100% - 40px));
   max-height: min(92vh, 940px);
   margin: auto;
   padding: 0;
@@ -115,6 +115,7 @@ body.upload-modal-open {
   padding: 0 30px 30px;
   border: 0;
   border-radius: 20px;
+  background: #f7f9fc;
   box-shadow: none;
 }
 
@@ -141,6 +142,66 @@ body.upload-modal-open {
 
 .upload-dialog-close {
   flex: 0 0 auto;
+}
+
+.upload-form-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.95fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.upload-form-fields {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.upload-form-fields .field-group,
+.upload-form-fields .video-source-fields,
+.upload-form-fields .form-grid .field-group {
+  margin-bottom: 16px;
+}
+
+.upload-form-fields > :last-child {
+  margin-bottom: 0;
+}
+
+.upload-form-fields .field-group textarea {
+  min-height: 82px;
+}
+
+.upload-form-fields .video-source-option {
+  min-height: 68px;
+  padding: 11px 12px;
+}
+
+.upload-preview-pane {
+  position: sticky;
+  top: 102px;
+  min-width: 0;
+}
+
+.upload-preview-pane .upload-card-preview-section {
+  margin: 0;
+}
+
+.upload-form-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.upload-form-footer .destination-box {
+  margin: 0;
+}
+
+.upload-form-footer .upload-submit {
+  min-height: 100%;
 }
 
 .security-note {
@@ -853,44 +914,104 @@ fieldset:disabled {
 }
 
 .file-picker {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  min-height: 48px;
+  display: flex;
+  min-height: 78px;
   align-items: center;
-  overflow: hidden;
-  border: 1px solid var(--slate-300);
-  border-radius: 10px;
-  background: #fff;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px dashed #9db4cc;
+  border-radius: 12px;
+  background: #f8fbff;
   cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
 .file-picker:hover {
   border-color: var(--blue-600);
+  background: var(--blue-50);
 }
 
-.file-picker-title {
-  align-self: stretch;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 15px;
+.file-picker:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.file-picker.is-dragover {
+  border-color: var(--blue-700);
+  background: #eaf4ff;
+  box-shadow: 0 0 0 3px rgba(36, 114, 212, 0.14);
+  transform: translateY(-1px);
+}
+
+.file-picker.is-error {
+  border-color: #d4483e;
+  background: #fff6f5;
+}
+
+.file-picker-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 10px;
   color: #fff;
   background: var(--blue-700);
-  font-size: 0.82rem;
-  font-weight: 800;
+  font-size: 1.15rem;
+  font-weight: 900;
 }
 
-.file-picker-secondary .file-picker-title {
+.file-picker-secondary .file-picker-icon {
   color: var(--navy-900);
   background: var(--blue-100);
 }
 
-.file-picker-name {
-  overflow: hidden;
-  padding: 0 13px;
-  color: var(--slate-500);
+.file-picker-copy {
+  display: block;
+  min-width: 0;
+  flex: 1;
+}
+
+.file-picker-title {
+  display: block;
+  color: var(--navy-900);
   font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.file-picker-copy small {
+  display: block;
+  margin-top: 2px;
+  color: var(--slate-500);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.file-picker-name {
+  display: block;
+  overflow: hidden;
+  margin-top: 6px;
+  color: var(--blue-700);
+  font-size: 0.76rem;
+  font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.drop-status {
+  min-height: 0;
+  margin: 6px 0 0;
+  color: #b42318;
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+
+.drop-status:empty {
+  display: none;
 }
 
 .character-count {
@@ -935,6 +1056,61 @@ fieldset:disabled {
   width: 100%;
   min-height: 50px;
   font-size: 0.94rem;
+}
+
+.confirm-dialog {
+  width: min(430px, calc(100% - 32px));
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  color: var(--slate-900);
+  background: transparent;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(3, 15, 29, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.confirm-dialog-card {
+  padding: 26px;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.confirm-dialog-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin-bottom: 15px;
+  border-radius: 50%;
+  color: #9a3412;
+  background: #fff1e8;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.confirm-dialog h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+}
+
+.confirm-dialog p {
+  margin: 8px 0 0;
+  color: var(--slate-600);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.confirm-dialog-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 21px;
 }
 
 .upload-result {
@@ -1650,6 +1826,18 @@ fieldset:disabled {
 }
 
 @media (max-width: 880px) {
+  .upload-form-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-preview-pane {
+    position: static;
+  }
+
+  .upload-form-footer {
+    grid-template-columns: 1fr;
+  }
+
   .inventory-filter-field {
     grid-template-columns: 1fr;
     gap: 6px;
@@ -1697,6 +1885,20 @@ fieldset:disabled {
   .upload-dialog-sticky-header {
     margin: 0 -17px 22px;
     padding: 18px 17px 14px;
+  }
+
+  .upload-form-fields {
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  .file-picker {
+    min-height: 72px;
+    padding: 10px 12px;
+  }
+
+  .file-picker-copy small {
+    font-size: 0.69rem;
   }
 
   .dialog-progress-overlay {
@@ -1829,6 +2031,14 @@ fieldset:disabled {
   .delete-dialog {
     padding: 22px 19px;
   }
+
+  .confirm-dialog-card {
+    padding: 22px 19px;
+  }
+
+  .confirm-dialog-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1836,5 +2046,9 @@ fieldset:disabled {
   .operation-spinner,
   .operation-progress-bar::after {
     animation-duration: 1.8s;
+  }
+
+  .file-picker {
+    transition: none;
   }
 }

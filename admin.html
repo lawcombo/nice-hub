@@ -102,6 +102,8 @@
           <form id="uploadForm" autocomplete="off">
             <fieldset id="uploadFields" disabled>
               <legend class="visually-hidden">자료 정보</legend>
+              <div class="upload-form-workspace">
+                <div class="upload-form-fields">
 
               <div class="form-grid form-grid-two">
                 <div class="field-group">
@@ -146,12 +148,17 @@
 
               <div id="materialFileGroup" class="field-group">
                 <label for="materialFile">자료 파일 <span aria-hidden="true">*</span></label>
-                <label class="file-picker" for="materialFile">
-                  <span class="file-picker-title">파일 선택</span>
-                  <span id="materialFileName" class="file-picker-name">선택된 파일 없음</span>
+                <label id="materialDropZone" class="file-picker upload-drop-zone" for="materialFile" tabindex="0">
+                  <span class="file-picker-icon" aria-hidden="true">↑</span>
+                  <span class="file-picker-copy">
+                    <span class="file-picker-title">자료 파일 선택</span>
+                    <small>클릭하거나 파일을 이곳에 끌어놓으세요.</small>
+                    <span id="materialFileName" class="file-picker-name">선택된 파일 없음</span>
+                  </span>
                 </label>
                 <input id="materialFile" name="materialFile" class="native-file-input" type="file" required />
                 <p id="fileHelp" class="field-help">PDF, 이미지, PPT 또는 Word 자료는 최대 20MB입니다.</p>
+                <p id="materialDropStatus" class="drop-status" aria-live="polite"></p>
               </div>
 
               <div id="youtubeUrlGroup" class="field-group" hidden>
@@ -183,11 +190,6 @@
                   placeholder="자료의 내용과 용도를 간단히 입력하세요."
                 ></textarea>
                 <p class="character-count"><span id="descriptionCount">0</span>/100 · 최대 2줄</p>
-              </div>
-
-              <div class="field-group">
-                <label for="updatedAt">등록·수정일 <span aria-hidden="true">*</span></label>
-                <input id="updatedAt" name="updatedAt" type="date" required />
               </div>
 
               <fieldset class="video-source-fields security-fields">
@@ -224,9 +226,13 @@
 
               <div class="field-group">
                 <label for="thumbnailFile">표지 이미지 <span class="optional-label">선택</span></label>
-                <label class="file-picker file-picker-secondary" for="thumbnailFile">
-                  <span class="file-picker-title">표지 선택</span>
-                  <span id="thumbnailFileName" class="file-picker-name">선택된 이미지 없음</span>
+                <label id="thumbnailDropZone" class="file-picker file-picker-secondary upload-drop-zone" for="thumbnailFile" tabindex="0">
+                  <span class="file-picker-icon" aria-hidden="true">↑</span>
+                  <span class="file-picker-copy">
+                    <span class="file-picker-title">표지 이미지 선택</span>
+                    <small>클릭하거나 이미지를 이곳에 끌어놓으세요.</small>
+                    <span id="thumbnailFileName" class="file-picker-name">선택된 이미지 없음</span>
+                  </span>
                 </label>
                 <input
                   id="thumbnailFile"
@@ -256,8 +262,11 @@
                     </div>
                   </dl>
                 </div>
+                <p id="thumbnailDropStatus" class="drop-status" aria-live="polite"></p>
               </div>
 
+                </div>
+                <aside class="upload-preview-pane">
               <section class="upload-card-preview-section" aria-labelledby="uploadCardPreviewHeading">
                 <div class="upload-card-preview-heading">
                   <div>
@@ -330,7 +339,10 @@
                   <div id="uploadListPreviewActions" class="upload-list-preview-actions" aria-hidden="true"></div>
                 </article>
               </section>
+                </aside>
+              </div>
 
+              <div class="upload-form-footer">
               <div class="destination-box">
                 <span>저장 위치</span>
                 <code id="destinationPreview">사업과 자료 유형을 선택해 주세요.</code>
@@ -339,6 +351,7 @@
               <button id="uploadButton" class="button button-primary upload-submit" type="submit">
                 GitHub에 업로드
               </button>
+              </div>
             </fieldset>
           </form>
 
@@ -362,6 +375,20 @@
 
           <div id="uploadResult" class="upload-result" hidden aria-live="polite"></div>
         </section>
+        </dialog>
+
+        <dialog id="discardUploadDialog" class="confirm-dialog discard-upload-dialog" aria-labelledby="discardUploadHeading">
+          <div class="confirm-dialog-card">
+            <span class="confirm-dialog-icon" aria-hidden="true">!</span>
+            <div>
+              <h2 id="discardUploadHeading">작성 중인 내용을 닫을까요?</h2>
+              <p>선택한 파일과 입력한 내용이 모두 사라집니다.</p>
+            </div>
+            <div class="confirm-dialog-actions">
+              <button id="continueUploadButton" class="button button-secondary" type="button">계속 작성</button>
+              <button id="discardUploadButton" class="button button-danger" type="button">내용 버리고 닫기</button>
+            </div>
+          </div>
         </dialog>
       </div>
 

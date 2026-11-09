@@ -44,11 +44,15 @@
     videoSourceInputs: [...document.querySelectorAll('input[name="videoSource"]')],
     materialFileGroup: document.querySelector("#materialFileGroup"),
     materialFile: document.querySelector("#materialFile"),
+    materialDropZone: document.querySelector("#materialDropZone"),
+    materialDropStatus: document.querySelector("#materialDropStatus"),
     materialFileName: document.querySelector("#materialFileName"),
     fileHelp: document.querySelector("#fileHelp"),
     youtubeUrlGroup: document.querySelector("#youtubeUrlGroup"),
     youtubeUrl: document.querySelector("#youtubeUrl"),
     thumbnailFile: document.querySelector("#thumbnailFile"),
+    thumbnailDropZone: document.querySelector("#thumbnailDropZone"),
+    thumbnailDropStatus: document.querySelector("#thumbnailDropStatus"),
     thumbnailFileName: document.querySelector("#thumbnailFileName"),
     uploadPreviewThumbnail: document.querySelector("#uploadPreviewThumbnail"),
     uploadPreviewThumbnailFallback: document.querySelector("#uploadPreviewThumbnailFallback"),
@@ -77,7 +81,6 @@
     title: document.querySelector("#title"),
     description: document.querySelector("#description"),
     descriptionCount: document.querySelector("#descriptionCount"),
-    updatedAt: document.querySelector("#updatedAt"),
     uploadSecurityInputs: [...document.querySelectorAll('input[name="uploadSecurityMode"]')],
     uploadSecurityPasswordGroup: document.querySelector("#uploadSecurityPasswordGroup"),
     uploadSecurityPassword: document.querySelector("#uploadSecurityPassword"),
@@ -89,6 +92,9 @@
     openUploadDialog: document.querySelector("#openUploadDialog"),
     uploadDialog: document.querySelector("#uploadDialog"),
     closeUploadDialog: document.querySelector("#closeUploadDialog"),
+    discardUploadDialog: document.querySelector("#discardUploadDialog"),
+    continueUploadButton: document.querySelector("#continueUploadButton"),
+    discardUploadButton: document.querySelector("#discardUploadButton"),
     inventorySection: document.querySelector("#inventorySection"),
     inventorySummary: document.querySelector("#inventorySummary"),
     inventoryCategoryFilter: document.querySelector("#inventoryCategoryFilter"),
@@ -170,6 +176,7 @@
   let pdfJsModulePromise = null;
   let uploadPreviewThumbnailFile = null;
   let uploadPreviewThumbnailUrl = "";
+  let uploadFormDirty = false;
   const localThumbnailPreviews = new Map();
 
   class GitHubApiError extends Error {
@@ -291,14 +298,18 @@
   function resetUploadForm() {
     clearUploadPreviewThumbnail();
     elements.form.reset();
-    elements.updatedAt.value = localDateString();
     elements.descriptionCount.textContent = "0";
     elements.materialFileName.textContent = "선택된 파일 없음";
     elements.thumbnailFileName.textContent = "선택된 이미지 없음";
+    elements.materialDropStatus.textContent = "";
+    elements.thumbnailDropStatus.textContent = "";
+    elements.materialDropZone.classList.remove("is-dragover", "is-error");
+    elements.thumbnailDropZone.classList.remove("is-dragover", "is-error");
     hideUploadProgress();
     updateUploadSecurityFields();
     updateFileAccept();
     updateFileLabels();
+    uploadFormDirty = false;
   }
 
   function openUploadModal() {
@@ -311,8 +322,31 @@
     window.requestAnimationFrame(() => elements.category.focus());
   }
 
+  function openDiscardUploadDialog() {
+    if (isUploading || elements.discardUploadDialog.open) return;
+    elements.discardUploadDialog.showModal();
+    window.requestAnimationFrame(() => elements.continueUploadButton.focus());
+  }
+
+  function closeDiscardUploadDialog() {
+    if (elements.discardUploadDialog.open) elements.discardUploadDialog.close();
+    window.requestAnimationFrame(() => elements.closeUploadDialog.focus());
+  }
+
+  function discardUploadDraft() {
+    if (elements.discardUploadDialog.open) elements.discardUploadDialog.close();
+    uploadFormDirty = false;
+    resetUploadForm();
+    closeUploadModal(true);
+  }
+
   function closeUploadModal(force = false) {
     if ((!force && isUploading) || !elements.uploadDialog.open) return;
+    if (!force && uploadFormDirty) {
+      openDiscardUploadDialog();
+      return;
+    }
+    if (elements.discardUploadDialog.open) elements.discardUploadDialog.close();
     elements.uploadDialog.close();
   }
 
@@ -530,6 +564,14 @@
     const thumbnail = elements.thumbnailFile.files[0];
     elements.materialFileName.textContent = file?.name || "선택된 파일 없음";
     elements.thumbnailFileName.textContent = thumbnail?.name || "선택된 이미지 없음";
+    if (file) {
+      elements.materialDropStatus.textContent = "";
+      elements.materialDropZone.classList.remove("is-error");
+    }
+    if (thumbnail) {
+      elements.thumbnailDropStatus.textContent = "";
+      elements.thumbnailDropZone.classList.remove("is-error");
+    }
 
     if (file && !elements.title.value.trim()) {
       elements.title.value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
@@ -636,9 +678,7 @@
     const fileInfo = isYoutube
       ? "동영상 · YouTube"
       : [formatLabel, fileSize].filter(Boolean).join(" · ") || "파일 형식";
-    const date = elements.updatedAt.value
-      ? `등록 ${formatDate(elements.updatedAt.value)}`
-      : "등록 날짜";
+    const date = `등록 ${formatDate(localDateString())}`;
     const isSecure = getSecurityMode(elements.uploadSecurityInputs) === "secure";
 
     elements.uploadPreviewCategory.textContent = categoryLabel;
@@ -987,6 +1027,67 @@
     return accepted.some((value) => (value.startsWith(".") ? lowerName.endsWith(value) : lowerMime === value));
   }
 
+  function getDroppedFileError(input, file) {
+    if (!file) return "파일을 확인하지 못했습니다. 다시 시도해 주세요.";
+
+    if (input === elements.thumbnailFile) {
+      const validTypes = ["image/webp", "image/jpeg", "image/png"];
+      if (!validTypes.includes(file.type)) return "표지는 JPG, PNG 또는 WebP 이미지만 사용할 수 있습니다.";
+      if (file.size > config.maxThumbnailBytes) return "표지 이미지는 5MB 이하만 사용할 수 있습니다.";
+      return "";
+    }
+
+    const type = getSelectedType();
+    if (!type) return "자료 유형을 먼저 선택해 주세요.";
+    const maximumBytes = isVideoType(type) ? config.maxVideoBytes : config.maxDocumentBytes;
+    const maximumLabel = isVideoType(type) ? "90MB" : "20MB";
+    if (file.size > maximumBytes) return `자료 파일은 ${maximumLabel} 이하만 사용할 수 있습니다.`;
+    if (!fileMatchesType(file, type)) return `${type.label}에 허용되지 않는 파일 형식입니다.`;
+    return "";
+  }
+
+  function assignDroppedFile(input, file) {
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function initializeDropZone(zone, input, status) {
+    let dragDepth = 0;
+
+    zone.addEventListener("keydown", (event) => {
+      if (!["Enter", " "].includes(event.key)) return;
+      event.preventDefault();
+      input.click();
+    });
+    zone.addEventListener("dragenter", (event) => {
+      event.preventDefault();
+      dragDepth += 1;
+      zone.classList.add("is-dragover");
+    });
+    zone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+      zone.classList.add("is-dragover");
+    });
+    zone.addEventListener("dragleave", (event) => {
+      event.preventDefault();
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (!dragDepth) zone.classList.remove("is-dragover");
+    });
+    zone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dragDepth = 0;
+      zone.classList.remove("is-dragover");
+      const file = event.dataTransfer.files?.[0];
+      const error = getDroppedFileError(input, file);
+      status.textContent = error;
+      zone.classList.toggle("is-error", Boolean(error));
+      if (!error) assignDroppedFile(input, file);
+    });
+  }
+
   function validateFolderSegment(value, label) {
     if (!/^[a-z0-9][a-z0-9-]*$/.test(value || "")) {
       throw new Error(`${label} 폴더 설정이 올바르지 않습니다.`);
@@ -1013,7 +1114,6 @@
     }
     if (!elements.title.value.trim()) throw new Error("자료명을 입력해 주세요.");
     if (!elements.description.value.trim()) throw new Error("자료 설명을 입력해 주세요.");
-    if (!elements.updatedAt.value) throw new Error("등록·수정일을 선택해 주세요.");
     const isSecure = getSecurityMode(elements.uploadSecurityInputs) === "secure";
 
     if (thumbnail) {
@@ -1560,7 +1660,7 @@
         description: limitDescriptionLines(elements.description.value).slice(0, config.maxDescriptionLength).trim(),
         file: materialPath,
         thumbnail: thumbnailPath,
-        updatedAt: elements.updatedAt.value,
+        updatedAt: localDateString(now),
         registeredAt: now.toISOString(),
         isSecure,
       };
@@ -2007,7 +2107,6 @@
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
       populateInventoryFilters(library);
-      elements.updatedAt.value = localDateString();
       updateUploadSecurityFields();
       updateFileAccept();
     } catch (error) {
@@ -2020,12 +2119,25 @@
   elements.openUploadDialog.addEventListener("click", openUploadModal);
   elements.closeUploadDialog.addEventListener("click", () => closeUploadModal());
   elements.uploadDialog.addEventListener("cancel", (event) => {
-    if (isUploading) event.preventDefault();
+    event.preventDefault();
+    closeUploadModal();
   });
   elements.uploadDialog.addEventListener("close", () => {
     document.body.classList.remove("upload-modal-open");
   });
+  elements.continueUploadButton.addEventListener("click", closeDiscardUploadDialog);
+  elements.discardUploadButton.addEventListener("click", discardUploadDraft);
+  elements.discardUploadDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeDiscardUploadDialog();
+  });
   elements.form.addEventListener("submit", handleUpload);
+  elements.form.addEventListener("input", () => {
+    if (elements.uploadDialog.open && !isUploading) uploadFormDirty = true;
+  });
+  elements.form.addEventListener("change", () => {
+    if (elements.uploadDialog.open && !isUploading) uploadFormDirty = true;
+  });
   elements.uploadSecurityInputs.forEach((input) => input.addEventListener("change", updateUploadSecurityFields));
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
   elements.inventoryCategoryFilter.addEventListener("change", () => renderInventory(library));
@@ -2116,9 +2228,11 @@
     if (lastDeleteTrigger && document.contains(lastDeleteTrigger)) lastDeleteTrigger.focus();
     lastDeleteTrigger = null;
   });
-  window.addEventListener("beforeunload", () => {
-    clearLocalThumbnailPreviews();
-    clearUploadPreviewThumbnail();
+  window.addEventListener("beforeunload", (event) => {
+    if (elements.uploadDialog.open && (uploadFormDirty || isUploading)) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
   });
   elements.category.addEventListener("change", () => {
     updateDestinationPreview();
@@ -2132,6 +2246,8 @@
   });
   elements.materialFile.addEventListener("change", updateFileLabels);
   elements.thumbnailFile.addEventListener("change", updateFileLabels);
+  initializeDropZone(elements.materialDropZone, elements.materialFile, elements.materialDropStatus);
+  initializeDropZone(elements.thumbnailDropZone, elements.thumbnailFile, elements.thumbnailDropStatus);
   elements.title.addEventListener("input", updateUploadCardPreview);
   elements.description.addEventListener("keydown", preventThirdDescriptionLine);
   elements.description.addEventListener("beforeinput", preventThirdDescriptionLine);
@@ -2139,7 +2255,6 @@
     enforceDescriptionLineLimit(elements.description, elements.descriptionCount);
     updateUploadCardPreview();
   });
-  elements.updatedAt.addEventListener("input", updateUploadCardPreview);
   elements.token.addEventListener("input", () => {
     if (!verifiedToken || elements.token.value.trim() === verifiedToken) return;
     verifiedToken = "";
@@ -2150,9 +2265,9 @@
     closeEditVideoDialog();
     setConnectionStatus("토큰이 변경되었습니다. 연결을 다시 확인해 주세요.");
   });
-  window.addEventListener("beforeunload", () => {
-    verifiedToken = "";
-    elements.token.value = "";
+  window.addEventListener("pagehide", () => {
+    clearLocalThumbnailPreviews();
+    clearUploadPreviewThumbnail();
   });
 
   initialize();
