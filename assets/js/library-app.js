@@ -529,6 +529,7 @@
       Number(activeMaterialType !== "all");
     elements.quickFilterActiveCount.textContent = String(activeCount);
     elements.quickFilterActiveCount.hidden = activeCount === 0;
+    scheduleQuickFilterFloatingVisibility();
   }
 
   function setQuickFilterDraft(group, value) {
@@ -727,6 +728,10 @@
     elements.openQuickFilter.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.scrollToTop.hidden = window.scrollY < Math.max(360, window.innerHeight * 0.55);
     elements.scrollToTop.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
+    elements.scrollToTop.style.setProperty(
+      "--quick-filter-button-width",
+      `${elements.openQuickFilter.hidden ? 0 : elements.openQuickFilter.getBoundingClientRect().width}px`,
+    );
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
     if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
   }

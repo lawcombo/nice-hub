@@ -642,11 +642,13 @@ a {
 .scroll-top-floating {
   position: fixed;
   z-index: 89;
-  right: max(24px, calc((100vw - 1180px) / 2 + 24px));
-  bottom: calc(88px + var(--quick-filter-footer-lift, 0px) + env(safe-area-inset-bottom));
+  right: calc(
+    max(24px, calc((100vw - 1180px) / 2 + 24px)) + var(--quick-filter-button-width, 128px) + 10px
+  );
+  bottom: calc(26px + var(--quick-filter-footer-lift, 0px) + env(safe-area-inset-bottom));
   display: inline-grid;
-  width: 46px;
-  height: 46px;
+  width: 50px;
+  height: 50px;
   place-items: center;
   padding: 0;
   border: 1px solid var(--slate-300);
@@ -656,6 +658,7 @@ a {
   box-shadow: 0 11px 26px rgba(7, 31, 61, 0.18);
   cursor: pointer;
   transition:
+    right 0.16s ease,
     bottom 0.08s linear,
     color 0.16s ease,
     background 0.16s ease,
@@ -2320,10 +2323,10 @@ button.button {
   }
 
   .scroll-top-floating {
-    right: 16px;
-    bottom: calc(76px + var(--quick-filter-footer-lift, 0px) + env(safe-area-inset-bottom));
-    width: 42px;
-    height: 42px;
+    right: calc(16px + var(--quick-filter-button-width, 120px) + 9px);
+    bottom: calc(18px + var(--quick-filter-footer-lift, 0px) + env(safe-area-inset-bottom));
+    width: 46px;
+    height: 46px;
   }
 
   .scroll-top-floating svg {
