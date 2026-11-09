@@ -1141,7 +1141,7 @@ a {
 .material-description {
   display: -webkit-box;
   overflow: hidden;
-  max-height: calc(1.62em * 3);
+  max-height: calc(1.62em * 2);
   margin: 10px 0 16px;
   color: var(--slate-700);
   font-size: 0.9rem;
@@ -1149,7 +1149,7 @@ a {
   text-overflow: ellipsis;
   white-space: pre-line;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 .material-detail-row {

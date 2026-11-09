@@ -9,6 +9,7 @@
     maxDocumentBytes: 20 * 1024 * 1024,
     maxVideoBytes: 90 * 1024 * 1024,
     maxThumbnailBytes: 5 * 1024 * 1024,
+    maxDescriptionLength: 100,
   };
 
   const documentAccept = [
@@ -293,6 +294,38 @@
     if (className) element.className = className;
     if (text !== undefined) element.textContent = text;
     return element;
+  }
+
+  function limitDescriptionLines(value) {
+    const normalized = String(value || "").replace(/\r\n?/g, "\n");
+    const lines = normalized.split("\n");
+    if (lines.length <= 2) return normalized;
+    return `${lines[0]}\n${lines.slice(1).join(" ")}`;
+  }
+
+  function hasExistingDescriptionLineBreakWithoutSelection(textarea) {
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? start;
+    const remainingValue = `${textarea.value.slice(0, start)}${textarea.value.slice(end)}`;
+    return remainingValue.includes("\n");
+  }
+
+  function preventThirdDescriptionLine(event) {
+    const isLineBreak =
+      (event.type === "beforeinput" && ["insertLineBreak", "insertParagraph"].includes(event.inputType)) ||
+      (event.type === "keydown" && event.key === "Enter");
+    if (!isLineBreak || event.isComposing) return;
+    if (hasExistingDescriptionLineBreakWithoutSelection(event.currentTarget)) event.preventDefault();
+  }
+
+  function enforceDescriptionLineLimit(textarea, countElement) {
+    const limitedValue = limitDescriptionLines(textarea.value).slice(0, Number(textarea.maxLength) || 300);
+    if (limitedValue !== textarea.value) {
+      const cursor = Math.min(textarea.selectionStart ?? limitedValue.length, limitedValue.length);
+      textarea.value = limitedValue;
+      textarea.setSelectionRange(cursor, cursor);
+    }
+    countElement.textContent = String(textarea.value.length);
   }
 
   function getCategoryLabel(categoryId, sourceLibrary = library) {
@@ -1224,7 +1257,10 @@
     pendingContentEditId = materialId;
     lastContentEditTrigger = trigger;
     elements.editMaterialTitle.value = material.title || "";
-    elements.editMaterialDescription.value = material.description || "";
+    elements.editMaterialDescription.value = limitDescriptionLines(material.description || "").slice(
+      0,
+      config.maxDescriptionLength,
+    );
     const securityMode = material.isSecure === true ? "secure" : "public";
     const securityInput = elements.editSecurityInputs.find((input) => input.value === securityMode);
     if (securityInput) securityInput.checked = true;
@@ -1245,7 +1281,9 @@
     event.preventDefault();
     const materialId = pendingContentEditId;
     const title = elements.editMaterialTitle.value.trim();
-    const description = elements.editMaterialDescription.value.trim();
+    const description = limitDescriptionLines(elements.editMaterialDescription.value)
+      .slice(0, config.maxDescriptionLength)
+      .trim();
     const isSecure = getSecurityMode(elements.editSecurityInputs) === "secure";
     if (!materialId || isEditingMaterial) return;
     if (!title || !description) {
@@ -1467,7 +1505,7 @@
         type: type.id,
         format: uploadedFormat,
         title: elements.title.value.trim(),
-        description: elements.description.value.trim(),
+        description: limitDescriptionLines(elements.description.value).slice(0, config.maxDescriptionLength).trim(),
         file: materialPath,
         thumbnail: thumbnailPath,
         updatedAt: elements.updatedAt.value,
@@ -1955,8 +1993,10 @@
   elements.editContentForm.addEventListener("submit", saveMaterialContent);
   elements.closeEditContentDialog.addEventListener("click", closeEditContentDialog);
   elements.cancelEditContentDialog.addEventListener("click", closeEditContentDialog);
+  elements.editMaterialDescription.addEventListener("keydown", preventThirdDescriptionLine);
+  elements.editMaterialDescription.addEventListener("beforeinput", preventThirdDescriptionLine);
   elements.editMaterialDescription.addEventListener("input", () => {
-    elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
+    enforceDescriptionLineLimit(elements.editMaterialDescription, elements.editDescriptionCount);
   });
   elements.editSecurityInputs.forEach((input) => input.addEventListener("change", updateEditSecurityFields));
   elements.editContentDialog.addEventListener("cancel", (event) => {
@@ -2047,8 +2087,10 @@
   elements.materialFile.addEventListener("change", updateFileLabels);
   elements.thumbnailFile.addEventListener("change", updateFileLabels);
   elements.title.addEventListener("input", updateUploadCardPreview);
+  elements.description.addEventListener("keydown", preventThirdDescriptionLine);
+  elements.description.addEventListener("beforeinput", preventThirdDescriptionLine);
   elements.description.addEventListener("input", () => {
-    elements.descriptionCount.textContent = String(elements.description.value.length);
+    enforceDescriptionLineLimit(elements.description, elements.descriptionCount);
     updateUploadCardPreview();
   });
   elements.updatedAt.addEventListener("input", updateUploadCardPreview);
