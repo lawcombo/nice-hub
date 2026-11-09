@@ -502,11 +502,14 @@ body.upload-modal-open {
 .upload-card-preview-body > p {
   display: -webkit-box;
   overflow: hidden;
+  max-height: calc(1.55em * 2);
   min-height: 42px;
   margin: 8px 0 14px;
   color: var(--slate-500);
   font-size: 0.8rem;
   line-height: 1.55;
+  text-overflow: ellipsis;
+  white-space: pre-line;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;

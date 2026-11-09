@@ -1141,10 +1141,13 @@ a {
 .material-description {
   display: -webkit-box;
   overflow: hidden;
+  max-height: calc(1.62em * 3);
   margin: 10px 0 16px;
   color: var(--slate-700);
   font-size: 0.9rem;
   line-height: 1.62;
+  text-overflow: ellipsis;
+  white-space: pre-line;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
@@ -1333,6 +1336,7 @@ a {
 }
 
 .is-list-view .material-description {
+  max-height: 1.5em;
   margin: 4px 0 6px;
   font-size: 0.82rem;
   line-height: 1.5;
