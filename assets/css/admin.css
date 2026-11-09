@@ -1118,21 +1118,27 @@ fieldset:disabled {
 }
 
 .confirm-dialog-card {
-  padding: 26px;
+  padding: 22px;
   border-radius: 18px;
   background: #fff;
 }
 
+.confirm-dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .confirm-dialog-icon {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   place-items: center;
-  margin-bottom: 15px;
   border-radius: 50%;
   color: #9a3412;
   background: #fff1e8;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 900;
 }
 
@@ -1143,7 +1149,7 @@ fieldset:disabled {
 }
 
 .confirm-dialog p {
-  margin: 8px 0 0;
+  margin: 7px 0 0 42px;
   color: var(--slate-600);
   font-size: 0.86rem;
   line-height: 1.55;
@@ -1153,7 +1159,7 @@ fieldset:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin-top: 21px;
+  margin-top: 16px;
 }
 
 .upload-result {
@@ -1893,38 +1899,79 @@ fieldset:disabled {
   }
 
   .upload-preview-pane .upload-card-preview {
-    width: min(100%, 260px);
+    width: min(100%, 283px);
   }
 
   .upload-preview-pane .upload-card-preview-body {
-    padding: 10px;
+    display: flex;
+    min-height: 183px;
+    flex-direction: column;
+    padding: 16.5px;
+  }
+
+  .upload-preview-pane .upload-card-preview-badges {
+    gap: 5px;
+    margin-bottom: 9px;
+  }
+
+  .upload-preview-pane .upload-card-preview-badges span {
+    min-height: 20px;
+    padding: 2px 7px;
+    font-size: .56rem;
+  }
+
+  .upload-preview-pane .upload-card-preview-security {
+    top: 9px;
+    right: 9px;
+    min-height: 21px;
+    gap: 4px;
+    padding: 3px 8px;
+    font-size: .555rem;
+  }
+
+  .upload-preview-pane .upload-card-preview-security svg {
+    width: 10.5px;
+    height: 10.5px;
   }
 
   .upload-preview-pane .upload-card-preview h3 {
-    margin-top: 7px;
-    font-size: 0.84rem;
+    margin-top: 0;
+    font-size: .81rem;
+    line-height: 1.48;
+    letter-spacing: -.025em;
+    -webkit-line-clamp: 3;
   }
 
   .upload-preview-pane .upload-card-preview-body > p {
-    min-height: 30px;
-    margin: 4px 0 7px;
-    font-size: 0.68rem;
+    min-height: 35px;
+    margin: 7.5px 0 12px;
+    color: var(--slate-700);
+    font-size: .675rem;
+    line-height: 1.62;
   }
 
   .upload-preview-pane .upload-card-preview-details {
-    padding-top: 7px;
+    align-items: baseline;
+    gap: 7.5px;
+    margin: auto 0 12px;
+    padding-top: 0;
+    border-top: 0;
+    font-size: .585rem;
   }
 
   .upload-preview-pane .upload-card-preview-actions {
-    margin-top: 7px;
+    gap: 4.5px;
+    margin-top: 0;
   }
 
   .upload-preview-pane .upload-card-preview-actions span {
-    min-height: 29px;
+    min-height: 33px;
+    padding: 5px;
+    font-size: .6rem;
   }
 
   .upload-preview-pane .upload-preview-mode-label-list {
-    margin-top: 10px;
+    margin-top: 18px;
   }
 
   .upload-preview-pane .upload-list-preview {
