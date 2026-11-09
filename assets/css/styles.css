@@ -1360,7 +1360,28 @@ a {
 }
 
 .is-list-view .card-actions-three {
+  display: grid;
   min-width: 326px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.is-list-view .card-actions-three .button {
+  min-width: 0;
+}
+
+.is-list-view .youtube-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.is-list-view .youtube-actions > :first-child {
+  grid-column: span 2;
+}
+
+.is-list-view .youtube-actions .button {
+  min-width: 0;
 }
 
 .is-list-view .card-actions .button {
@@ -2195,6 +2216,18 @@ button.button {
     min-width: 0;
     flex-direction: column;
   }
+
+  .is-list-view .youtube-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .is-list-view .card-actions-three {
+    display: flex;
+  }
+
+  .is-list-view .youtube-actions > :first-child {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 620px) {
@@ -2433,6 +2466,14 @@ button.button {
 
   .is-list-view .card-actions-three {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .is-list-view .youtube-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .is-list-view .youtube-actions > :first-child {
+    grid-column: span 2;
   }
 
   .is-list-view .card-actions .button {

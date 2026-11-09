@@ -933,6 +933,7 @@
       actions.appendChild(downloadLink);
       actions.classList.add("card-actions-three", "responsive-preview-actions");
     } else if (material.type === "video" && isYouTubeMaterial(material)) {
+      actions.classList.add("youtube-actions");
       const openLink = createElement("a", "button button-primary", "YouTube에서 보기");
       openLink.href = resolveUrl(material.file);
       openLink.target = "_blank";
