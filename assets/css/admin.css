@@ -94,10 +94,11 @@ body.upload-modal-open {
 
 .upload-dialog {
   width: min(1120px, calc(100% - 40px));
-  max-height: min(92vh, 940px);
+  height: min(92dvh, 940px);
+  max-height: min(92dvh, 940px);
   margin: auto;
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
   border: 0;
   border-radius: 20px;
   color: var(--slate-900);
@@ -112,6 +113,11 @@ body.upload-modal-open {
 
 .upload-dialog-card {
   position: relative;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
   padding: 0 30px 30px;
   border: 0;
   border-radius: 20px;
@@ -120,10 +126,10 @@ body.upload-modal-open {
 }
 
 .upload-dialog-sticky-header {
-  position: sticky;
+  position: relative;
   z-index: 5;
-  top: 0;
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
@@ -133,6 +139,20 @@ body.upload-modal-open {
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 5px 14px rgba(7, 29, 55, 0.055);
   backdrop-filter: blur(8px);
+}
+
+.upload-dialog-card > form {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.upload-dialog #uploadFields {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
 }
 
 .upload-dialog-sticky-header .admin-card-heading {
@@ -146,13 +166,19 @@ body.upload-modal-open {
 
 .upload-form-workspace {
   display: grid;
+  min-height: 0;
+  flex: 1;
   grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.95fr);
-  align-items: start;
+  align-items: stretch;
   gap: 20px;
 }
 
 .upload-form-fields {
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding: 20px;
   border: 1px solid var(--slate-200);
   border-radius: 16px;
@@ -179,9 +205,10 @@ body.upload-modal-open {
 }
 
 .upload-preview-pane {
-  position: sticky;
-  top: 102px;
+  position: relative;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .upload-preview-pane .upload-card-preview-section {
@@ -189,19 +216,12 @@ body.upload-modal-open {
 }
 
 .upload-form-footer {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
-  align-items: stretch;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.upload-form-footer .destination-box {
-  margin: 0;
+  flex: 0 0 auto;
+  margin-top: 14px;
 }
 
 .upload-form-footer .upload-submit {
-  min-height: 100%;
+  min-height: 52px;
 }
 
 .security-note {
@@ -1834,17 +1854,123 @@ fieldset:disabled {
   }
 }
 
+@media (min-width: 881px) {
+  .upload-preview-pane .upload-card-preview-section {
+    height: 100%;
+    overflow: hidden;
+    padding: 14px;
+  }
+
+  .upload-preview-pane .upload-card-preview-heading {
+    margin-bottom: 8px;
+  }
+
+  .upload-preview-pane .upload-card-preview-heading p {
+    display: none;
+  }
+
+  .upload-preview-pane .upload-preview-mode-label {
+    margin-bottom: 6px;
+  }
+
+  .upload-preview-pane .upload-preview-mode-label strong {
+    min-height: 22px;
+    padding: 3px 8px;
+  }
+
+  .upload-preview-pane .upload-card-preview {
+    width: min(100%, 260px);
+  }
+
+  .upload-preview-pane .upload-card-preview-body {
+    padding: 10px;
+  }
+
+  .upload-preview-pane .upload-card-preview h3 {
+    margin-top: 7px;
+    font-size: 0.84rem;
+  }
+
+  .upload-preview-pane .upload-card-preview-body > p {
+    min-height: 30px;
+    margin: 4px 0 7px;
+    font-size: 0.68rem;
+  }
+
+  .upload-preview-pane .upload-card-preview-details {
+    padding-top: 7px;
+  }
+
+  .upload-preview-pane .upload-card-preview-actions {
+    margin-top: 7px;
+  }
+
+  .upload-preview-pane .upload-card-preview-actions span {
+    min-height: 29px;
+  }
+
+  .upload-preview-pane .upload-preview-mode-label-list {
+    margin-top: 10px;
+  }
+
+  .upload-preview-pane .upload-list-preview {
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 6px 10px;
+    padding: 8px;
+  }
+
+  .upload-preview-pane .upload-list-preview-thumbnail {
+    width: 90px;
+  }
+
+  .upload-preview-pane .upload-list-preview-actions {
+    padding-top: 5px;
+  }
+
+  .upload-preview-pane .upload-list-preview-actions span {
+    min-height: 27px;
+  }
+}
+
 @media (max-width: 880px) {
+  .upload-dialog {
+    height: auto;
+    max-height: 94dvh;
+    overflow: auto;
+  }
+
+  .upload-dialog-card {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .upload-dialog-sticky-header {
+    position: sticky;
+    top: 0;
+  }
+
+  .upload-dialog-card > form,
+  .upload-dialog #uploadFields {
+    display: block;
+  }
+
   .upload-form-workspace {
+    min-height: auto;
     grid-template-columns: 1fr;
+  }
+
+  .upload-form-fields {
+    overflow: visible;
   }
 
   .upload-preview-pane {
     position: static;
+    overflow: visible;
   }
 
   .upload-form-footer {
-    grid-template-columns: 1fr;
+    margin-top: 14px;
   }
 
   .inventory-filter-field {

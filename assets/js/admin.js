@@ -84,7 +84,6 @@
     uploadSecurityInputs: [...document.querySelectorAll('input[name="uploadSecurityMode"]')],
     uploadSecurityPasswordGroup: document.querySelector("#uploadSecurityPasswordGroup"),
     uploadSecurityPassword: document.querySelector("#uploadSecurityPassword"),
-    destinationPreview: document.querySelector("#destinationPreview"),
     progress: document.querySelector("#uploadProgress"),
     progressTitle: document.querySelector("#progressTitle"),
     progressMessage: document.querySelector("#progressMessage"),
@@ -536,27 +535,7 @@
       elements.fileHelp.textContent =
         "PDF, PNG, JPG, JPEG, WebP, PPT, PPTX, DOC 또는 DOCX 자료를 선택하세요. 최대 20MB입니다.";
     }
-    updateDestinationPreview();
     updateUploadCardPreview();
-  }
-
-  function updateDestinationPreview() {
-    const category = getSelectedCategory();
-    const type = getSelectedType();
-    const file = elements.materialFile.files[0];
-
-    if (!category || !type) {
-      elements.destinationPreview.textContent = "사업과 자료 유형을 선택해 주세요.";
-      return;
-    }
-
-    if (isVideoType(type) && getVideoSourceMethod() === "youtube") {
-      elements.destinationPreview.textContent = elements.youtubeUrl.value.trim() || "YouTube 외부 링크로 등록";
-      return;
-    }
-
-    const fileName = file ? sanitizeFileName(file.name) : "선택한-파일명";
-    elements.destinationPreview.textContent = `assets/materials/${category.folder || category.id}/${type.folder}/${timestampString()}-${fileName}`;
   }
 
   function updateFileLabels() {
@@ -576,7 +555,6 @@
     if (file && !elements.title.value.trim()) {
       elements.title.value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
     }
-    updateDestinationPreview();
     updateUploadCardPreview();
   }
 
@@ -1949,7 +1927,6 @@
       populateInventoryFilters(library);
       elements.category.value = category.id;
       updateFileAccept();
-      updateDestinationPreview();
       renderInventory(library);
       elements.categoryDialog.close();
       clearResult();
@@ -2236,13 +2213,11 @@
     }
   });
   elements.category.addEventListener("change", () => {
-    updateDestinationPreview();
     updateUploadCardPreview();
   });
   elements.materialType.addEventListener("change", updateFileAccept);
   elements.videoSourceInputs.forEach((input) => input.addEventListener("change", updateFileAccept));
   elements.youtubeUrl.addEventListener("input", () => {
-    updateDestinationPreview();
     updateUploadCardPreview();
   });
   elements.materialFile.addEventListener("change", updateFileLabels);
