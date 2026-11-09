@@ -38,7 +38,8 @@
   padding-block: 48px 72px;
 }
 
-body.upload-modal-open {
+body.upload-modal-open,
+body.dialog-scroll-locked {
   overflow: hidden;
 }
 

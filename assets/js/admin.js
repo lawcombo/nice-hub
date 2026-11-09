@@ -1398,6 +1398,7 @@
     elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
     setEditContentDialogStatus();
     hideEditContentProgress();
+    document.body.classList.add("dialog-scroll-locked");
     elements.editContentDialog.showModal();
     window.requestAnimationFrame(() => elements.editMaterialTitle.focus());
   }
@@ -2138,10 +2139,8 @@
   elements.editContentDialog.addEventListener("cancel", (event) => {
     if (isEditingMaterial) event.preventDefault();
   });
-  elements.editContentDialog.addEventListener("click", (event) => {
-    if (event.target === elements.editContentDialog) closeEditContentDialog();
-  });
   elements.editContentDialog.addEventListener("close", () => {
+    document.body.classList.remove("dialog-scroll-locked");
     elements.editContentForm.reset();
     elements.editDescriptionCount.textContent = "0";
     setEditContentDialogStatus();
