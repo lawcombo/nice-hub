@@ -2119,6 +2119,7 @@
   elements.openUploadDialog.addEventListener("click", openUploadModal);
   elements.closeUploadDialog.addEventListener("click", () => closeUploadModal());
   elements.uploadDialog.addEventListener("cancel", (event) => {
+    if (event.target !== elements.uploadDialog) return;
     event.preventDefault();
     closeUploadModal();
   });
