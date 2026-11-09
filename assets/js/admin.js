@@ -62,6 +62,18 @@
     uploadPreviewFileInfo: document.querySelector("#uploadPreviewFileInfo"),
     uploadPreviewDate: document.querySelector("#uploadPreviewDate"),
     uploadPreviewActions: document.querySelector("#uploadPreviewActions"),
+    uploadListPreviewThumbnail: document.querySelector("#uploadListPreviewThumbnail"),
+    uploadListPreviewThumbnailFallback: document.querySelector("#uploadListPreviewThumbnailFallback"),
+    uploadListPreviewFormatMark: document.querySelector("#uploadListPreviewFormatMark"),
+    uploadListPreviewTypeFallback: document.querySelector("#uploadListPreviewTypeFallback"),
+    uploadListPreviewSecurity: document.querySelector("#uploadListPreviewSecurity"),
+    uploadListPreviewCategory: document.querySelector("#uploadListPreviewCategory"),
+    uploadListPreviewType: document.querySelector("#uploadListPreviewType"),
+    uploadListPreviewTitle: document.querySelector("#uploadListPreviewTitle"),
+    uploadListPreviewDescription: document.querySelector("#uploadListPreviewDescription"),
+    uploadListPreviewFileInfo: document.querySelector("#uploadListPreviewFileInfo"),
+    uploadListPreviewDate: document.querySelector("#uploadListPreviewDate"),
+    uploadListPreviewActions: document.querySelector("#uploadListPreviewActions"),
     title: document.querySelector("#title"),
     description: document.querySelector("#description"),
     descriptionCount: document.querySelector("#descriptionCount"),
@@ -541,6 +553,29 @@
     return labels[String(format || "").toLowerCase()] || String(format || "파일").toUpperCase();
   }
 
+  function syncUploadPreviewThumbnail(image, fallback) {
+    if (!uploadPreviewThumbnailUrl) {
+      image.hidden = true;
+      image.removeAttribute("src");
+      fallback.hidden = false;
+      return;
+    }
+
+    image.onload = () => {
+      image.hidden = false;
+      fallback.hidden = true;
+    };
+    image.onerror = () => {
+      image.hidden = true;
+      fallback.hidden = false;
+    };
+    if (image.src !== uploadPreviewThumbnailUrl) {
+      image.hidden = true;
+      fallback.hidden = false;
+      image.src = uploadPreviewThumbnailUrl;
+    }
+  }
+
   function updateUploadPreviewThumbnail(thumbnail) {
     if (thumbnail !== uploadPreviewThumbnailFile) {
       clearUploadPreviewThumbnail();
@@ -548,26 +583,8 @@
       if (thumbnail) uploadPreviewThumbnailUrl = URL.createObjectURL(thumbnail);
     }
 
-    if (!uploadPreviewThumbnailUrl) {
-      elements.uploadPreviewThumbnail.hidden = true;
-      elements.uploadPreviewThumbnail.removeAttribute("src");
-      elements.uploadPreviewThumbnailFallback.hidden = false;
-      return;
-    }
-
-    elements.uploadPreviewThumbnail.onload = () => {
-      elements.uploadPreviewThumbnail.hidden = false;
-      elements.uploadPreviewThumbnailFallback.hidden = true;
-    };
-    elements.uploadPreviewThumbnail.onerror = () => {
-      elements.uploadPreviewThumbnail.hidden = true;
-      elements.uploadPreviewThumbnailFallback.hidden = false;
-    };
-    if (elements.uploadPreviewThumbnail.src !== uploadPreviewThumbnailUrl) {
-      elements.uploadPreviewThumbnail.hidden = true;
-      elements.uploadPreviewThumbnailFallback.hidden = false;
-      elements.uploadPreviewThumbnail.src = uploadPreviewThumbnailUrl;
-    }
+    syncUploadPreviewThumbnail(elements.uploadPreviewThumbnail, elements.uploadPreviewThumbnailFallback);
+    syncUploadPreviewThumbnail(elements.uploadListPreviewThumbnail, elements.uploadListPreviewThumbnailFallback);
   }
 
   function updateUploadPreviewActions(format, isYoutube) {
@@ -577,9 +594,13 @@
     else if (["pdf", "image"].includes(format)) labels = ["문서보기", "다운로드", "링크 복사"];
     else labels = ["다운로드", "링크 복사"];
 
-    elements.uploadPreviewActions.replaceChildren(
-      ...labels.map((label, index) => createElement("span", index === 0 ? "is-primary" : "", label)),
-    );
+    [elements.uploadPreviewActions, elements.uploadListPreviewActions].forEach((container) => {
+      container.classList.toggle("is-three", labels.length === 3);
+      container.classList.toggle("is-youtube", isYoutube);
+      container.replaceChildren(
+        ...labels.map((label, index) => createElement("span", index === 0 ? "is-primary" : "", label)),
+      );
+    });
   }
 
   function updateUploadCardPreview() {
@@ -594,20 +615,36 @@
     const typeLabel = type?.label || "자료 유형";
     const fileSize = file ? formatPreviewFileSize(file.size) : "";
 
-    elements.uploadPreviewCategory.textContent = category?.label || "사업 카테고리";
-    elements.uploadPreviewType.textContent = typeLabel;
-    elements.uploadPreviewTypeFallback.textContent = typeLabel;
-    elements.uploadPreviewTitle.textContent = elements.title.value.trim() || "자료명이 표시됩니다.";
-    elements.uploadPreviewDescription.textContent =
-      elements.description.value.trim() || "짧은 설명이 표시됩니다.";
-    elements.uploadPreviewFormatMark.textContent = formatLabel.toUpperCase();
-    elements.uploadPreviewFileInfo.textContent = isYoutube
+    const categoryLabel = category?.label || "사업 카테고리";
+    const title = elements.title.value.trim() || "자료명이 표시됩니다.";
+    const description = elements.description.value.trim() || "짧은 설명이 표시됩니다.";
+    const fileInfo = isYoutube
       ? "동영상 · YouTube"
       : [formatLabel, fileSize].filter(Boolean).join(" · ") || "파일 형식";
-    elements.uploadPreviewDate.textContent = elements.updatedAt.value
+    const date = elements.updatedAt.value
       ? `등록 ${formatDate(elements.updatedAt.value)}`
       : "등록 날짜";
-    elements.uploadPreviewSecurity.hidden = getSecurityMode(elements.uploadSecurityInputs) !== "secure";
+    const isSecure = getSecurityMode(elements.uploadSecurityInputs) === "secure";
+
+    elements.uploadPreviewCategory.textContent = categoryLabel;
+    elements.uploadPreviewType.textContent = typeLabel;
+    elements.uploadPreviewTypeFallback.textContent = typeLabel;
+    elements.uploadPreviewTitle.textContent = title;
+    elements.uploadPreviewDescription.textContent = description;
+    elements.uploadPreviewFormatMark.textContent = formatLabel.toUpperCase();
+    elements.uploadPreviewFileInfo.textContent = fileInfo;
+    elements.uploadPreviewDate.textContent = date;
+    elements.uploadPreviewSecurity.hidden = !isSecure;
+
+    elements.uploadListPreviewCategory.textContent = categoryLabel;
+    elements.uploadListPreviewType.textContent = typeLabel;
+    elements.uploadListPreviewTypeFallback.textContent = typeLabel;
+    elements.uploadListPreviewTitle.textContent = title;
+    elements.uploadListPreviewDescription.textContent = description;
+    elements.uploadListPreviewFormatMark.textContent = formatLabel.toUpperCase();
+    elements.uploadListPreviewFileInfo.textContent = fileInfo;
+    elements.uploadListPreviewDate.textContent = date;
+    elements.uploadListPreviewSecurity.hidden = !isSecure;
 
     updateUploadPreviewThumbnail(thumbnail);
     updateUploadPreviewActions(format, isYoutube);

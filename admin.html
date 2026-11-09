@@ -261,10 +261,14 @@
               <section class="upload-card-preview-section" aria-labelledby="uploadCardPreviewHeading">
                 <div class="upload-card-preview-heading">
                   <div>
-                    <strong id="uploadCardPreviewHeading">메인페이지 카드 미리보기</strong>
+                    <strong id="uploadCardPreviewHeading">메인페이지 미리보기</strong>
                     <p>입력한 내용과 표지 이미지가 실시간으로 반영됩니다.</p>
                   </div>
                   <span>미리보기</span>
+                </div>
+                <div class="upload-preview-mode-label">
+                  <strong>카드형</strong>
+                  <span>메인페이지 기본 보기</span>
                 </div>
                 <article class="upload-card-preview" aria-label="업로드할 자료 카드 미리보기">
                   <div class="upload-card-preview-thumbnail">
@@ -293,6 +297,39 @@
                     </div>
                     <div id="uploadPreviewActions" class="upload-card-preview-actions" aria-hidden="true"></div>
                   </div>
+                </article>
+
+                <div class="upload-preview-mode-label upload-preview-mode-label-list">
+                  <strong>목록형</strong>
+                  <span>컴팩트 보기</span>
+                </div>
+                <article class="upload-list-preview" aria-label="업로드할 자료 목록 미리보기">
+                  <div class="upload-list-preview-thumbnail">
+                    <img id="uploadListPreviewThumbnail" alt="선택한 표지 목록형 미리보기" hidden />
+                    <div id="uploadListPreviewThumbnailFallback" class="upload-card-preview-fallback upload-list-preview-fallback">
+                      <span id="uploadListPreviewFormatMark">FILE</span>
+                      <small id="uploadListPreviewTypeFallback">자료 유형</small>
+                    </div>
+                    <span id="uploadListPreviewSecurity" class="upload-card-preview-security" hidden>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7.5 10V7.5a4.5 4.5 0 0 1 9 0V10M6.5 10h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" />
+                      </svg>
+                      보안
+                    </span>
+                  </div>
+                  <div class="upload-list-preview-content">
+                    <div class="upload-card-preview-badges upload-list-preview-badges">
+                      <span id="uploadListPreviewCategory">사업 카테고리</span>
+                      <span id="uploadListPreviewType">자료 유형</span>
+                    </div>
+                    <h3 id="uploadListPreviewTitle">자료명이 표시됩니다.</h3>
+                    <p id="uploadListPreviewDescription">짧은 설명이 표시됩니다.</p>
+                    <div class="upload-list-preview-details">
+                      <strong id="uploadListPreviewFileInfo">파일 형식</strong>
+                      <span id="uploadListPreviewDate">등록 날짜</span>
+                    </div>
+                  </div>
+                  <div id="uploadListPreviewActions" class="upload-list-preview-actions" aria-hidden="true"></div>
                 </article>
               </section>
 
