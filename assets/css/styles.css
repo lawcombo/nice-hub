@@ -639,6 +639,56 @@ a {
   height: 1px;
 }
 
+.scroll-top-floating {
+  position: fixed;
+  z-index: 89;
+  right: max(24px, calc((100vw - 1180px) / 2 + 24px));
+  bottom: calc(88px + var(--quick-filter-footer-lift, 0px) + env(safe-area-inset-bottom));
+  display: inline-grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--slate-300);
+  border-radius: 50%;
+  color: var(--navy-900);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 11px 26px rgba(7, 31, 61, 0.18);
+  cursor: pointer;
+  transition:
+    bottom 0.08s linear,
+    color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.scroll-top-floating[hidden] {
+  display: none;
+}
+
+.scroll-top-floating svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.scroll-top-floating:hover {
+  color: var(--blue-700);
+  background: var(--blue-50);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(7, 31, 61, 0.22);
+}
+
+.scroll-top-floating:focus-visible {
+  outline: none;
+  box-shadow: var(--focus), 0 11px 26px rgba(7, 31, 61, 0.18);
+}
+
 .quick-filter-floating {
   position: fixed;
   z-index: 90;
@@ -2229,6 +2279,18 @@ button.button {
     min-height: 46px;
     padding: 9px 14px;
     font-size: 0.8rem;
+  }
+
+  .scroll-top-floating {
+    right: 16px;
+    bottom: calc(76px + var(--quick-filter-footer-lift, 0px) + env(safe-area-inset-bottom));
+    width: 42px;
+    height: 42px;
+  }
+
+  .scroll-top-floating svg {
+    width: 21px;
+    height: 21px;
   }
 
   .materials-end-toast.avoid-quick-filter {

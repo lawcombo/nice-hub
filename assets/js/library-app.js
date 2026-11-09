@@ -26,6 +26,7 @@
     summary: document.querySelector("#resultSummary"),
     searchInput: document.querySelector("#materialSearch"),
     clearSearch: document.querySelector("#clearMaterialSearch"),
+    scrollToTop: document.querySelector("#scrollToTop"),
     openQuickFilter: document.querySelector("#openQuickFilter"),
     quickFilterActiveCount: document.querySelector("#quickFilterActiveCount"),
     quickFilterModal: document.querySelector("#quickFilterModal"),
@@ -724,6 +725,8 @@
     const footerLift = Math.max(0, Math.min(footerRect.height, window.innerHeight - footerRect.top));
     elements.openQuickFilter.hidden = controlsRect.bottom >= 12;
     elements.openQuickFilter.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
+    elements.scrollToTop.hidden = window.scrollY < Math.max(360, window.innerHeight * 0.55);
+    elements.scrollToTop.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
     if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
   }
@@ -731,6 +734,11 @@
   function scheduleQuickFilterFloatingVisibility() {
     if (quickFilterVisibilityFrame) return;
     quickFilterVisibilityFrame = window.requestAnimationFrame(updateQuickFilterFloatingVisibility);
+  }
+
+  function scrollPageToTop() {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   }
 
   function getRegistrationTime(material) {
@@ -1736,6 +1744,7 @@
   elements.searchInput.addEventListener("input", updateSearch);
   elements.searchInput.addEventListener("search", updateSearch);
   elements.clearSearch.addEventListener("click", clearSearch);
+  elements.scrollToTop.addEventListener("click", scrollPageToTop);
   elements.openQuickFilter.addEventListener("click", openQuickFilter);
   elements.closeQuickFilter.addEventListener("click", () => requestModalClose("quick-filter", closeQuickFilter));
   elements.quickFilterModal

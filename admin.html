@@ -258,6 +258,44 @@
                 </div>
               </div>
 
+              <section class="upload-card-preview-section" aria-labelledby="uploadCardPreviewHeading">
+                <div class="upload-card-preview-heading">
+                  <div>
+                    <strong id="uploadCardPreviewHeading">메인페이지 카드 미리보기</strong>
+                    <p>입력한 내용과 표지 이미지가 실시간으로 반영됩니다.</p>
+                  </div>
+                  <span>미리보기</span>
+                </div>
+                <article class="upload-card-preview" aria-label="업로드할 자료 카드 미리보기">
+                  <div class="upload-card-preview-thumbnail">
+                    <img id="uploadPreviewThumbnail" alt="선택한 표지 미리보기" hidden />
+                    <div id="uploadPreviewThumbnailFallback" class="upload-card-preview-fallback">
+                      <span id="uploadPreviewFormatMark">FILE</span>
+                      <small id="uploadPreviewTypeFallback">자료 유형</small>
+                    </div>
+                    <span id="uploadPreviewSecurity" class="upload-card-preview-security" hidden>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7.5 10V7.5a4.5 4.5 0 0 1 9 0V10M6.5 10h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" />
+                      </svg>
+                      보안 문서
+                    </span>
+                  </div>
+                  <div class="upload-card-preview-body">
+                    <div class="upload-card-preview-badges">
+                      <span id="uploadPreviewCategory">사업 카테고리</span>
+                      <span id="uploadPreviewType">자료 유형</span>
+                    </div>
+                    <h3 id="uploadPreviewTitle">자료명이 표시됩니다.</h3>
+                    <p id="uploadPreviewDescription">짧은 설명이 표시됩니다.</p>
+                    <div class="upload-card-preview-details">
+                      <strong id="uploadPreviewFileInfo">파일 형식</strong>
+                      <span id="uploadPreviewDate">등록 날짜</span>
+                    </div>
+                    <div id="uploadPreviewActions" class="upload-card-preview-actions" aria-hidden="true"></div>
+                  </div>
+                </article>
+              </section>
+
               <div class="destination-box">
                 <span>저장 위치</span>
                 <code id="destinationPreview">사업과 자료 유형을 선택해 주세요.</code>

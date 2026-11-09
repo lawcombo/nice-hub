@@ -49,6 +49,18 @@
     youtubeUrl: document.querySelector("#youtubeUrl"),
     thumbnailFile: document.querySelector("#thumbnailFile"),
     thumbnailFileName: document.querySelector("#thumbnailFileName"),
+    uploadPreviewThumbnail: document.querySelector("#uploadPreviewThumbnail"),
+    uploadPreviewThumbnailFallback: document.querySelector("#uploadPreviewThumbnailFallback"),
+    uploadPreviewFormatMark: document.querySelector("#uploadPreviewFormatMark"),
+    uploadPreviewTypeFallback: document.querySelector("#uploadPreviewTypeFallback"),
+    uploadPreviewSecurity: document.querySelector("#uploadPreviewSecurity"),
+    uploadPreviewCategory: document.querySelector("#uploadPreviewCategory"),
+    uploadPreviewType: document.querySelector("#uploadPreviewType"),
+    uploadPreviewTitle: document.querySelector("#uploadPreviewTitle"),
+    uploadPreviewDescription: document.querySelector("#uploadPreviewDescription"),
+    uploadPreviewFileInfo: document.querySelector("#uploadPreviewFileInfo"),
+    uploadPreviewDate: document.querySelector("#uploadPreviewDate"),
+    uploadPreviewActions: document.querySelector("#uploadPreviewActions"),
     title: document.querySelector("#title"),
     description: document.querySelector("#description"),
     descriptionCount: document.querySelector("#descriptionCount"),
@@ -143,6 +155,8 @@
   let lastCategoryTrigger = null;
   let lastMaterialTypeTrigger = null;
   let pdfJsModulePromise = null;
+  let uploadPreviewThumbnailFile = null;
+  let uploadPreviewThumbnailUrl = "";
   const localThumbnailPreviews = new Map();
 
   class GitHubApiError extends Error {
@@ -215,6 +229,7 @@
       elements.uploadSecurityPasswordGroup,
       elements.uploadSecurityPassword,
     );
+    updateUploadCardPreview();
   }
 
   function updateEditSecurityFields() {
@@ -428,6 +443,7 @@
         "PDF, PNG, JPG, JPEG, WebP, PPT, PPTX, DOC 또는 DOCX 자료를 선택하세요. 최대 20MB입니다.";
     }
     updateDestinationPreview();
+    updateUploadCardPreview();
   }
 
   function updateDestinationPreview() {
@@ -459,6 +475,109 @@
       elements.title.value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
     }
     updateDestinationPreview();
+    updateUploadCardPreview();
+  }
+
+  function clearUploadPreviewThumbnail() {
+    if (uploadPreviewThumbnailUrl) URL.revokeObjectURL(uploadPreviewThumbnailUrl);
+    uploadPreviewThumbnailUrl = "";
+    uploadPreviewThumbnailFile = null;
+  }
+
+  function formatPreviewFileSize(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "";
+    const units = ["B", "KB", "MB", "GB"];
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const amount = bytes / 1024 ** unitIndex;
+    return `${amount.toFixed(unitIndex === 0 || amount >= 10 ? 0 : 1)}${units[unitIndex]}`;
+  }
+
+  function getUploadPreviewFormatLabel(format) {
+    const labels = {
+      pdf: "PDF",
+      image: "이미지",
+      video: "동영상",
+      youtube: "YouTube",
+      ppt: "PPT",
+      pptx: "PPTX",
+      doc: "Word",
+      docx: "Word",
+      document: "파일",
+      file: "파일",
+    };
+    return labels[String(format || "").toLowerCase()] || String(format || "파일").toUpperCase();
+  }
+
+  function updateUploadPreviewThumbnail(thumbnail) {
+    if (thumbnail !== uploadPreviewThumbnailFile) {
+      clearUploadPreviewThumbnail();
+      uploadPreviewThumbnailFile = thumbnail || null;
+      if (thumbnail) uploadPreviewThumbnailUrl = URL.createObjectURL(thumbnail);
+    }
+
+    if (!uploadPreviewThumbnailUrl) {
+      elements.uploadPreviewThumbnail.hidden = true;
+      elements.uploadPreviewThumbnail.removeAttribute("src");
+      elements.uploadPreviewThumbnailFallback.hidden = false;
+      return;
+    }
+
+    elements.uploadPreviewThumbnail.onload = () => {
+      elements.uploadPreviewThumbnail.hidden = false;
+      elements.uploadPreviewThumbnailFallback.hidden = true;
+    };
+    elements.uploadPreviewThumbnail.onerror = () => {
+      elements.uploadPreviewThumbnail.hidden = true;
+      elements.uploadPreviewThumbnailFallback.hidden = false;
+    };
+    if (elements.uploadPreviewThumbnail.src !== uploadPreviewThumbnailUrl) {
+      elements.uploadPreviewThumbnail.hidden = true;
+      elements.uploadPreviewThumbnailFallback.hidden = false;
+      elements.uploadPreviewThumbnail.src = uploadPreviewThumbnailUrl;
+    }
+  }
+
+  function updateUploadPreviewActions(format, isYoutube) {
+    let labels;
+    if (isYoutube) labels = ["YouTube에서 보기", "링크 복사"];
+    else if (format === "video") labels = ["재생", "다운로드", "링크 복사"];
+    else if (["pdf", "image"].includes(format)) labels = ["문서보기", "다운로드", "링크 복사"];
+    else labels = ["다운로드", "링크 복사"];
+
+    elements.uploadPreviewActions.replaceChildren(
+      ...labels.map((label, index) => createElement("span", index === 0 ? "is-primary" : "", label)),
+    );
+  }
+
+  function updateUploadCardPreview() {
+    if (!elements.uploadPreviewTitle) return;
+    const category = getSelectedCategory();
+    const type = getSelectedType();
+    const file = elements.materialFile.files?.[0];
+    const thumbnail = elements.thumbnailFile.files?.[0];
+    const isYoutube = isVideoType(type) && getVideoSourceMethod() === "youtube";
+    const format = isYoutube ? "youtube" : getUploadedFormat(file, type);
+    const formatLabel = getUploadPreviewFormatLabel(format);
+    const typeLabel = type?.label || "자료 유형";
+    const fileSize = file ? formatPreviewFileSize(file.size) : "";
+
+    elements.uploadPreviewCategory.textContent = category?.label || "사업 카테고리";
+    elements.uploadPreviewType.textContent = typeLabel;
+    elements.uploadPreviewTypeFallback.textContent = typeLabel;
+    elements.uploadPreviewTitle.textContent = elements.title.value.trim() || "자료명이 표시됩니다.";
+    elements.uploadPreviewDescription.textContent =
+      elements.description.value.trim() || "짧은 설명이 표시됩니다.";
+    elements.uploadPreviewFormatMark.textContent = formatLabel.toUpperCase();
+    elements.uploadPreviewFileInfo.textContent = isYoutube
+      ? "동영상 · YouTube"
+      : [formatLabel, fileSize].filter(Boolean).join(" · ") || "파일 형식";
+    elements.uploadPreviewDate.textContent = elements.updatedAt.value
+      ? `등록 ${formatDate(elements.updatedAt.value)}`
+      : "등록 날짜";
+    elements.uploadPreviewSecurity.hidden = getSecurityMode(elements.uploadSecurityInputs) !== "secure";
+
+    updateUploadPreviewThumbnail(thumbnail);
+    updateUploadPreviewActions(format, isYoutube);
   }
 
   function setConnectionStatus(message, type = "") {
@@ -1911,16 +2030,28 @@
     if (lastDeleteTrigger && document.contains(lastDeleteTrigger)) lastDeleteTrigger.focus();
     lastDeleteTrigger = null;
   });
-  window.addEventListener("beforeunload", clearLocalThumbnailPreviews);
-  elements.category.addEventListener("change", updateDestinationPreview);
+  window.addEventListener("beforeunload", () => {
+    clearLocalThumbnailPreviews();
+    clearUploadPreviewThumbnail();
+  });
+  elements.category.addEventListener("change", () => {
+    updateDestinationPreview();
+    updateUploadCardPreview();
+  });
   elements.materialType.addEventListener("change", updateFileAccept);
   elements.videoSourceInputs.forEach((input) => input.addEventListener("change", updateFileAccept));
-  elements.youtubeUrl.addEventListener("input", updateDestinationPreview);
+  elements.youtubeUrl.addEventListener("input", () => {
+    updateDestinationPreview();
+    updateUploadCardPreview();
+  });
   elements.materialFile.addEventListener("change", updateFileLabels);
   elements.thumbnailFile.addEventListener("change", updateFileLabels);
+  elements.title.addEventListener("input", updateUploadCardPreview);
   elements.description.addEventListener("input", () => {
     elements.descriptionCount.textContent = String(elements.description.value.length);
+    updateUploadCardPreview();
   });
+  elements.updatedAt.addEventListener("input", updateUploadCardPreview);
   elements.token.addEventListener("input", () => {
     if (!verifiedToken || elements.token.value.trim() === verifiedToken) return;
     verifiedToken = "";
