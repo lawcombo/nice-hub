@@ -906,6 +906,15 @@ a {
   font-weight: 700;
 }
 
+.share-download-fallback {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.share-download-fallback[hidden] {
+  display: none;
+}
+
 @keyframes share-redirect-spin {
   to {
     transform: rotate(360deg);
@@ -913,6 +922,7 @@ a {
 }
 
 .material-card {
+  position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -1063,6 +1073,7 @@ a {
 }
 
 .card-body {
+  position: relative;
   display: flex;
   min-height: 244px;
   flex: 1;
@@ -1075,6 +1086,55 @@ a {
   min-width: 0;
   flex: 1;
   flex-direction: column;
+}
+
+.card-heading-content {
+  min-height: 82px;
+  padding-right: 94px;
+}
+
+.material-card-qr {
+  position: absolute;
+  z-index: 2;
+  top: 22px;
+  right: 22px;
+  display: grid;
+  width: 82px;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  padding: 4px;
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  color: var(--navy-900);
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(7, 29, 55, 0.08);
+}
+
+.material-card-qr:hover {
+  border-color: var(--blue-400);
+  box-shadow: 0 6px 16px rgba(7, 29, 55, 0.14);
+}
+
+.material-card-qr:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.material-card-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.material-card-qr-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border: 2px solid var(--navy-900);
+  font-size: 0.72rem;
+  font-weight: 900;
 }
 
 .card-meta {
@@ -1316,10 +1376,26 @@ a {
   min-width: 0;
   min-height: 0;
   flex: 1;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 72px auto;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
   padding: 18px 20px 18px 0;
+}
+
+.is-list-view .card-content {
+  grid-column: 1;
+}
+
+.is-list-view .card-heading-content {
+  min-height: 0;
+  padding-right: 0;
+}
+
+.is-list-view .material-card-qr {
+  position: static;
+  width: 72px;
+  align-self: center;
+  grid-column: 2;
 }
 
 .is-list-view .card-meta {
@@ -1356,6 +1432,7 @@ a {
 }
 
 .is-list-view .card-actions {
+  grid-column: 3;
   display: flex;
   width: 326px;
   min-width: 326px;
@@ -2210,7 +2287,12 @@ button.button {
   }
 
   .is-list-view .card-body {
+    grid-template-columns: minmax(0, 1fr) 60px auto;
     gap: 16px;
+  }
+
+  .is-list-view .material-card-qr {
+    width: 60px;
   }
 
   .is-list-view .card-actions,
@@ -2348,6 +2430,15 @@ button.button {
     grid-template-columns: 1fr;
   }
 
+  .card-heading-content {
+    min-height: 72px;
+    padding-right: 82px;
+  }
+
+  .material-card-qr {
+    width: 72px;
+  }
+
   .button.mobile-preview-action {
     display: inline-flex;
   }
@@ -2411,6 +2502,19 @@ button.button {
     grid-column: 2;
     justify-content: center;
     padding: 11px 12px 8px;
+  }
+
+  .is-list-view .card-heading-content {
+    min-height: 54px;
+    padding-right: 60px;
+  }
+
+  .is-list-view .material-card-qr {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 54px;
+    grid-column: auto;
   }
 
   .is-list-view .card-meta {

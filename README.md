@@ -340,6 +340,18 @@ GitHub에서 직접 교체할 경우:
 
 자료 객체만 삭제해도 화면에서는 즉시 사라지지만, 저장소 용량 관리를 위해 사용하지 않는 파일도 함께 정리하는 것이 좋습니다.
 
+## 공유 링크와 QR 썸네일 갱신하기
+
+자료 관리 화면에서 등록·수정·삭제하면 `share/` 폴더의 자료별 공유 페이지도 자동으로 함께 갱신됩니다. 이 페이지의 Open Graph 정보 덕분에 카카오톡 등에서 링크를 공유할 때 자료명, 설명과 썸네일을 표시할 수 있습니다.
+
+`assets/data/library.json`을 GitHub에서 직접 수정했다면 로컬에서 아래 명령을 한 번 실행한 뒤 생성된 `share/` 폴더 변경사항도 함께 커밋하세요.
+
+```powershell
+node scripts/generate-share-pages.js
+```
+
+문자 앱의 링크 미리보기는 휴대폰 기종과 사용 중인 문자 앱의 지원 여부에 따라 표시되지 않을 수 있습니다.
+
 ## GitHub Pages 배포하기
 
 이 프로젝트는 저장소 루트에서 바로 GitHub Pages로 배포할 수 있습니다. CSS, JavaScript, PDF 경로는 모두 상대경로를 사용하므로 `https://사용자명.github.io/저장소명/`처럼 저장소 하위 주소에서도 동작합니다.
@@ -376,3 +388,8 @@ git push -u origin main
 - 테스트용 PDF나 테스트 자료 객체가 실제 배포 목록에 남아 있지 않은지
 - 관리 화면 토큰이 코드나 브라우저 저장소에 남지 않는지
 - 업로드 완료 후 GitHub 커밋과 Pages 반영을 확인했는지
+
+## 사용한 오픈소스
+
+- `qrcode-generator` 2.0.4 — 카드의 QR을 브라우저 안에서 생성하는 MIT 라이선스 라이브러리
+- 라이선스 전문: `assets/vendor/qrcode-generator.LICENSE.txt`

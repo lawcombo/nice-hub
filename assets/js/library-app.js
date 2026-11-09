@@ -900,6 +900,8 @@
     );
 
     const title = createElement("h3", "material-title", material.title);
+    const heading = createElement("div", "card-heading-content");
+    heading.append(meta, title);
     const description = createElement(
       "p",
       "material-description",
@@ -915,6 +917,7 @@
       ? createElement("p", "material-preview-note", "PPT · Word 파일은 미리보기 제공 불가")
       : null;
     const actions = createElement("div", "card-actions");
+    const qrCode = createMaterialQr(material);
 
     if (String(material.format).toLowerCase() === "pdf" || isImageMaterial(material)) {
       const previewButton = createElement("button", "button button-primary mobile-preview-action", "미리보기");
@@ -970,9 +973,9 @@
     if (actions.childElementCount === 3) actions.classList.add("card-actions-three");
 
     const content = createElement("div", "card-content");
-    content.append(meta, title, description, detailRow);
+    content.append(heading, description, detailRow);
     if (previewNotice) content.appendChild(previewNotice);
-    body.append(content, actions);
+    body.append(content, qrCode, actions);
     card.append(thumbnail, body);
     return card;
   }
@@ -1014,6 +1017,49 @@
       createElement("span", "thumbnail-loading-text", "썸네일 이미지 로딩중"),
     );
     return loading;
+  }
+
+  function getMaterialQrUrl(material) {
+    if (isYouTubeMaterial(material)) return resolveUrl(material.file);
+    const url = new URL(getMaterialShareUrl(material, false));
+    if (isMobileDevice()) url.searchParams.set("mode", "download");
+    return url.href;
+  }
+
+  function createMaterialQr(material) {
+    const targetUrl = getMaterialQrUrl(material);
+    const link = createElement("a", "material-card-qr");
+    link.href = targetUrl;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.setAttribute(
+      "aria-label",
+      isYouTubeMaterial(material)
+        ? `${material.title} YouTube 영상 QR로 열기`
+        : `${material.title} QR로 ${isMobileDevice() ? "다운로드" : "열기"}`,
+    );
+    link.title = isYouTubeMaterial(material) ? "QR 스캔 시 YouTube 열기" : "QR 스캔 시 자료 열기";
+
+    if (typeof window.qrcode !== "function" || !targetUrl) {
+      link.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
+      return link;
+    }
+
+    try {
+      const qr = window.qrcode(0, "M");
+      qr.addData(targetUrl);
+      qr.make();
+      link.innerHTML = qr.createSvgTag({ cellSize: 2, margin: 2, scalable: true });
+      const svg = link.querySelector("svg");
+      if (svg) {
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+      }
+    } catch (error) {
+      console.error("자료 QR을 만들지 못했습니다.", error);
+      link.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
+    }
+    return link;
   }
 
   function createDownloadLink(material) {
@@ -1090,12 +1136,13 @@
   async function shareMaterialLink(material, button) {
     const url = getMaterialShareUrl(material);
     if (!url) return;
+    const message = `안녕하세요. 요청하신 ‘${material.title}’ 자료를 전달드립니다.\n아래 링크에서 확인해 주세요.`;
 
     if (isMobileDevice() && typeof navigator.share === "function") {
       try {
         await navigator.share({
           title: material.title,
-          text: `${material.title} 자료를 확인해 보세요.`,
+          text: message,
           url,
         });
         return;
@@ -1106,18 +1153,28 @@
     }
 
     try {
-      await copyText(url);
-      showShareFeedback(button, "링크 복사됨");
+      await copyText(`${message}\n${url}`);
+      showShareFeedback(button, "문구·링크 복사됨");
     } catch (error) {
       console.error("자료 링크를 복사하지 못했습니다.", error);
       showShareFeedback(button, "복사 실패");
     }
   }
 
-  function getMaterialShareUrl(material) {
+  function getMaterialShareUrl(material, includeVersion = true) {
     if (!material?.id) return "";
+    if (window.NiceHubSharePage?.getSharePageUrl) {
+      return window.NiceHubSharePage.getSharePageUrl(material, {
+        publicBaseUrl: new URL("./", document.baseURI).href,
+        includeVersion,
+      });
+    }
     const url = new URL("open.html", document.baseURI);
     url.searchParams.set("id", material.id);
+    if (includeVersion) {
+      const version = material.modifiedAt || material.updatedAt || material.registeredAt;
+      if (version) url.searchParams.set("v", version);
+    }
     return url.href;
   }
 

@@ -65,6 +65,7 @@
     uploadPreviewDescription: document.querySelector("#uploadPreviewDescription"),
     uploadPreviewFileInfo: document.querySelector("#uploadPreviewFileInfo"),
     uploadPreviewDate: document.querySelector("#uploadPreviewDate"),
+    uploadPreviewQr: document.querySelector("#uploadPreviewQr"),
     uploadPreviewActions: document.querySelector("#uploadPreviewActions"),
     uploadListPreviewThumbnail: document.querySelector("#uploadListPreviewThumbnail"),
     uploadListPreviewThumbnailFallback: document.querySelector("#uploadListPreviewThumbnailFallback"),
@@ -77,6 +78,7 @@
     uploadListPreviewDescription: document.querySelector("#uploadListPreviewDescription"),
     uploadListPreviewFileInfo: document.querySelector("#uploadListPreviewFileInfo"),
     uploadListPreviewDate: document.querySelector("#uploadListPreviewDate"),
+    uploadListPreviewQr: document.querySelector("#uploadListPreviewQr"),
     uploadListPreviewActions: document.querySelector("#uploadListPreviewActions"),
     title: document.querySelector("#title"),
     description: document.querySelector("#description"),
@@ -638,6 +640,29 @@
     });
   }
 
+  function renderUploadPreviewQr(container, targetUrl) {
+    if (!container) return;
+    container.replaceChildren();
+    if (typeof window.qrcode !== "function") {
+      container.appendChild(createElement("span", "upload-preview-qr-fallback", "QR"));
+      return;
+    }
+
+    try {
+      const qr = window.qrcode(0, "M");
+      qr.addData(targetUrl);
+      qr.make();
+      container.innerHTML = qr.createSvgTag({ cellSize: 2, margin: 2, scalable: true });
+      const svg = container.querySelector("svg");
+      if (svg) {
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+      }
+    } catch (error) {
+      container.appendChild(createElement("span", "upload-preview-qr-fallback", "QR"));
+    }
+  }
+
   function updateUploadCardPreview() {
     if (!elements.uploadPreviewTitle) return;
     const category = getSelectedCategory();
@@ -678,6 +703,17 @@
     elements.uploadListPreviewFileInfo.textContent = fileInfo;
     elements.uploadListPreviewDate.textContent = date;
     elements.uploadListPreviewSecurity.hidden = !isSecure;
+
+    let previewQrUrl = "https://lawcombo.github.io/nice-hub/share/material-preview.html";
+    if (isYoutube && elements.youtubeUrl.value.trim()) {
+      try {
+        previewQrUrl = normalizeYouTubeUrl(elements.youtubeUrl.value);
+      } catch (error) {
+        // 입력 중인 YouTube 주소가 완성되기 전에는 대표 QR을 유지합니다.
+      }
+    }
+    renderUploadPreviewQr(elements.uploadPreviewQr, previewQrUrl);
+    renderUploadPreviewQr(elements.uploadListPreviewQr, previewQrUrl);
 
     updateUploadPreviewThumbnail(thumbnail);
     updateUploadPreviewActions(format, isYoutube);
@@ -1168,6 +1204,20 @@
     });
   }
 
+  async function createSharePageTreeEntry(material) {
+    if (!window.NiceHubSharePage?.createSharePage || !window.NiceHubSharePage?.getSharePagePath) {
+      throw new Error("자료 공유 페이지 생성 기능을 불러오지 못했습니다. 화면을 새로고침해 주세요.");
+    }
+    const html = window.NiceHubSharePage.createSharePage(material);
+    const blob = await createBlob(verifiedToken, textToBase64(html));
+    return {
+      path: window.NiceHubSharePage.getSharePagePath(material),
+      mode: "100644",
+      type: "blob",
+      sha: blob.sha,
+    };
+  }
+
   async function commitLibraryUpdate(reference, latestLibrary, treeEntries, message) {
     const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
     const parentCommit = await githubApi(
@@ -1215,7 +1265,13 @@
       if (!material) throw new Error("수정할 자료를 최신 목록에서 찾지 못했습니다. 목록을 새로고침해 주세요.");
 
       const update = await updater(material, latestLibrary);
-      const commit = await commitLibraryUpdate(reference, latestLibrary, update.treeEntries || [], update.commitMessage);
+      const sharePageEntry = await createSharePageTreeEntry(material);
+      const commit = await commitLibraryUpdate(
+        reference,
+        latestLibrary,
+        [...(update.treeEntries || []), sharePageEntry],
+        update.commitMessage,
+      );
       library = latestLibrary;
       setInventoryStatus(update.successMessage, "success");
       renderInventory(library);
@@ -1651,6 +1707,7 @@
       latestLibrary.materials.push(material);
 
       setProgress("자료 목록을 업데이트하고 있습니다.", "파일과 자료 정보를 하나의 커밋으로 묶는 중입니다.");
+      const sharePageEntry = await createSharePageTreeEntry(material);
       const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
       const parentCommit = await githubApi(
         `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
@@ -1663,6 +1720,7 @@
       if (thumbnailBlob) {
         treeEntries.push({ path: thumbnailPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha });
       }
+      treeEntries.push(sharePageEntry);
 
       const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {
         method: "POST",
@@ -1771,6 +1829,14 @@
       }
       if (thumbnailPath && !thumbnailPathIsShared) {
         treeEntries.push({ path: thumbnailPath, mode: "100644", type: "blob", sha: null });
+      }
+      if (window.NiceHubSharePage?.getSharePagePath) {
+        treeEntries.push({
+          path: window.NiceHubSharePage.getSharePagePath(material),
+          mode: "100644",
+          type: "blob",
+          sha: null,
+        });
       }
 
       const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {

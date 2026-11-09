@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "nice-hub-shell-v42";
+const CACHE_NAME = "nice-hub-shell-v43";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,7 +8,9 @@ const APP_SHELL = [
   "./assets/css/styles.css",
   "./assets/js/library-app.js",
   "./assets/js/material-open.js",
+  "./assets/js/share-page-builder.js",
   "./assets/js/pwa-install.js",
+  "./assets/vendor/qrcode-generator.js",
   "./assets/data/library.json",
   "./manifest.webmanifest",
   "./assets/icons/app-icon-192.png",
