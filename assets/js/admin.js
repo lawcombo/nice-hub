@@ -288,11 +288,26 @@
     populateInventoryFilter(elements.inventoryTypeFilter, materialTypes, "전체 유형");
   }
 
+  function resetUploadForm() {
+    clearUploadPreviewThumbnail();
+    elements.form.reset();
+    elements.updatedAt.value = localDateString();
+    elements.descriptionCount.textContent = "0";
+    elements.materialFileName.textContent = "선택된 파일 없음";
+    elements.thumbnailFileName.textContent = "선택된 이미지 없음";
+    hideUploadProgress();
+    updateUploadSecurityFields();
+    updateFileAccept();
+    updateFileLabels();
+  }
+
   function openUploadModal() {
     if (!verifiedToken || isUploading || elements.uploadDialog.open) return;
     clearResult();
+    resetUploadForm();
     document.body.classList.add("upload-modal-open");
     elements.uploadDialog.showModal();
+    elements.uploadDialog.scrollTo({ top: 0, behavior: "auto" });
     window.requestAnimationFrame(() => elements.category.focus());
   }
 
@@ -1599,16 +1614,10 @@
           ? "YouTube 링크와 자료 정보가 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다."
           : "파일과 자료 목록이 GitHub에 저장됐습니다. Pages 반영에는 잠시 시간이 걸릴 수 있습니다.",
       );
-      elements.form.reset();
-      elements.updatedAt.value = localDateString();
-      updateUploadSecurityFields();
-      elements.descriptionCount.textContent = "0";
-      elements.materialFileName.textContent = "선택된 파일 없음";
-      elements.thumbnailFileName.textContent = "선택된 이미지 없음";
       populateSelect(elements.category, library.categories || []);
       populateSelect(elements.materialType, library.materialTypes || []);
       populateInventoryFilters(library);
-      updateFileAccept();
+      resetUploadForm();
       elements.inventorySection.hidden = false;
       if (thumbnail) setLocalThumbnailPreview(material.id, thumbnail);
       renderInventory(library);
