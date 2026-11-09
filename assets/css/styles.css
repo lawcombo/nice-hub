@@ -1354,9 +1354,9 @@ a {
 
 .is-list-view .card-actions {
   display: flex;
-  width: auto;
-  min-width: 218px;
-  justify-content: flex-end;
+  width: 326px;
+  min-width: 326px;
+  justify-content: flex-start;
 }
 
 .is-list-view .card-actions-three {
@@ -2191,6 +2191,7 @@ button.button {
 
   .is-list-view .card-actions,
   .is-list-view .card-actions-three {
+    width: auto;
     min-width: 0;
     flex-direction: column;
   }
