@@ -1170,6 +1170,8 @@ a {
   color: var(--navy-900);
   background: #fff;
   box-shadow: 0 4px 12px rgba(7, 29, 55, 0.08);
+  cursor: zoom-in;
+  font: inherit;
 }
 
 .material-card-qr:hover {
@@ -1196,6 +1198,15 @@ a {
   border: 2px solid var(--navy-900);
   font-size: 0.72rem;
   font-weight: 900;
+}
+
+.search-highlight {
+  padding: 0 2px;
+  border-radius: 3px;
+  color: inherit;
+  background: #ffe58a;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .card-meta {
@@ -2113,6 +2124,50 @@ button.button {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+}
+
+.qr-dialog {
+  position: relative;
+  width: min(440px, 100%);
+  overflow: hidden;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+}
+
+.qr-modal-content {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 30px;
+  text-align: center;
+}
+
+.qr-modal-code {
+  display: grid;
+  width: min(320px, 72vw);
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid var(--slate-200);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(7, 29, 55, 0.12);
+}
+
+.qr-modal-code svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.qr-modal-content p {
+  max-width: 330px;
+  margin: 0;
+  color: var(--slate-700);
+  font-size: 0.9rem;
+  font-weight: 750;
+  line-height: 1.6;
 }
 
 .modal-header {

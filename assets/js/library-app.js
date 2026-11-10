@@ -54,6 +54,10 @@
     materialSecurityError: document.querySelector("#materialSecurityError"),
     closeMaterialSecurity: document.querySelector("#closeMaterialSecurity"),
     cancelMaterialSecurity: document.querySelector("#cancelMaterialSecurity"),
+    qrModal: document.querySelector("#qrModal"),
+    qrModalTitle: document.querySelector("#qrModalTitle"),
+    qrModalCode: document.querySelector("#qrModalCode"),
+    closeQrModal: document.querySelector("#closeQrModal"),
     modal: document.querySelector("#previewModal"),
     previewTypeLabel: document.querySelector("#previewTypeLabel"),
     modalTitle: document.querySelector("#previewTitle"),
@@ -108,6 +112,7 @@
   let lastSecurityFocusedElement = null;
   let pendingSecurityAction = null;
   let lastVideoFocusedElement = null;
+  let lastQrFocusedElement = null;
   let pendingHistoryModalClose = "";
   let exitGuardEnabled = false;
   let quickFilterDraftCategory = "all";
@@ -257,6 +262,10 @@
       closePreview();
       return true;
     }
+    if (!elements.qrModal.hidden) {
+      closeQrModal();
+      return true;
+    }
     if (!elements.videoModal.hidden) {
       closeVideoPreview();
       return true;
@@ -293,6 +302,36 @@
     const element = document.createElement(tagName);
     if (className) element.className = className;
     if (text !== undefined) element.textContent = text;
+    return element;
+  }
+
+  function materialMatchesSearch(material, search) {
+    if (!search) return true;
+    return [material?.title, material?.description].some((value) =>
+      String(value || "").toLocaleLowerCase("ko").includes(search),
+    );
+  }
+
+  function appendHighlightedText(element, value) {
+    const text = String(value || "");
+    const query = elements.searchInput.value.trim();
+    if (!activeSearch || !query) {
+      element.textContent = text;
+      return element;
+    }
+
+    const normalizedText = text.toLocaleLowerCase("ko");
+    const normalizedQuery = query.toLocaleLowerCase("ko");
+    let cursor = 0;
+    let matchIndex = normalizedText.indexOf(normalizedQuery, cursor);
+    while (matchIndex !== -1) {
+      if (matchIndex > cursor) element.appendChild(document.createTextNode(text.slice(cursor, matchIndex)));
+      const mark = createElement("mark", "search-highlight", text.slice(matchIndex, matchIndex + query.length));
+      element.appendChild(mark);
+      cursor = matchIndex + query.length;
+      matchIndex = normalizedText.indexOf(normalizedQuery, cursor);
+    }
+    if (cursor < text.length) element.appendChild(document.createTextNode(text.slice(cursor)));
     return element;
   }
 
@@ -495,7 +534,7 @@
     return materials
       .filter((material) => activeCategory === "all" || material.category === activeCategory)
       .filter((material) => activeMaterialType === "all" || material.type === activeMaterialType)
-      .filter((material) => !activeSearch || String(material?.title || "").toLocaleLowerCase("ko").includes(activeSearch))
+      .filter((material) => materialMatchesSearch(material, activeSearch))
       .filter((material) => material && material.id && material.title && material.file)
       .sort((a, b) => {
         const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
@@ -513,7 +552,7 @@
         material.file &&
         (quickFilterDraftCategory === "all" || material.category === quickFilterDraftCategory) &&
         (quickFilterDraftType === "all" || material.type === quickFilterDraftType) &&
-        (!search || String(material.title).toLocaleLowerCase("ko").includes(search)),
+        materialMatchesSearch(material, search),
     ).length;
   }
 
@@ -902,12 +941,11 @@
       createElement("span", "badge badge-subtle", getTypeLabel(material.type)),
     );
 
-    const title = createElement("h3", "material-title", material.title);
+    const title = appendHighlightedText(createElement("h3", "material-title"), material.title);
     const heading = createElement("div", "card-heading-content");
     heading.append(meta, title);
-    const description = createElement(
-      "p",
-      "material-description",
+    const description = appendHighlightedText(
+      createElement("p", "material-description"),
       material.description || "자료의 자세한 내용은 파일에서 확인해 주세요.",
     );
     const fileInfo = createElement("p", "material-file-info", getMaterialFileInfo(material));
@@ -1031,38 +1069,79 @@
 
   function createMaterialQr(material) {
     const targetUrl = getMaterialQrUrl(material);
-    const link = createElement("a", "material-card-qr");
-    link.href = targetUrl;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.setAttribute(
-      "aria-label",
-      isYouTubeMaterial(material)
-        ? `${material.title} YouTube 영상 QR로 열기`
-        : `${material.title} QR로 ${isMobileDevice() ? "다운로드" : "열기"}`,
-    );
-    link.title = isYouTubeMaterial(material) ? "QR 스캔 시 YouTube 열기" : "QR 스캔 시 자료 열기";
+    const button = createElement("button", "material-card-qr");
+    button.type = "button";
+    button.setAttribute("aria-label", `${material.title} QR 코드 크게 보기`);
+    button.title = "QR 코드를 크게 보기";
+    button.addEventListener("click", () => openQrModal(material, targetUrl, button));
 
     if (typeof window.qrcode !== "function" || !targetUrl) {
-      link.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
-      return link;
+      button.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
+      return button;
     }
 
     try {
       const qr = window.qrcode(0, "M");
       qr.addData(targetUrl);
       qr.make();
-      link.innerHTML = qr.createSvgTag({ cellSize: 2, margin: 2, scalable: true });
-      const svg = link.querySelector("svg");
+      button.innerHTML = qr.createSvgTag({ cellSize: 2, margin: 2, scalable: true });
+      const svg = button.querySelector("svg");
       if (svg) {
         svg.setAttribute("aria-hidden", "true");
         svg.setAttribute("focusable", "false");
       }
     } catch (error) {
       console.error("자료 QR을 만들지 못했습니다.", error);
-      link.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
+      button.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
     }
-    return link;
+    return button;
+  }
+
+  function openQrModal(material, targetUrl, trigger) {
+    if (!targetUrl || typeof window.qrcode !== "function") return;
+    pushModalHistory("qr");
+    lastQrFocusedElement = trigger || document.activeElement;
+    elements.qrModalTitle.textContent = material.title;
+    elements.qrModalCode.replaceChildren();
+
+    try {
+      const qr = window.qrcode(0, "M");
+      qr.addData(targetUrl);
+      qr.make();
+      elements.qrModalCode.innerHTML = qr.createSvgTag({ cellSize: 8, margin: 4, scalable: true });
+      const svg = elements.qrModalCode.querySelector("svg");
+      if (svg) {
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+      }
+    } catch (error) {
+      console.error("확대 QR을 만들지 못했습니다.", error);
+      elements.qrModalCode.appendChild(createElement("span", "material-card-qr-fallback", "QR"));
+    }
+
+    elements.qrModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleQrModalKeydown);
+    window.requestAnimationFrame(() => elements.closeQrModal.focus());
+  }
+
+  function closeQrModal() {
+    if (elements.qrModal.hidden) return;
+    elements.qrModal.hidden = true;
+    elements.qrModalCode.replaceChildren();
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleQrModalKeydown);
+    if (lastQrFocusedElement && document.contains(lastQrFocusedElement)) lastQrFocusedElement.focus();
+    lastQrFocusedElement = null;
+  }
+
+  function handleQrModalKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      requestModalClose("qr", closeQrModal);
+      return;
+    }
+    if (event.key === "Tab") event.preventDefault();
   }
 
   function createDownloadLink(material) {
@@ -1808,6 +1887,10 @@
   elements.modal
     .querySelector("[data-close-modal]")
     .addEventListener("click", () => requestModalClose("preview", closePreview));
+  elements.closeQrModal.addEventListener("click", () => requestModalClose("qr", closeQrModal));
+  elements.qrModal
+    .querySelector("[data-close-qr-modal]")
+    .addEventListener("click", () => requestModalClose("qr", closeQrModal));
   elements.closeVideo.addEventListener("click", () => requestModalClose("video", closeVideoPreview));
   elements.videoModal
     .querySelector("[data-close-video-modal]")

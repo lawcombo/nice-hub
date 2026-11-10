@@ -67,6 +67,7 @@ jobs:
           grep --fixed-strings './assets/vendor/qrcode-generator.js' "$RUNNER_TEMP/index.html"
           grep --fixed-strings './assets/js/share-page-builder.js' "$RUNNER_TEMP/index.html"
           grep --fixed-strings 'id="shareFeedbackToast"' "$RUNNER_TEMP/index.html"
+          grep --fixed-strings 'id="qrModal"' "$RUNNER_TEMP/index.html"
 
           curl --fail --location --silent --show-error \
             --retry 10 --retry-delay 5 --retry-all-errors \
@@ -74,6 +75,8 @@ jobs:
             --output "$RUNNER_TEMP/library-app.js"
           grep --fixed-strings '공유가 완료되었습니다.' "$RUNNER_TEMP/library-app.js"
           grep --fixed-strings '링크를 복사했습니다.' "$RUNNER_TEMP/library-app.js"
+          grep --fixed-strings 'openQrModal(material, targetUrl, button)' "$RUNNER_TEMP/library-app.js"
+          grep --fixed-strings 'search-highlight' "$RUNNER_TEMP/library-app.js"
 
           curl --fail --location --silent --show-error \
             --retry 10 --retry-delay 5 --retry-all-errors \
