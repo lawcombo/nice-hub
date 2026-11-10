@@ -1131,12 +1131,12 @@
     button.dataset.defaultAriaLabel = `${material.title} ${label}`;
     button.setAttribute("aria-label", button.dataset.defaultAriaLabel);
     button.addEventListener("click", () =>
-      runMaterialAction(material, button, () => shareMaterialLink(material)),
+      runMaterialAction(material, button, () => shareMaterialLink(material, button)),
     );
     return button;
   }
 
-  async function shareMaterialLink(material) {
+  async function shareMaterialLink(material, button) {
     const url = getMaterialShareUrl(material);
     if (!url) return;
     const message = `안녕하세요. 요청하신 ‘${material.title}’ 자료를 전달드립니다.\n아래 링크에서 확인해 주세요.`;
@@ -1148,6 +1148,7 @@
           text: message,
           url,
         });
+        showShareFeedback(button, "공유되었습니다.");
         showShareToast("공유가 완료되었습니다.");
         return;
       } catch (error) {
@@ -1157,10 +1158,12 @@
     }
 
     try {
-      await copyText(`${message}\n${url}`);
-      showShareToast("문구와 링크를 복사했습니다.");
+      await copyText(url);
+      showShareFeedback(button, "복사되었습니다.");
+      showShareToast("링크를 복사했습니다.");
     } catch (error) {
       console.error("자료 링크를 복사하지 못했습니다.", error);
+      showShareFeedback(button, "복사 실패");
       showShareToast("링크를 복사하지 못했습니다.", "error");
     }
   }
@@ -1199,6 +1202,18 @@
     const copied = document.execCommand("copy");
     textArea.remove();
     if (!copied) throw new Error("브라우저가 클립보드 복사를 허용하지 않았습니다.");
+  }
+
+  function showShareFeedback(button, message) {
+    window.clearTimeout(Number(button.dataset.feedbackTimer || 0));
+    button.textContent = message;
+    button.setAttribute("aria-label", message);
+    const timer = window.setTimeout(() => {
+      button.textContent = button.dataset.defaultLabel || getShareActionLabel();
+      button.setAttribute("aria-label", button.dataset.defaultAriaLabel || button.textContent);
+      delete button.dataset.feedbackTimer;
+    }, 1800);
+    button.dataset.feedbackTimer = String(timer);
   }
 
   function showShareToast(message, tone = "success") {

@@ -73,6 +73,7 @@ jobs:
             "$BASE_URL/assets/js/library-app.js?verify=$GITHUB_SHA" \
             --output "$RUNNER_TEMP/library-app.js"
           grep --fixed-strings '공유가 완료되었습니다.' "$RUNNER_TEMP/library-app.js"
+          grep --fixed-strings '링크를 복사했습니다.' "$RUNNER_TEMP/library-app.js"
 
           curl --fail --location --silent --show-error \
             --retry 10 --retry-delay 5 --retry-all-errors \
