@@ -1,12 +1,10 @@
-name: Recover GitHub Pages deployment
+name: Deploy NICE Hub to GitHub Pages
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-    paths:
-      - .github/workflows/pages-recovery.yml
 
 permissions:
   contents: read
@@ -23,6 +21,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
+
+      - name: Verify generated share pages
+        run: |
+          node scripts/generate-share-pages.js
+          git diff --exit-code -- share
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -42,3 +45,59 @@ jobs:
         uses: actions/deploy-pages@v5
         with:
           timeout: 1800000
+
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the production site
+        env:
+          BASE_URL: https://lawcombo.github.io/nice-hub
+          SHARE_PAGE: share/school-safety-brochure-mw04g8ig.html
+        run: |
+          set -euo pipefail
+
+          curl --fail --location --silent --show-error \
+            --retry 10 --retry-delay 5 --retry-all-errors \
+            "$BASE_URL/?verify=$GITHUB_SHA" \
+            --output "$RUNNER_TEMP/index.html"
+          grep --fixed-strings './assets/vendor/qrcode-generator.js' "$RUNNER_TEMP/index.html"
+          grep --fixed-strings './assets/js/share-page-builder.js' "$RUNNER_TEMP/index.html"
+
+          curl --fail --location --silent --show-error \
+            --retry 10 --retry-delay 5 --retry-all-errors \
+            "$BASE_URL/assets/vendor/qrcode-generator.js?verify=$GITHUB_SHA" \
+            --output "$RUNNER_TEMP/qrcode-generator.js"
+          test -s "$RUNNER_TEMP/qrcode-generator.js"
+
+          curl --fail --location --silent --show-error \
+            --retry 10 --retry-delay 5 --retry-all-errors \
+            "$BASE_URL/$SHARE_PAGE?verify=$GITHUB_SHA" \
+            --output "$RUNNER_TEMP/share.html"
+          grep --fixed-strings 'property="og:image"' "$RUNNER_TEMP/share.html"
+          grep --fixed-strings 'name="twitter:image"' "$RUNNER_TEMP/share.html"
+
+          image_url="$(sed -n 's/.*<meta property="og:image" content="\([^"]*\)".*/\1/p' "$RUNNER_TEMP/share.html" | head -n 1)"
+          test -n "$image_url"
+          curl --fail --location --silent --show-error \
+            --retry 10 --retry-delay 5 --retry-all-errors \
+            "$image_url?verify=$GITHUB_SHA" \
+            --output /dev/null
+
+          google-chrome --headless=new --no-sandbox --disable-gpu \
+            --virtual-time-budget=15000 \
+            --dump-dom "$BASE_URL/?verify=$GITHUB_SHA" \
+            > "$RUNNER_TEMP/rendered.html"
+
+          RENDERED_HTML="$RUNNER_TEMP/rendered.html" node <<'NODE'
+          const fs = require("node:fs");
+          const html = fs.readFileSync(process.env.RENDERED_HTML, "utf8");
+          const cards = html.match(/<article[^>]*class="[^"]*material-card[^"]*"/g) || [];
+          const qrLinks = [...html.matchAll(/<a[^>]*class="[^"]*material-card-qr[^"]*"[^>]*>([\s\S]*?)<\/a>/g)];
+          if (!cards.length) throw new Error("No material cards were rendered.");
+          if (!qrLinks.length) throw new Error("No material QR links were rendered.");
+          if (qrLinks.some((match) => !match[1].includes("<svg"))) {
+            throw new Error("At least one material QR did not render as SVG.");
+          }
+          console.log(`Verified ${cards.length} cards and ${qrLinks.length} QR codes.`);
+          NODE
