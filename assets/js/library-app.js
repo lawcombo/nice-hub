@@ -20,6 +20,7 @@
     loadMore: document.querySelector("#loadMoreMaterials"),
     endSentinel: document.querySelector("#materialsEndSentinel"),
     endToast: document.querySelector("#materialsEndToast"),
+    shareFeedbackToast: document.querySelector("#shareFeedbackToast"),
     empty: document.querySelector("#emptyState"),
     emptyTitle: document.querySelector("#emptyState h3"),
     emptyMessage: document.querySelector("#emptyState p"),
@@ -91,6 +92,8 @@
   let hasMoreMaterialsAvailable = false;
   let hasAnnouncedMaterialEnd = false;
   let endToastTimer = 0;
+  let shareToastTimer = 0;
+  let shareToastCleanupTimer = 0;
   let lastFocusedElement = null;
   let pdfJsModulePromise = null;
   let pdfViewerWarmupScheduled = false;
@@ -1128,12 +1131,12 @@
     button.dataset.defaultAriaLabel = `${material.title} ${label}`;
     button.setAttribute("aria-label", button.dataset.defaultAriaLabel);
     button.addEventListener("click", () =>
-      runMaterialAction(material, button, () => shareMaterialLink(material, button)),
+      runMaterialAction(material, button, () => shareMaterialLink(material)),
     );
     return button;
   }
 
-  async function shareMaterialLink(material, button) {
+  async function shareMaterialLink(material) {
     const url = getMaterialShareUrl(material);
     if (!url) return;
     const message = `안녕하세요. 요청하신 ‘${material.title}’ 자료를 전달드립니다.\n아래 링크에서 확인해 주세요.`;
@@ -1145,6 +1148,7 @@
           text: message,
           url,
         });
+        showShareToast("공유가 완료되었습니다.");
         return;
       } catch (error) {
         if (error?.name === "AbortError") return;
@@ -1154,10 +1158,10 @@
 
     try {
       await copyText(`${message}\n${url}`);
-      showShareFeedback(button, "문구·링크 복사됨");
+      showShareToast("문구와 링크를 복사했습니다.");
     } catch (error) {
       console.error("자료 링크를 복사하지 못했습니다.", error);
-      showShareFeedback(button, "복사 실패");
+      showShareToast("링크를 복사하지 못했습니다.", "error");
     }
   }
 
@@ -1197,16 +1201,24 @@
     if (!copied) throw new Error("브라우저가 클립보드 복사를 허용하지 않았습니다.");
   }
 
-  function showShareFeedback(button, message) {
-    window.clearTimeout(Number(button.dataset.feedbackTimer || 0));
-    button.textContent = message;
-    button.setAttribute("aria-label", message);
-    const timer = window.setTimeout(() => {
-      button.textContent = button.dataset.defaultLabel || getShareActionLabel();
-      button.setAttribute("aria-label", button.dataset.defaultAriaLabel || button.textContent);
-      delete button.dataset.feedbackTimer;
-    }, 1800);
-    button.dataset.feedbackTimer = String(timer);
+  function showShareToast(message, tone = "success") {
+    if (!elements.shareFeedbackToast) return;
+
+    window.clearTimeout(shareToastTimer);
+    window.clearTimeout(shareToastCleanupTimer);
+    elements.shareFeedbackToast.textContent = message;
+    elements.shareFeedbackToast.dataset.tone = tone;
+    elements.shareFeedbackToast.hidden = false;
+    window.requestAnimationFrame(() => elements.shareFeedbackToast.classList.add("is-visible"));
+
+    shareToastTimer = window.setTimeout(() => {
+      elements.shareFeedbackToast.classList.remove("is-visible");
+      shareToastCleanupTimer = window.setTimeout(() => {
+        if (!elements.shareFeedbackToast.classList.contains("is-visible")) {
+          elements.shareFeedbackToast.hidden = true;
+        }
+      }, 200);
+    }, 2000);
   }
 
   function getFileName(path, fallbackTitle) {
