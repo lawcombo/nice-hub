@@ -113,11 +113,11 @@ jobs:
           const fs = require("node:fs");
           const html = fs.readFileSync(process.env.RENDERED_HTML, "utf8");
           const cards = html.match(/<article[^>]*class="[^"]*material-card[^"]*"/g) || [];
-          const qrLinks = [...html.matchAll(/<a[^>]*class="[^"]*material-card-qr[^"]*"[^>]*>([\s\S]*?)<\/a>/g)];
+          const qrButtons = [...html.matchAll(/<button[^>]*class="[^"]*material-card-qr[^"]*"[^>]*>([\s\S]*?)<\/button>/g)];
           if (!cards.length) throw new Error("No material cards were rendered.");
-          if (!qrLinks.length) throw new Error("No material QR links were rendered.");
-          if (qrLinks.some((match) => !match[1].includes("<svg"))) {
+          if (!qrButtons.length) throw new Error("No material QR buttons were rendered.");
+          if (qrButtons.some((match) => !match[1].includes("<svg"))) {
             throw new Error("At least one material QR did not render as SVG.");
           }
-          console.log(`Verified ${cards.length} cards and ${qrLinks.length} QR codes.`);
+          console.log(`Verified ${cards.length} cards and ${qrButtons.length} QR buttons.`);
           NODE
