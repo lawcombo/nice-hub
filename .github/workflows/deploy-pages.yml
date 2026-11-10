@@ -22,6 +22,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Verify generated share pages
         run: |
           node scripts/generate-share-pages.js
@@ -35,7 +38,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
