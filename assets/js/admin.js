@@ -102,6 +102,8 @@
     inventoryTypeFilter: document.querySelector("#inventoryTypeFilter"),
     openCategoryOrderDialog: document.querySelector("#openCategoryOrderDialog"),
     openMaterialTypeOrderDialog: document.querySelector("#openMaterialTypeOrderDialog"),
+    inventoryOpenCategoryDialog: document.querySelector("#inventoryOpenCategoryDialog"),
+    inventoryOpenMaterialTypeDialog: document.querySelector("#inventoryOpenMaterialTypeDialog"),
     materialInventory: document.querySelector("#materialInventory"),
     refreshMaterialsButton: document.querySelector("#refreshMaterialsButton"),
     operationOverlay: document.querySelector("#operationOverlay"),
@@ -953,6 +955,8 @@
       isReorderingSettings;
     elements.openCategoryOrderDialog.disabled = settingsBusy || categories.length < 2;
     elements.openMaterialTypeOrderDialog.disabled = settingsBusy || materialTypes.length < 2;
+    elements.inventoryOpenCategoryDialog.disabled = settingsBusy;
+    elements.inventoryOpenMaterialTypeDialog.disabled = settingsBusy;
     const selectedCategory = elements.inventoryCategoryFilter.value || "all";
     const selectedType = elements.inventoryTypeFilter.value || "all";
     const hasActiveFilter = selectedCategory !== "all" || selectedType !== "all";
@@ -2138,7 +2142,16 @@
   }
 
   function openCategoryDialog() {
-    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType) return;
+    if (
+      !verifiedToken ||
+      isUploading ||
+      isDeleting ||
+      isEditingMaterial ||
+      isAddingCategory ||
+      isAddingMaterialType ||
+      isReorderingSettings
+    )
+      return;
     lastCategoryTrigger = document.activeElement;
     elements.categoryForm.reset();
     setCategoryDialogStatus();
@@ -2265,6 +2278,7 @@
       elements.saveCategoryButton.disabled = false;
       elements.closeCategoryDialog.disabled = false;
       elements.cancelCategoryDialog.disabled = false;
+      renderInventory(library);
     }
   }
 
@@ -2274,7 +2288,16 @@
   }
 
   function openMaterialTypeDialog() {
-    if (!verifiedToken || isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType) return;
+    if (
+      !verifiedToken ||
+      isUploading ||
+      isDeleting ||
+      isEditingMaterial ||
+      isAddingCategory ||
+      isAddingMaterialType ||
+      isReorderingSettings
+    )
+      return;
     lastMaterialTypeTrigger = document.activeElement;
     elements.materialTypeForm.reset();
     setMaterialTypeDialogStatus();
@@ -2398,6 +2421,7 @@
       elements.saveMaterialTypeButton.disabled = false;
       elements.closeMaterialTypeDialog.disabled = false;
       elements.cancelMaterialTypeDialog.disabled = false;
+      renderInventory(library);
     }
   }
 
@@ -2517,6 +2541,7 @@
     lastVideoEditTrigger = null;
   });
   elements.openCategoryDialog.addEventListener("click", openCategoryDialog);
+  elements.inventoryOpenCategoryDialog.addEventListener("click", openCategoryDialog);
   elements.categoryForm.addEventListener("submit", addCategory);
   elements.closeCategoryDialog.addEventListener("click", closeCategoryDialog);
   elements.cancelCategoryDialog.addEventListener("click", closeCategoryDialog);
@@ -2530,6 +2555,7 @@
     lastCategoryTrigger = null;
   });
   elements.openMaterialTypeDialog.addEventListener("click", openMaterialTypeDialog);
+  elements.inventoryOpenMaterialTypeDialog.addEventListener("click", openMaterialTypeDialog);
   elements.materialTypeForm.addEventListener("submit", addMaterialType);
   elements.closeMaterialTypeDialog.addEventListener("click", closeMaterialTypeDialog);
   elements.cancelMaterialTypeDialog.addEventListener("click", closeMaterialTypeDialog);
