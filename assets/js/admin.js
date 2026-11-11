@@ -1481,6 +1481,7 @@
     elements.settingsOrderDescription.textContent = config.description;
     renderSettingsOrderList();
     elements.settingsOrderDialog.showModal();
+    syncDialogScrollLock();
     window.requestAnimationFrame(() => elements.settingsOrderList.querySelector("button:not(:disabled)")?.focus());
   }
 
@@ -1693,6 +1694,17 @@
     elements.editContentDialogStatus.className = `dialog-status${type ? ` status-${type}` : ""}`;
   }
 
+  function syncDialogScrollLock() {
+    const hasOpenLockingDialog = [
+      elements.settingsOrderDialog,
+      elements.editContentDialog,
+      elements.categoryDialog,
+      elements.materialTypeDialog,
+    ].some((dialog) => dialog.open);
+    document.documentElement.classList.toggle("dialog-scroll-locked", hasOpenLockingDialog);
+    document.body.classList.toggle("dialog-scroll-locked", hasOpenLockingDialog);
+  }
+
   function openEditContentDialog(materialId, trigger) {
     if (!verifiedToken || isUploading || isDeleting || isEditingMaterial) return;
     const material = library?.materials?.find((item) => item.id === materialId);
@@ -1711,8 +1723,8 @@
     elements.editDescriptionCount.textContent = String(elements.editMaterialDescription.value.length);
     setEditContentDialogStatus();
     hideEditContentProgress();
-    document.body.classList.add("dialog-scroll-locked");
     elements.editContentDialog.showModal();
+    syncDialogScrollLock();
     window.requestAnimationFrame(() => elements.editMaterialTitle.focus());
   }
 
@@ -2156,6 +2168,7 @@
     elements.categoryForm.reset();
     setCategoryDialogStatus();
     elements.categoryDialog.showModal();
+    syncDialogScrollLock();
     window.requestAnimationFrame(() => elements.newCategoryName.focus());
   }
 
@@ -2302,6 +2315,7 @@
     elements.materialTypeForm.reset();
     setMaterialTypeDialogStatus();
     elements.materialTypeDialog.showModal();
+    syncDialogScrollLock();
     window.requestAnimationFrame(() => elements.newMaterialTypeName.focus());
   }
 
@@ -2483,6 +2497,7 @@
     closeSettingsOrderDialog();
   });
   elements.settingsOrderDialog.addEventListener("close", () => {
+    syncDialogScrollLock();
     settingsOrderKind = "";
     settingsOrderDraft = [];
     settingsOrderInitial = [];
@@ -2509,7 +2524,7 @@
     if (isEditingMaterial) event.preventDefault();
   });
   elements.editContentDialog.addEventListener("close", () => {
-    document.body.classList.remove("dialog-scroll-locked");
+    syncDialogScrollLock();
     elements.editContentForm.reset();
     elements.editDescriptionCount.textContent = "0";
     setEditContentDialogStatus();
@@ -2549,6 +2564,7 @@
     if (isAddingCategory) event.preventDefault();
   });
   elements.categoryDialog.addEventListener("close", () => {
+    syncDialogScrollLock();
     elements.categoryForm.reset();
     setCategoryDialogStatus();
     if (lastCategoryTrigger && document.contains(lastCategoryTrigger)) lastCategoryTrigger.focus();
@@ -2563,6 +2579,7 @@
     if (isAddingMaterialType) event.preventDefault();
   });
   elements.materialTypeDialog.addEventListener("close", () => {
+    syncDialogScrollLock();
     elements.materialTypeForm.reset();
     setMaterialTypeDialogStatus();
     if (lastMaterialTypeTrigger && document.contains(lastMaterialTypeTrigger)) lastMaterialTypeTrigger.focus();

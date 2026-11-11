@@ -39,8 +39,10 @@
 }
 
 body.upload-modal-open,
+html.dialog-scroll-locked,
 body.dialog-scroll-locked {
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .admin-layout {
