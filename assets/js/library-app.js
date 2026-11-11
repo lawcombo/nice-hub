@@ -486,7 +486,17 @@
     const fragment = document.createDocumentFragment();
 
     typeItems.forEach((type) => {
-      const button = createElement("button", "material-type-button", type.label);
+      const count = materials.filter(
+        (material) =>
+          isDisplayableMaterial(material) &&
+          (activeCategory === "all" || material.category === activeCategory) &&
+          (type.id === "all" || material.type === type.id),
+      ).length;
+      const button = createElement("button", "material-type-button");
+      button.append(
+        document.createTextNode(type.label),
+        createElement("span", "material-type-count", `(${count})`),
+      );
       button.type = "button";
       button.dataset.materialType = type.id;
       button.setAttribute("aria-pressed", type.id === activeMaterialType ? "true" : "false");
@@ -527,6 +537,7 @@
     const selectedTab = elements.tabs.querySelector(`[data-category="${CSS.escape(categoryId)}"]`);
     if (selectedTab) elements.panel.setAttribute("aria-labelledby", selectedTab.id);
     centerSelectedTab(selectedTab, elements.categoryTabsScroll);
+    renderMaterialTypeTabs();
     renderMaterials();
     updateQuickFilterActiveCount();
   }
@@ -729,6 +740,7 @@
       tab.setAttribute("aria-selected", selected ? "true" : "false");
       tab.tabIndex = selected ? 0 : -1;
     });
+    renderMaterialTypeTabs();
     elements.typeTabs.querySelectorAll("[data-material-type]").forEach((button) => {
       button.setAttribute("aria-pressed", button.dataset.materialType === activeMaterialType ? "true" : "false");
     });
