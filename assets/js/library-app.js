@@ -1880,7 +1880,9 @@
         ? [...data.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
         : [];
       materials = Array.isArray(data.materials) ? data.materials : [];
-      materialTypes = Array.isArray(data.materialTypes) ? data.materialTypes : [];
+      materialTypes = Array.isArray(data.materialTypes)
+        ? [...data.materialTypes].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+        : [];
       categoryMap = new Map(categories.map((category) => [category.id, category]));
       materialTypeMap = new Map(materialTypes.map((type) => [type.id, type]));
 

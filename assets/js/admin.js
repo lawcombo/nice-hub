@@ -100,6 +100,8 @@
     inventorySummary: document.querySelector("#inventorySummary"),
     inventoryCategoryFilter: document.querySelector("#inventoryCategoryFilter"),
     inventoryTypeFilter: document.querySelector("#inventoryTypeFilter"),
+    openCategoryOrderDialog: document.querySelector("#openCategoryOrderDialog"),
+    openMaterialTypeOrderDialog: document.querySelector("#openMaterialTypeOrderDialog"),
     materialInventory: document.querySelector("#materialInventory"),
     refreshMaterialsButton: document.querySelector("#refreshMaterialsButton"),
     operationOverlay: document.querySelector("#operationOverlay"),
@@ -110,6 +112,15 @@
     operationResultTitle: document.querySelector("#operationResultTitle"),
     operationResultMessage: document.querySelector("#operationResultMessage"),
     closeOperationResult: document.querySelector("#closeOperationResult"),
+    settingsOrderDialog: document.querySelector("#settingsOrderDialog"),
+    settingsOrderForm: document.querySelector("#settingsOrderForm"),
+    settingsOrderKicker: document.querySelector("#settingsOrderKicker"),
+    settingsOrderDialogTitle: document.querySelector("#settingsOrderDialogTitle"),
+    settingsOrderDescription: document.querySelector("#settingsOrderDescription"),
+    settingsOrderList: document.querySelector("#settingsOrderList"),
+    closeSettingsOrderDialog: document.querySelector("#closeSettingsOrderDialog"),
+    cancelSettingsOrderDialog: document.querySelector("#cancelSettingsOrderDialog"),
+    saveSettingsOrderButton: document.querySelector("#saveSettingsOrderButton"),
     deleteDialog: document.querySelector("#deleteDialog"),
     deleteDialogMessage: document.querySelector("#deleteDialogMessage"),
     cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
@@ -166,6 +177,11 @@
   let isEditingMaterial = false;
   let isAddingCategory = false;
   let isAddingMaterialType = false;
+  let isReorderingSettings = false;
+  let settingsOrderKind = "";
+  let settingsOrderDraft = [];
+  let settingsOrderInitial = [];
+  let lastSettingsOrderTrigger = null;
   let pendingDeleteId = "";
   let lastDeleteTrigger = null;
   let pendingContentEditId = "";
@@ -263,7 +279,7 @@
 
   function populateSelect(select, items) {
     const fragment = document.createDocumentFragment();
-    items.forEach((item) => {
+    sortSettingsByOrder(items).forEach((item) => {
       const option = document.createElement("option");
       option.value = item.id;
       option.textContent = item.label;
@@ -289,9 +305,22 @@
     select.value = items.some((item) => item.id === currentValue) ? currentValue : "all";
   }
 
+  function sortSettingsByOrder(items) {
+    return items
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => {
+        const aOrder = Number.isFinite(Number(a.item?.order)) ? Number(a.item.order) : (a.index + 1) * 10;
+        const bOrder = Number.isFinite(Number(b.item?.order)) ? Number(b.item.order) : (b.index + 1) * 10;
+        return aOrder - bOrder || a.index - b.index;
+      })
+      .map(({ item }) => item);
+  }
+
   function populateInventoryFilters(sourceLibrary = library) {
-    const categories = Array.isArray(sourceLibrary?.categories) ? sourceLibrary.categories : [];
-    const materialTypes = Array.isArray(sourceLibrary?.materialTypes) ? sourceLibrary.materialTypes : [];
+    const categories = Array.isArray(sourceLibrary?.categories) ? sortSettingsByOrder(sourceLibrary.categories) : [];
+    const materialTypes = Array.isArray(sourceLibrary?.materialTypes)
+      ? sortSettingsByOrder(sourceLibrary.materialTypes)
+      : [];
     populateInventoryFilter(elements.inventoryCategoryFilter, categories, "전체 사업");
     populateInventoryFilter(elements.inventoryTypeFilter, materialTypes, "전체 유형");
   }
@@ -825,7 +854,13 @@
 
     const actions = createElement("div", "inventory-item-actions");
     const actionsDisabled =
-      !verifiedToken || isUploading || isDeleting || isEditingMaterial || isAddingCategory || isAddingMaterialType;
+      !verifiedToken ||
+      isUploading ||
+      isDeleting ||
+      isEditingMaterial ||
+      isAddingCategory ||
+      isAddingMaterialType ||
+      isReorderingSettings;
     const thumbnailButton = createElement(
       "button",
       "button button-secondary inventory-action-button",
@@ -902,9 +937,22 @@
 
   function renderInventory(sourceLibrary = library) {
     const categories = Array.isArray(sourceLibrary?.categories)
-      ? [...sourceLibrary.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+      ? sortSettingsByOrder(sourceLibrary.categories)
+      : [];
+    const materialTypes = Array.isArray(sourceLibrary?.materialTypes)
+      ? sortSettingsByOrder(sourceLibrary.materialTypes)
       : [];
     const allMaterials = Array.isArray(sourceLibrary?.materials) ? [...sourceLibrary.materials] : [];
+    const settingsBusy =
+      !verifiedToken ||
+      isUploading ||
+      isDeleting ||
+      isEditingMaterial ||
+      isAddingCategory ||
+      isAddingMaterialType ||
+      isReorderingSettings;
+    elements.openCategoryOrderDialog.disabled = settingsBusy || categories.length < 2;
+    elements.openMaterialTypeOrderDialog.disabled = settingsBusy || materialTypes.length < 2;
     const selectedCategory = elements.inventoryCategoryFilter.value || "all";
     const selectedType = elements.inventoryTypeFilter.value || "all";
     const hasActiveFilter = selectedCategory !== "all" || selectedType !== "all";
@@ -1332,6 +1380,169 @@
         successMessage: "",
       };
     });
+  }
+
+  function getSettingsOrderConfig(kind) {
+    return kind === "category"
+      ? {
+          key: "categories",
+          kicker: "사업 분류 설정",
+          title: "사업 카테고리 순서 변경",
+          description: "메인 자료허브의 사업 카테고리 탭 표시 순서를 변경합니다.",
+          commitMessage: "Reorder business categories",
+          successMessage: "사업 카테고리 순서를 저장했습니다.",
+        }
+      : {
+          key: "materialTypes",
+          kicker: "자료 분류 설정",
+          title: "자료 유형 순서 변경",
+          description: "메인 자료허브의 자료 유형 탭 표시 순서를 변경합니다.",
+          commitMessage: "Reorder material types",
+          successMessage: "자료 유형 순서를 저장했습니다.",
+        };
+  }
+
+  function renderSettingsOrderList() {
+    const config = getSettingsOrderConfig(settingsOrderKind);
+    const items = Array.isArray(library?.[config.key]) ? library[config.key] : [];
+    const itemMap = new Map(items.map((item) => [item.id, item]));
+    const fragment = document.createDocumentFragment();
+
+    settingsOrderDraft.forEach((id, index) => {
+      const item = itemMap.get(id);
+      if (!item) return;
+      const row = createElement("div", "settings-order-item");
+      row.dataset.settingId = id;
+      row.append(
+        createElement("span", "settings-order-number", String(index + 1)),
+        createElement("strong", "settings-order-label", item.label || id),
+      );
+
+      const actions = createElement("div", "settings-order-actions");
+      const upButton = createElement("button", "settings-order-move", "↑");
+      upButton.type = "button";
+      upButton.disabled = index === 0;
+      upButton.setAttribute("aria-label", `${item.label || id} 위로 이동`);
+      upButton.addEventListener("click", () => moveSettingsOrderItem(index, -1));
+
+      const downButton = createElement("button", "settings-order-move", "↓");
+      downButton.type = "button";
+      downButton.disabled = index === settingsOrderDraft.length - 1;
+      downButton.setAttribute("aria-label", `${item.label || id} 아래로 이동`);
+      downButton.addEventListener("click", () => moveSettingsOrderItem(index, 1));
+      actions.append(upButton, downButton);
+      row.appendChild(actions);
+      fragment.appendChild(row);
+    });
+
+    elements.settingsOrderList.replaceChildren(fragment);
+  }
+
+  function moveSettingsOrderItem(index, offset) {
+    const nextIndex = index + offset;
+    if (nextIndex < 0 || nextIndex >= settingsOrderDraft.length) return;
+    const movedId = settingsOrderDraft[index];
+    [settingsOrderDraft[index], settingsOrderDraft[nextIndex]] = [
+      settingsOrderDraft[nextIndex],
+      settingsOrderDraft[index],
+    ];
+    renderSettingsOrderList();
+    window.requestAnimationFrame(() => {
+      const row = elements.settingsOrderList.querySelector(`[data-setting-id="${CSS.escape(movedId)}"]`);
+      row?.querySelector(".settings-order-move:not(:disabled)")?.focus();
+    });
+  }
+
+  function openSettingsOrderDialog(kind, trigger) {
+    if (
+      !verifiedToken ||
+      isUploading ||
+      isDeleting ||
+      isEditingMaterial ||
+      isAddingCategory ||
+      isAddingMaterialType ||
+      isReorderingSettings
+    )
+      return;
+
+    const config = getSettingsOrderConfig(kind);
+    const items = Array.isArray(library?.[config.key]) ? sortSettingsByOrder(library[config.key]) : [];
+    if (items.length < 2) return;
+    settingsOrderKind = kind;
+    settingsOrderDraft = items.map((item) => item.id);
+    settingsOrderInitial = [...settingsOrderDraft];
+    lastSettingsOrderTrigger = trigger;
+    elements.settingsOrderKicker.textContent = config.kicker;
+    elements.settingsOrderDialogTitle.textContent = config.title;
+    elements.settingsOrderDescription.textContent = config.description;
+    renderSettingsOrderList();
+    elements.settingsOrderDialog.showModal();
+    window.requestAnimationFrame(() => elements.settingsOrderList.querySelector("button:not(:disabled)")?.focus());
+  }
+
+  function closeSettingsOrderDialog() {
+    if (isReorderingSettings || !elements.settingsOrderDialog.open) return;
+    elements.settingsOrderDialog.close();
+  }
+
+  async function saveSettingsOrder(event) {
+    event.preventDefault();
+    if (isReorderingSettings || !settingsOrderKind) return;
+    if (!verifiedToken || verifiedToken !== elements.token.value.trim()) {
+      elements.settingsOrderDialog.close();
+      showOperationResult("error", "순서를 저장하지 못했습니다.", "토큰 연결을 다시 확인해 주세요.");
+      return;
+    }
+
+    const kind = settingsOrderKind;
+    const config = getSettingsOrderConfig(kind);
+    const requestedOrder = [...settingsOrderDraft];
+    const orderChanged = requestedOrder.some((id, index) => id !== settingsOrderInitial[index]);
+    if (!orderChanged) {
+      elements.settingsOrderDialog.close();
+      showOperationResult("success", "변경된 순서가 없습니다.", "현재 표시 순서를 그대로 유지합니다.");
+      return;
+    }
+
+    isReorderingSettings = true;
+    elements.settingsOrderDialog.close();
+    elements.fields.disabled = true;
+    elements.refreshMaterialsButton.disabled = true;
+    renderInventory(library);
+    showOperationProgress("순서를 저장하고 있습니다.", "GitHub에 변경된 표시 순서를 반영하는 중입니다.");
+
+    try {
+      const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
+      const latestItems = Array.isArray(latestLibrary[config.key]) ? latestLibrary[config.key] : [];
+      const latestMap = new Map(latestItems.map((item) => [item.id, item]));
+      const requestedIds = new Set(requestedOrder);
+      const orderedItems = requestedOrder.map((id) => latestMap.get(id)).filter(Boolean);
+      orderedItems.push(...latestItems.filter((item) => !requestedIds.has(item.id)));
+      orderedItems.forEach((item, index) => {
+        item.order = (index + 1) * 10;
+      });
+      latestLibrary[config.key] = orderedItems;
+
+      await commitLibraryUpdate(reference, latestLibrary, [], config.commitMessage);
+      const selectedCategory = elements.category.value;
+      const selectedType = elements.materialType.value;
+      library = latestLibrary;
+      populateSelect(elements.category, library.categories || []);
+      populateSelect(elements.materialType, library.materialTypes || []);
+      if (library.categories?.some((item) => item.id === selectedCategory)) elements.category.value = selectedCategory;
+      if (library.materialTypes?.some((item) => item.id === selectedType)) elements.materialType.value = selectedType;
+      populateInventoryFilters(library);
+      updateFileAccept();
+      renderInventory(library);
+      showOperationResult("success", "순서 변경이 완료되었습니다.", config.successMessage);
+    } catch (error) {
+      showOperationResult("error", "순서를 저장하지 못했습니다.", userFriendlyError(error));
+    } finally {
+      isReorderingSettings = false;
+      elements.fields.disabled = !verifiedToken;
+      elements.refreshMaterialsButton.disabled = false;
+      renderInventory(library);
+    }
   }
 
   function openReplacementFilePicker(materialId, replacementType, trigger) {
@@ -2077,22 +2288,26 @@
   }
 
   function createMaterialTypeSetting(label, sourceLibrary) {
+    const materialTypes = Array.isArray(sourceLibrary.materialTypes) ? sourceLibrary.materialTypes : [];
     const existingLabels = new Set(
-      (sourceLibrary.materialTypes || []).map((type) => String(type.label || "").trim().toLocaleLowerCase("ko")),
+      materialTypes.map((type) => String(type.label || "").trim().toLocaleLowerCase("ko")),
     );
     if (existingLabels.has(label.toLocaleLowerCase("ko"))) {
       throw new Error("같은 이름의 자료 유형이 이미 등록되어 있습니다.");
     }
 
     let suffix = Date.now().toString(36);
-    const existingIds = new Set((sourceLibrary.materialTypes || []).map((type) => type.id));
+    const existingIds = new Set(materialTypes.map((type) => type.id));
     while (existingIds.has(`type-${suffix}`)) suffix = `${suffix}-${Math.random().toString(36).slice(2, 6)}`;
+    const orders = materialTypes.map((type) => Number(type.order)).filter(Number.isFinite);
+    const nextOrder = (orders.length ? Math.max(...orders) : materialTypes.length * 10) + 10;
     return {
       id: `type-${suffix}`,
       label,
       folder: `type-${suffix}`,
       format: "document",
       accept: [...documentAccept],
+      order: nextOrder,
     };
   }
 
@@ -2230,6 +2445,27 @@
   elements.refreshMaterialsButton.addEventListener("click", refreshMaterials);
   elements.inventoryCategoryFilter.addEventListener("change", () => renderInventory(library));
   elements.inventoryTypeFilter.addEventListener("change", () => renderInventory(library));
+  elements.openCategoryOrderDialog.addEventListener("click", (event) =>
+    openSettingsOrderDialog("category", event.currentTarget),
+  );
+  elements.openMaterialTypeOrderDialog.addEventListener("click", (event) =>
+    openSettingsOrderDialog("materialType", event.currentTarget),
+  );
+  elements.settingsOrderForm.addEventListener("submit", saveSettingsOrder);
+  elements.closeSettingsOrderDialog.addEventListener("click", closeSettingsOrderDialog);
+  elements.cancelSettingsOrderDialog.addEventListener("click", closeSettingsOrderDialog);
+  elements.settingsOrderDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeSettingsOrderDialog();
+  });
+  elements.settingsOrderDialog.addEventListener("close", () => {
+    settingsOrderKind = "";
+    settingsOrderDraft = [];
+    settingsOrderInitial = [];
+    elements.settingsOrderList.replaceChildren();
+    if (lastSettingsOrderTrigger && document.contains(lastSettingsOrderTrigger)) lastSettingsOrderTrigger.focus();
+    lastSettingsOrderTrigger = null;
+  });
   elements.closeOperationResult.addEventListener("click", closeOperationResult);
   elements.operationResultDialog.addEventListener("click", (event) => {
     if (event.target === elements.operationResultDialog) closeOperationResult();

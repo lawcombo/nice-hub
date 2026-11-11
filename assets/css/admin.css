@@ -1526,6 +1526,21 @@ fieldset:disabled {
   box-shadow: var(--focus);
 }
 
+.inventory-filter-control {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.inventory-order-button {
+  min-height: 42px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
 .inventory-summary {
   color: var(--navy-900);
   font-weight: 800;
@@ -1960,6 +1975,86 @@ fieldset:disabled {
   gap: 9px;
 }
 
+.settings-order-dialog {
+  width: min(460px, calc(100% - 32px));
+}
+
+.settings-order-list {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-order-item {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--slate-200);
+  border-radius: 10px;
+  background: var(--slate-100);
+}
+
+.settings-order-number {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--blue-700);
+  background: var(--blue-100);
+  font-size: 0.75rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-order-label {
+  overflow: hidden;
+  color: var(--navy-900);
+  font-size: 0.88rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-order-actions {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.settings-order-move {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--slate-300);
+  border-radius: 8px;
+  color: var(--navy-900);
+  background: #fff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.settings-order-move:hover:not(:disabled) {
+  color: var(--blue-700);
+  border-color: var(--blue-600);
+  background: var(--blue-50);
+}
+
+.settings-order-move:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.settings-order-move:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+
 .edit-content-dialog textarea {
   min-height: 112px;
   resize: vertical;
@@ -2199,6 +2294,10 @@ fieldset:disabled {
     grid-template-columns: 1fr;
     gap: 6px;
   }
+
+  .inventory-filter-control {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 }
 
 @media (max-width: 620px) {
@@ -2410,6 +2509,12 @@ fieldset:disabled {
 
   .confirm-dialog-actions {
     grid-template-columns: 1fr;
+  }
+
+  .settings-order-item {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-inline: 8px;
   }
 }
 

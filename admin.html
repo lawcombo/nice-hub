@@ -413,15 +413,25 @@
         <div class="inventory-filters" aria-label="현재 자료 필터">
           <div class="inventory-filter-field">
             <label for="inventoryCategoryFilter">사업 카테고리별</label>
-            <select id="inventoryCategoryFilter">
-              <option value="all">전체 사업</option>
-            </select>
+            <div class="inventory-filter-control">
+              <select id="inventoryCategoryFilter">
+                <option value="all">전체 사업</option>
+              </select>
+              <button id="openCategoryOrderDialog" class="button button-secondary inventory-order-button" type="button">
+                순서 변경
+              </button>
+            </div>
           </div>
           <div class="inventory-filter-field">
             <label for="inventoryTypeFilter">자료 유형별</label>
-            <select id="inventoryTypeFilter">
-              <option value="all">전체 유형</option>
-            </select>
+            <div class="inventory-filter-control">
+              <select id="inventoryTypeFilter">
+                <option value="all">전체 유형</option>
+              </select>
+              <button id="openMaterialTypeOrderDialog" class="button button-secondary inventory-order-button" type="button">
+                순서 변경
+              </button>
+            </div>
           </div>
         </div>
         <div id="materialInventory" class="material-inventory"></div>
@@ -462,6 +472,28 @@
       <h2 id="operationResultTitle">작업이 완료되었습니다.</h2>
       <p id="operationResultMessage"></p>
       <button id="closeOperationResult" class="button button-primary" type="button">확인</button>
+    </dialog>
+
+    <dialog id="settingsOrderDialog" class="material-type-dialog settings-order-dialog" aria-labelledby="settingsOrderDialogTitle">
+      <form id="settingsOrderForm" method="dialog">
+        <div class="dialog-heading-row">
+          <div>
+            <p id="settingsOrderKicker" class="section-kicker">분류 순서 설정</p>
+            <h2 id="settingsOrderDialogTitle">순서 변경</h2>
+          </div>
+          <button id="closeSettingsOrderDialog" class="icon-button" type="button" aria-label="순서 변경 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <p id="settingsOrderDescription" class="material-type-dialog-description">
+          화살표 버튼으로 표시 순서를 변경해 주세요.
+        </p>
+        <div id="settingsOrderList" class="settings-order-list" aria-live="polite"></div>
+        <div class="material-type-dialog-actions">
+          <button id="cancelSettingsOrderDialog" class="button button-secondary" type="button">취소</button>
+          <button id="saveSettingsOrderButton" class="button button-primary" type="submit">순서 저장</button>
+        </div>
+      </form>
     </dialog>
 
     <dialog id="categoryDialog" class="material-type-dialog" aria-labelledby="categoryDialogTitle">
