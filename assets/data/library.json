@@ -272,7 +272,8 @@
       "mimeType": "application/pdf",
       "fileSizeBytes": 540564,
       "pageCount": 8,
-      "isSecure": true
+      "isSecure": true,
+      "isPublished": false
     },
     {
       "id": "lodging-manual-mw3bwduk",
