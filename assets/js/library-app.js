@@ -451,7 +451,19 @@
     const fragment = document.createDocumentFragment();
 
     tabItems.forEach((category) => {
-      const button = createElement("button", "tab-button", category.label);
+      const count = materials.filter(
+        (material) =>
+          material &&
+          material.id &&
+          material.title &&
+          material.file &&
+          (category.id === "all" || material.category === category.id),
+      ).length;
+      const button = createElement("button", "tab-button");
+      button.append(
+        document.createTextNode(category.label),
+        createElement("span", "tab-button-count", `(${count})`),
+      );
       button.type = "button";
       button.id = `tab-${category.id}`;
       button.dataset.category = category.id;

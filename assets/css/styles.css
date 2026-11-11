@@ -450,6 +450,13 @@ a {
     border-color 0.16s ease;
 }
 
+.tab-button-count {
+  margin-left: 5px;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
+
 .tab-button:hover {
   color: var(--blue-700);
   background: var(--blue-50);
