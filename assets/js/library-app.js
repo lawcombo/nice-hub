@@ -446,6 +446,10 @@
     return details.join(" · ");
   }
 
+  function isDisplayableMaterial(material) {
+    return Boolean(material && material.id && material.title && material.file && material.isPublished !== false);
+  }
+
   function renderTabs() {
     const tabItems = [{ id: "all", label: "전체" }, ...categories];
     const fragment = document.createDocumentFragment();
@@ -453,10 +457,7 @@
     tabItems.forEach((category) => {
       const count = materials.filter(
         (material) =>
-          material &&
-          material.id &&
-          material.title &&
-          material.file &&
+          isDisplayableMaterial(material) &&
           (category.id === "all" || material.category === category.id),
       ).length;
       const button = createElement("button", "tab-button");
@@ -544,10 +545,10 @@
 
   function getVisibleMaterials() {
     return materials
+      .filter(isDisplayableMaterial)
       .filter((material) => activeCategory === "all" || material.category === activeCategory)
       .filter((material) => activeMaterialType === "all" || material.type === activeMaterialType)
       .filter((material) => materialMatchesSearch(material, activeSearch))
-      .filter((material) => material && material.id && material.title && material.file)
       .sort((a, b) => {
         const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
         return registrationDifference || String(b.id || "").localeCompare(String(a.id || ""), "ko");
@@ -558,10 +559,7 @@
     const search = elements.quickFilterSearch.value.trim().toLocaleLowerCase("ko");
     return materials.filter(
       (material) =>
-        material &&
-        material.id &&
-        material.title &&
-        material.file &&
+        isDisplayableMaterial(material) &&
         (quickFilterDraftCategory === "all" || material.category === quickFilterDraftCategory) &&
         (quickFilterDraftType === "all" || material.type === quickFilterDraftType) &&
         materialMatchesSearch(material, search),

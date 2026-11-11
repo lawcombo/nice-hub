@@ -1660,6 +1660,14 @@ fieldset:disabled {
   content: "🔒 ";
 }
 
+.inventory-private-label {
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #5c6675;
+  background: #e8edf3;
+  font-weight: 850;
+}
+
 .inventory-item-title {
   overflow: hidden;
   margin: 0;
@@ -1710,6 +1718,67 @@ fieldset:disabled {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 7px;
+}
+
+.inventory-state-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+}
+
+.inventory-visibility-control {
+  display: inline-grid;
+  overflow: hidden;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--slate-300);
+  border-radius: 9px;
+  background: var(--slate-100);
+}
+
+.inventory-visibility-button {
+  min-width: 54px;
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 0;
+  color: var(--slate-600);
+  background: transparent;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.inventory-visibility-button + .inventory-visibility-button {
+  border-left: 1px solid var(--slate-300);
+}
+
+.inventory-visibility-button:hover:not(:disabled) {
+  color: var(--blue-700);
+  background: var(--blue-50);
+}
+
+.inventory-visibility-button[data-visibility="public"][aria-pressed="true"] {
+  color: #fff;
+  background: var(--blue-700);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+}
+
+.inventory-visibility-button[data-visibility="private"][aria-pressed="true"] {
+  color: #fff;
+  background: #596579;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.inventory-visibility-button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.inventory-visibility-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
 .inventory-action-button {
@@ -2305,6 +2374,14 @@ fieldset:disabled {
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px;
+  }
+
+  .inventory-state-actions {
+    grid-column: 1 / -1;
+  }
+
+  .inventory-visibility-control {
+    flex: 1;
   }
 
   .inventory-action-button,

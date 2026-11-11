@@ -153,6 +153,11 @@
         return;
       }
 
+      if (material.isPublished === false) {
+        showError("비공개 자료입니다.", "현재 공개되지 않은 자료입니다. 자료 담당자에게 문의해 주세요.");
+        return;
+      }
+
       const targetUrl = getTargetUrl(material);
       if (!targetUrl) {
         showError("자료 파일을 열 수 없습니다.", "자료 경로를 확인한 뒤 다시 시도해 주세요.");

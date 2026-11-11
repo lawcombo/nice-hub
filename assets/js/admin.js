@@ -817,6 +817,7 @@
       createElement("span", "", `업데이트 ${formatDate(material.updatedAt)}`),
     );
     if (material.isSecure === true) meta.prepend(createElement("span", "inventory-secure-label", "보안 문서"));
+    if (material.isPublished === false) meta.prepend(createElement("span", "inventory-private-label", "비공개"));
     const title = createElement("h4", "inventory-item-title", material.title || "이름 없는 자료");
     const fileName = createElement("p", "inventory-file-name", getFileName(material.file));
     copy.append(meta, title, fileName);
@@ -861,7 +862,29 @@
     deleteButton.type = "button";
     deleteButton.disabled = actionsDisabled;
     deleteButton.addEventListener("click", () => openDeleteDialog(material.id, deleteButton));
-    actions.append(thumbnailButton, fileButton, contentButton, deleteButton);
+
+    const visibilityControl = createElement("div", "inventory-visibility-control");
+    visibilityControl.setAttribute("role", "group");
+    visibilityControl.setAttribute("aria-label", `${material.title || "자료"} 공개 상태`);
+    [
+      { value: true, label: "공개" },
+      { value: false, label: "비공개" },
+    ].forEach((option) => {
+      const selected = (material.isPublished !== false) === option.value;
+      const button = createElement("button", "inventory-visibility-button", option.label);
+      button.type = "button";
+      button.disabled = actionsDisabled;
+      button.dataset.visibility = option.value ? "public" : "private";
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+      button.addEventListener("click", () => {
+        if (!selected) void setMaterialVisibility(material.id, option.value);
+      });
+      visibilityControl.appendChild(button);
+    });
+
+    const stateActions = createElement("div", "inventory-state-actions");
+    stateActions.append(visibilityControl, deleteButton);
+    actions.append(thumbnailButton, fileButton, contentButton, stateActions);
     item.append(main, actions);
     return item;
   }
@@ -1276,7 +1299,10 @@
       setInventoryStatus(update.successMessage, "success");
       renderInventory(library);
       hideOperationProgress();
-      window.setTimeout(() => showOperationResult("success", "변경이 완료되었습니다.", update.successMessage), 0);
+      window.setTimeout(
+        () => showOperationResult("success", update.successTitle || "변경이 완료되었습니다.", update.successMessage),
+        0,
+      );
       return true;
     } catch (error) {
       const message = userFriendlyError(error);
@@ -1290,6 +1316,24 @@
       elements.refreshMaterialsButton.disabled = false;
       renderInventory(library);
     }
+  }
+
+  async function setMaterialVisibility(materialId, isPublished) {
+    const currentMaterial = library?.materials?.find((item) => item.id === materialId);
+    if (!currentMaterial || (currentMaterial.isPublished !== false) === isPublished) return;
+
+    const actionLabel = isPublished ? "공개" : "비공개";
+    await runMaterialUpdate(materialId, `‘${currentMaterial.title}’ 자료를 ${actionLabel}로 변경하고 있습니다.`, async (material) => {
+      material.isPublished = isPublished;
+      return {
+        treeEntries: [],
+        commitMessage: `${isPublished ? "Publish" : "Unpublish"} material: ${material.title}`,
+        successTitle: `${actionLabel} 처리되었습니다.`,
+        successMessage: isPublished
+          ? `‘${material.title}’ 자료가 공개 처리되었습니다. GitHub Pages 배포 후 자료HUB 메인 페이지에 다시 노출됩니다.`
+          : `‘${material.title}’ 자료가 비공개 처리되었습니다. GitHub Pages 배포 후 자료HUB 메인 페이지에서 더 이상 노출되지 않습니다.`,
+      };
+    });
   }
 
   function openReplacementFilePicker(materialId, replacementType, trigger) {
@@ -1698,6 +1742,7 @@
         updatedAt: localDateString(now),
         registeredAt: now.toISOString(),
         isSecure,
+        isPublished: true,
       };
       if (file?.type) material.mimeType = file.type;
       if (file?.size) material.fileSizeBytes = file.size;
