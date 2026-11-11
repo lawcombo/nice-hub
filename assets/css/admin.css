@@ -1420,6 +1420,14 @@ fieldset:disabled {
   line-height: 1.65;
 }
 
+.operation-result-dialog p:empty {
+  display: none;
+}
+
+.operation-result-dialog p:empty + .button {
+  margin-top: 22px;
+}
+
 .operation-result-dialog .button {
   width: 100%;
   min-height: 45px;

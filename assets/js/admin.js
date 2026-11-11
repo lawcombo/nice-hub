@@ -1329,9 +1329,7 @@
         treeEntries: [],
         commitMessage: `${isPublished ? "Publish" : "Unpublish"} material: ${material.title}`,
         successTitle: `${actionLabel} 처리되었습니다.`,
-        successMessage: isPublished
-          ? `‘${material.title}’ 자료가 공개 처리되었습니다. GitHub Pages 배포 후 자료HUB 메인 페이지에 다시 노출됩니다.`
-          : `‘${material.title}’ 자료가 비공개 처리되었습니다. GitHub Pages 배포 후 자료HUB 메인 페이지에서 더 이상 노출되지 않습니다.`,
+        successMessage: "",
       };
     });
   }
