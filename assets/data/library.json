@@ -1,17 +1,17 @@
 {
   "categories": [
     {
-      "id": "school-safety",
-      "label": "등하교",
-      "folder": "school-safety",
-      "description": "등하교 사업의 홍보·운영자료",
-      "order": 10
-    },
-    {
       "id": "lodging",
       "label": "무인숙박",
       "folder": "lodging",
       "description": "무인숙박 사업의 홍보·운영자료",
+      "order": 10
+    },
+    {
+      "id": "school-safety",
+      "label": "등하교",
+      "folder": "school-safety",
+      "description": "등하교 사업의 홍보·운영자료",
       "order": 20
     }
   ],
