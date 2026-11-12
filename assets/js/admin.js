@@ -2313,9 +2313,15 @@
 
     isAddingCategory = true;
     elements.saveCategoryButton.disabled = true;
+    elements.saveCategoryButton.textContent = "추가 중…";
     elements.closeCategoryDialog.disabled = true;
     elements.cancelCategoryDialog.disabled = true;
-    setCategoryDialogStatus("GitHub에 사업 카테고리와 자료 유형별 폴더를 만들고 있습니다.", "progress");
+    elements.categoryDialog.close();
+    renderInventory(library);
+    showOperationProgress(
+      "사업 카테고리를 추가하고 있습니다.",
+      "GitHub에 사업 카테고리와 자료 유형별 폴더를 만드는 중입니다.",
+    );
 
     try {
       const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
@@ -2368,9 +2374,7 @@
       elements.category.value = category.id;
       updateFileAccept();
       renderInventory(library);
-      elements.categoryDialog.close();
-      clearResult();
-      showResult(
+      showOperationResult(
         "success",
         "사업 카테고리가 추가되었습니다.",
         `‘${category.label}’ 사업과 ${materialTypes.length}개 자료 유형 폴더를 GitHub에 만들었습니다.`,
@@ -2378,10 +2382,14 @@
       setConnectionStatus(`‘${category.label}’ 사업 카테고리가 추가되었습니다.`, "success");
       window.requestAnimationFrame(() => elements.category.focus());
     } catch (error) {
-      setCategoryDialogStatus(userFriendlyError(error), "error");
+      const message = userFriendlyError(error);
+      setConnectionStatus(message, "error");
+      showOperationResult("error", "사업 카테고리를 추가하지 못했습니다.", message);
     } finally {
+      hideOperationProgress();
       isAddingCategory = false;
       elements.saveCategoryButton.disabled = false;
+      elements.saveCategoryButton.textContent = "추가";
       elements.closeCategoryDialog.disabled = false;
       elements.cancelCategoryDialog.disabled = false;
       renderInventory(library);
@@ -2458,9 +2466,15 @@
 
     isAddingMaterialType = true;
     elements.saveMaterialTypeButton.disabled = true;
+    elements.saveMaterialTypeButton.textContent = "추가 중…";
     elements.closeMaterialTypeDialog.disabled = true;
     elements.cancelMaterialTypeDialog.disabled = true;
-    setMaterialTypeDialogStatus("GitHub에 자료 유형과 사업별 폴더를 만들고 있습니다.", "progress");
+    elements.materialTypeDialog.close();
+    renderInventory(library);
+    showOperationProgress(
+      "자료 유형을 추가하고 있습니다.",
+      "GitHub에 자료 유형과 사업별 폴더를 만드는 중입니다.",
+    );
 
     try {
       const { reference, library: latestLibrary } = await fetchRepositoryState(verifiedToken);
@@ -2512,9 +2526,7 @@
       elements.materialType.value = materialType.id;
       updateFileAccept();
       renderInventory(library);
-      elements.materialTypeDialog.close();
-      clearResult();
-      showResult(
+      showOperationResult(
         "success",
         "자료 유형이 추가되었습니다.",
         `‘${materialType.label}’ 유형과 ${categories.length}개 사업별 폴더를 GitHub에 만들었습니다.`,
@@ -2522,10 +2534,14 @@
       setConnectionStatus(`‘${materialType.label}’ 자료 유형이 추가되었습니다.`, "success");
       window.requestAnimationFrame(() => elements.materialType.focus());
     } catch (error) {
-      setMaterialTypeDialogStatus(userFriendlyError(error), "error");
+      const message = userFriendlyError(error);
+      setConnectionStatus(message, "error");
+      showOperationResult("error", "자료 유형을 추가하지 못했습니다.", message);
     } finally {
+      hideOperationProgress();
       isAddingMaterialType = false;
       elements.saveMaterialTypeButton.disabled = false;
+      elements.saveMaterialTypeButton.textContent = "추가";
       elements.closeMaterialTypeDialog.disabled = false;
       elements.cancelMaterialTypeDialog.disabled = false;
       renderInventory(library);
