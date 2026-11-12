@@ -325,6 +325,21 @@
       "fileSizeBytes": 732601,
       "pageCount": 8,
       "isSecure": true
+    },
+    {
+      "id": "lodging-video-mwcwfwng",
+      "category": "lodging",
+      "type": "video",
+      "format": "video",
+      "title": "통합무인운영솔루션 홍보영상",
+      "description": "'26 킨텍스 행사 상영 영상",
+      "file": "https://youtu.be/dC_NszjisVs",
+      "thumbnail": "assets/thumbnails/20261112-105846-숙박업-통합-무인운영-솔루션_홍보영상.png",
+      "updatedAt": "2026-11-12",
+      "registeredAt": "2026-11-12T01:58:46.025Z",
+      "isSecure": false,
+      "isPublished": true,
+      "sourceType": "youtube"
     }
   ]
 }
