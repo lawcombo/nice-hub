@@ -51,6 +51,16 @@
     }
   }
 
+  function finishDownload() {
+    elements.spinner.hidden = true;
+    elements.title.textContent = "다운로드를 시작했습니다.";
+    elements.message.textContent = "다운로드 알림에서 파일을 확인해 주세요. 이 창은 닫아도 됩니다.";
+
+    window.setTimeout(() => {
+      window.close();
+    }, 800);
+  }
+
   async function downloadTarget(material, targetUrl) {
     const target = new URL(targetUrl);
     if (target.origin !== window.location.origin) {
@@ -76,9 +86,7 @@
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-      elements.spinner.hidden = true;
-      elements.title.textContent = "다운로드를 시작했습니다.";
-      elements.message.textContent = "자동으로 시작되지 않으면 아래 버튼을 눌러 주세요.";
+      finishDownload();
     } catch (error) {
       console.error("자료 다운로드를 시작하지 못했습니다.", error);
       elements.spinner.hidden = true;
@@ -88,6 +96,7 @@
 
     elements.downloadFallback.href = targetUrl;
     elements.downloadFallback.download = getFileName(material);
+    elements.downloadFallback.textContent = "다시 다운로드";
     elements.downloadFallback.hidden = false;
   }
 

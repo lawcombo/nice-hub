@@ -1194,7 +1194,7 @@
   function getMaterialQrUrl(material) {
     if (isYouTubeMaterial(material)) return resolveUrl(material.file);
     const url = new URL(getMaterialShareUrl(material, false));
-    if (isMobileDevice()) url.searchParams.set("mode", "download");
+    url.searchParams.set("mode", "download");
     return url.href;
   }
 
