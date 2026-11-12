@@ -1833,12 +1833,18 @@ fieldset:disabled {
   backdrop-filter: blur(3px);
 }
 
+.delete-dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .delete-dialog-icon {
   display: grid;
   width: 42px;
   height: 42px;
+  flex: 0 0 42px;
   place-items: center;
-  margin-bottom: 15px;
   border-radius: 50%;
   color: #b42318;
   background: #feeceb;
@@ -1848,8 +1854,9 @@ fieldset:disabled {
 
 .delete-dialog h2 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: clamp(1.08rem, 5vw, 1.25rem);
   letter-spacing: -0.03em;
+  white-space: nowrap;
 }
 
 .delete-dialog p {
@@ -2057,9 +2064,101 @@ fieldset:disabled {
   cursor: default;
 }
 
+.edit-content-dialog {
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+
+.edit-content-dialog form {
+  gap: 12px;
+  padding: 20px;
+}
+
+.edit-content-dialog .dialog-heading-row {
+  align-items: center;
+}
+
+.edit-content-dialog .section-kicker,
+.edit-content-dialog .material-type-dialog-description {
+  display: none;
+}
+
+.edit-content-dialog .dialog-heading-row h2 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.edit-content-dialog .field-group,
+.edit-content-dialog .video-source-fields {
+  margin: 0;
+}
+
+.edit-content-dialog .field-group label:not(.file-picker),
+.edit-content-dialog .video-source-fields legend {
+  margin-bottom: 5px;
+  font-size: 0.8rem;
+}
+
+.edit-content-dialog .field-group input:not([type="file"]) {
+  min-height: 42px;
+  padding-block: 7px;
+}
+
 .edit-content-dialog textarea {
-  min-height: 112px;
+  min-height: 68px;
+  max-height: 112px;
+  padding-block: 9px;
   resize: vertical;
+}
+
+.edit-content-dialog .character-count {
+  margin-top: 2px;
+}
+
+.edit-content-dialog .video-source-options {
+  gap: 8px;
+}
+
+.edit-content-dialog .video-source-option {
+  min-height: 46px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+}
+
+.edit-content-dialog .video-source-option input {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+  margin-top: 0;
+}
+
+.edit-content-dialog .video-source-option strong {
+  font-size: 0.8rem;
+}
+
+.edit-content-dialog .video-source-option small {
+  display: none;
+}
+
+.edit-content-dialog .field-help {
+  margin-top: 4px;
+  font-size: 0.72rem;
+}
+
+.edit-content-dialog .dialog-status {
+  min-height: 0;
+  margin: 0;
+}
+
+.edit-content-dialog .dialog-status:empty {
+  display: none;
+}
+
+.edit-content-dialog .material-type-dialog-actions {
+  gap: 8px;
 }
 
 @keyframes spin {
