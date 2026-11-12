@@ -114,6 +114,11 @@
     operationResultTitle: document.querySelector("#operationResultTitle"),
     operationResultMessage: document.querySelector("#operationResultMessage"),
     closeOperationResult: document.querySelector("#closeOperationResult"),
+    visibilityConfirmDialog: document.querySelector("#visibilityConfirmDialog"),
+    visibilityConfirmTitle: document.querySelector("#visibilityConfirmTitle"),
+    visibilityConfirmMessage: document.querySelector("#visibilityConfirmMessage"),
+    cancelVisibilityConfirm: document.querySelector("#cancelVisibilityConfirm"),
+    confirmVisibilityChange: document.querySelector("#confirmVisibilityChange"),
     settingsOrderDialog: document.querySelector("#settingsOrderDialog"),
     settingsOrderForm: document.querySelector("#settingsOrderForm"),
     settingsOrderKicker: document.querySelector("#settingsOrderKicker"),
@@ -186,6 +191,9 @@
   let lastSettingsOrderTrigger = null;
   let pendingDeleteId = "";
   let lastDeleteTrigger = null;
+  let pendingVisibilityId = "";
+  let pendingVisibilityState = null;
+  let lastVisibilityTrigger = null;
   let pendingContentEditId = "";
   let lastContentEditTrigger = null;
   let pendingVideoEditId = "";
@@ -914,7 +922,7 @@
       button.dataset.visibility = option.value ? "public" : "private";
       button.setAttribute("aria-pressed", selected ? "true" : "false");
       button.addEventListener("click", () => {
-        if (!selected) void setMaterialVisibility(material.id, option.value);
+        if (!selected) openVisibilityConfirmDialog(material.id, option.value, button);
       });
       visibilityControl.appendChild(button);
     });
@@ -1022,6 +1030,7 @@
     lastDeleteTrigger = trigger;
     elements.deleteDialogMessage.textContent = `‘${material.title}’ 자료를 삭제합니다.`;
     elements.deleteDialog.showModal();
+    syncDialogScrollLock();
     window.requestAnimationFrame(() => elements.cancelDeleteButton.focus());
   }
 
@@ -1386,6 +1395,36 @@
     });
   }
 
+  function openVisibilityConfirmDialog(materialId, isPublished, trigger) {
+    const material = library?.materials?.find((item) => item.id === materialId);
+    if (!material || (material.isPublished !== false) === isPublished || elements.visibilityConfirmDialog.open) return;
+    pendingVisibilityId = materialId;
+    pendingVisibilityState = isPublished;
+    lastVisibilityTrigger = trigger;
+    const actionLabel = isPublished ? "공개" : "비공개";
+    elements.visibilityConfirmTitle.textContent = `정말 ${actionLabel}할까요?`;
+    elements.visibilityConfirmMessage.textContent = isPublished
+      ? `‘${material.title}’ 자료가 자료HUB 메인페이지에 노출됩니다.`
+      : `‘${material.title}’ 자료가 자료HUB 메인페이지에 노출되지 않습니다.`;
+    elements.confirmVisibilityChange.textContent = `${actionLabel}하기`;
+    elements.confirmVisibilityChange.className = `button ${isPublished ? "button-primary" : "button-danger"}`;
+    elements.visibilityConfirmDialog.showModal();
+    syncDialogScrollLock();
+    window.requestAnimationFrame(() => elements.cancelVisibilityConfirm.focus());
+  }
+
+  function closeVisibilityConfirmDialog() {
+    if (elements.visibilityConfirmDialog.open) elements.visibilityConfirmDialog.close();
+  }
+
+  async function confirmMaterialVisibility() {
+    const materialId = pendingVisibilityId;
+    const isPublished = pendingVisibilityState;
+    if (!materialId || typeof isPublished !== "boolean") return;
+    closeVisibilityConfirmDialog();
+    await setMaterialVisibility(materialId, isPublished);
+  }
+
   function getSettingsOrderConfig(kind) {
     return kind === "category"
       ? {
@@ -1700,6 +1739,8 @@
       elements.editContentDialog,
       elements.categoryDialog,
       elements.materialTypeDialog,
+      elements.deleteDialog,
+      elements.visibilityConfirmDialog,
     ].some((dialog) => dialog.open);
     document.documentElement.classList.toggle("dialog-scroll-locked", hasOpenLockingDialog);
     document.body.classList.toggle("dialog-scroll-locked", hasOpenLockingDialog);
@@ -2509,6 +2550,18 @@
   elements.operationResultDialog.addEventListener("click", (event) => {
     if (event.target === elements.operationResultDialog) closeOperationResult();
   });
+  elements.cancelVisibilityConfirm.addEventListener("click", closeVisibilityConfirmDialog);
+  elements.confirmVisibilityChange.addEventListener("click", () => void confirmMaterialVisibility());
+  elements.visibilityConfirmDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+  });
+  elements.visibilityConfirmDialog.addEventListener("close", () => {
+    syncDialogScrollLock();
+    pendingVisibilityId = "";
+    pendingVisibilityState = null;
+    if (lastVisibilityTrigger && document.contains(lastVisibilityTrigger)) lastVisibilityTrigger.focus();
+    lastVisibilityTrigger = null;
+  });
   elements.cancelDeleteButton.addEventListener("click", closeDeleteDialog);
   elements.confirmDeleteButton.addEventListener("click", deleteSelectedMaterial);
   elements.editContentForm.addEventListener("submit", saveMaterialContent);
@@ -2585,10 +2638,11 @@
     if (lastMaterialTypeTrigger && document.contains(lastMaterialTypeTrigger)) lastMaterialTypeTrigger.focus();
     lastMaterialTypeTrigger = null;
   });
-  elements.deleteDialog.addEventListener("click", (event) => {
-    if (event.target === elements.deleteDialog) closeDeleteDialog();
+  elements.deleteDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
   });
   elements.deleteDialog.addEventListener("close", () => {
+    syncDialogScrollLock();
     pendingDeleteId = "";
     if (lastDeleteTrigger && document.contains(lastDeleteTrigger)) lastDeleteTrigger.focus();
     lastDeleteTrigger = null;

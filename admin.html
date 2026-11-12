@@ -20,9 +20,7 @@
     <header class="site-header admin-header">
       <div class="shell header-inner admin-header-inner">
         <div>
-          <p class="header-kicker">NICE MATERIAL HUB</p>
           <h1>자료 관리</h1>
-          <p class="header-description">사업별 자료를 GitHub 저장소에 등록하고 관리합니다.</p>
         </div>
         <a class="header-back-link" href="./index.html">자료허브로 돌아가기</a>
       </div>
@@ -478,6 +476,20 @@
       <h2 id="operationResultTitle">작업이 완료되었습니다.</h2>
       <p id="operationResultMessage"></p>
       <button id="closeOperationResult" class="button button-primary" type="button">확인</button>
+    </dialog>
+
+    <dialog id="visibilityConfirmDialog" class="confirm-dialog" aria-labelledby="visibilityConfirmTitle">
+      <div class="confirm-dialog-card">
+        <div class="confirm-dialog-heading">
+          <span class="confirm-dialog-icon" aria-hidden="true">!</span>
+          <h2 id="visibilityConfirmTitle">자료 공개 상태를 변경할까요?</h2>
+        </div>
+        <p id="visibilityConfirmMessage"></p>
+        <div class="confirm-dialog-actions">
+          <button id="cancelVisibilityConfirm" class="button button-secondary" type="button">취소</button>
+          <button id="confirmVisibilityChange" class="button button-primary" type="button">변경하기</button>
+        </div>
+      </div>
     </dialog>
 
     <dialog id="settingsOrderDialog" class="material-type-dialog settings-order-dialog" aria-labelledby="settingsOrderDialogTitle">

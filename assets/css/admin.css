@@ -1,18 +1,18 @@
 .admin-header-inner {
-  min-height: 192px;
-  padding-block: 43px 39px;
+  min-height: 92px;
+  padding-block: 16px 15px;
 }
 
 .admin-header .site-header h1,
 .admin-header h1 {
-  font-size: clamp(1.85rem, 4vw, 2.55rem);
+  font-size: clamp(1.6rem, 3vw, 2rem);
 }
 
 .header-back-link {
   display: inline-flex;
-  min-height: 43px;
+  min-height: 38px;
   align-items: center;
-  padding: 8px 15px;
+  padding: 7px 13px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 10px;
   color: #fff;
@@ -2403,12 +2403,12 @@ fieldset:disabled {
 
 @media (max-width: 620px) {
   .admin-header-inner {
-    min-height: 210px;
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-    gap: 20px;
-    padding-block: 34px 31px;
+    min-height: 0;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 14px 13px;
   }
 
   .admin-main {
