@@ -13,6 +13,13 @@
       "folder": "school-safety",
       "description": "등하교 사업의 홍보·운영자료",
       "order": 20
+    },
+    {
+      "id": "category-mwd104f5",
+      "label": "FC",
+      "folder": "category-mwd104f5",
+      "description": "FC 사업의 홍보·운영자료",
+      "order": 30
     }
   ],
   "materialTypes": [
