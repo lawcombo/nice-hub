@@ -134,6 +134,8 @@
     confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
     editContentDialog: document.querySelector("#editContentDialog"),
     editContentForm: document.querySelector("#editContentForm"),
+    editMaterialCategory: document.querySelector("#editMaterialCategory"),
+    editMaterialType: document.querySelector("#editMaterialType"),
     editMaterialTitle: document.querySelector("#editMaterialTitle"),
     editMaterialDescription: document.querySelector("#editMaterialDescription"),
     editDescriptionCount: document.querySelector("#editDescriptionCount"),
@@ -1752,6 +1754,13 @@
     if (!material) return;
     pendingContentEditId = materialId;
     lastContentEditTrigger = trigger;
+    const currentType = library?.materialTypes?.find((type) => type.id === material.type);
+    const videoMaterial = isVideoType(currentType) || isYouTubeMaterial(material) || material.format === "video";
+    const compatibleTypes = (library?.materialTypes || []).filter((type) => isVideoType(type) === videoMaterial);
+    populateSelect(elements.editMaterialCategory, library?.categories || []);
+    populateSelect(elements.editMaterialType, compatibleTypes);
+    elements.editMaterialCategory.value = material.category;
+    elements.editMaterialType.value = material.type;
     elements.editMaterialTitle.value = material.title || "";
     elements.editMaterialDescription.value = limitDescriptionLines(material.description || "").slice(
       0,
@@ -1774,6 +1783,31 @@
     elements.editContentDialog.close();
   }
 
+  async function createClassificationMoveEntries(material, nextCategory, nextType, latestLibrary) {
+    const oldPath = getDeletableRepositoryPath(material.file, "assets/materials/");
+    if (!oldPath || (material.category === nextCategory.id && material.type === nextType.id)) return [];
+
+    const categoryFolder = validateFolderSegment(nextCategory.folder || nextCategory.id, "사업 카테고리");
+    const typeFolder = validateFolderSegment(nextType.folder, "자료 유형");
+    const fileName = oldPath.split("/").pop();
+    let newPath = `assets/materials/${categoryFolder}/${typeFolder}/${fileName}`;
+    const newPathInUse = latestLibrary.materials.some((item) => item.id !== material.id && item.file === newPath);
+    if (newPathInUse) newPath = `assets/materials/${categoryFolder}/${typeFolder}/${timestampString()}-${fileName}`;
+    if (newPath === oldPath) return [];
+
+    const fileInfo = await githubApi(
+      `/repos/${config.owner}/${config.repo}/contents/${encodeRepositoryPath(oldPath)}?ref=${encodeURIComponent(config.branch)}`,
+      verifiedToken,
+    );
+    if (!fileInfo?.sha) throw new Error("이동할 원본 자료 파일을 GitHub에서 찾지 못했습니다.");
+
+    const oldPathIsShared = latestLibrary.materials.some((item) => item.id !== material.id && item.file === oldPath);
+    material.file = newPath;
+    const treeEntries = [{ path: newPath, mode: "100644", type: "blob", sha: fileInfo.sha }];
+    if (!oldPathIsShared) treeEntries.push({ path: oldPath, mode: "100644", type: "blob", sha: null });
+    return treeEntries;
+  }
+
   async function saveMaterialContent(event) {
     event.preventDefault();
     const materialId = pendingContentEditId;
@@ -1781,35 +1815,51 @@
     const description = limitDescriptionLines(elements.editMaterialDescription.value)
       .slice(0, config.maxDescriptionLength)
       .trim();
+    const categoryId = elements.editMaterialCategory.value;
+    const typeId = elements.editMaterialType.value;
     const isSecure = getSecurityMode(elements.editSecurityInputs) === "secure";
     if (!materialId || isEditingMaterial) return;
-    if (!title || !description) {
-      setEditContentDialogStatus("자료명과 짧은 설명을 모두 입력해 주세요.", "error");
+    if (!categoryId || !typeId || !title || !description) {
+      setEditContentDialogStatus("사업 카테고리, 자료 유형, 자료명과 짧은 설명을 모두 입력해 주세요.", "error");
       return;
     }
 
     elements.saveEditContentButton.disabled = true;
     elements.cancelEditContentDialog.disabled = true;
     elements.closeEditContentDialog.disabled = true;
+    elements.editMaterialCategory.disabled = true;
+    elements.editMaterialType.disabled = true;
     setEditContentDialogStatus();
     showEditContentProgress(
       "변경 내용을 저장하고 있습니다.",
-      "자료명, 설명과 보안 설정을 GitHub에 반영하는 중입니다.",
+      "자료 분류와 상세 정보를 GitHub에 반영하는 중입니다.",
     );
     let saved = false;
     try {
       saved = await runMaterialUpdate(
         materialId,
-        "자료명과 짧은 설명을 GitHub에 반영하고 있습니다.",
-        async (material) => {
+        "자료 분류와 상세 정보를 GitHub에 반영하고 있습니다.",
+        async (material, latestLibrary) => {
+          const nextCategory = latestLibrary.categories?.find((category) => category.id === categoryId);
+          const nextType = latestLibrary.materialTypes?.find((type) => type.id === typeId);
+          const currentType = latestLibrary.materialTypes?.find((type) => type.id === material.type);
+          if (!nextCategory || !nextType) throw new Error("선택한 사업 카테고리 또는 자료 유형을 찾지 못했습니다.");
+          const videoMaterial = isVideoType(currentType) || isYouTubeMaterial(material) || material.format === "video";
+          if (isVideoType(nextType) !== videoMaterial) {
+            throw new Error("문서와 동영상 사이에서는 자료 유형을 변경할 수 없습니다.");
+          }
+
+          const treeEntries = await createClassificationMoveEntries(material, nextCategory, nextType, latestLibrary);
+          material.category = nextCategory.id;
+          material.type = nextType.id;
           material.title = title;
           material.description = description;
           material.isSecure = isSecure;
           markMaterialUpdated(material);
           return {
-            treeEntries: [],
+            treeEntries,
             commitMessage: `Update material details: ${title}`,
-            successMessage: `‘${title}’ 자료의 자료명과 짧은 설명을 변경했습니다.`,
+            successMessage: `‘${title}’ 자료의 분류와 상세 정보를 변경했습니다.`,
           };
         },
       );
@@ -1818,6 +1868,8 @@
       elements.saveEditContentButton.disabled = false;
       elements.cancelEditContentDialog.disabled = false;
       elements.closeEditContentDialog.disabled = false;
+      elements.editMaterialCategory.disabled = false;
+      elements.editMaterialType.disabled = false;
     }
     if (saved && elements.editContentDialog.open) elements.editContentDialog.close();
     else if (!saved) setEditContentDialogStatus("변경 내용을 저장하지 못했습니다. 목록의 오류 안내를 확인해 주세요.", "error");

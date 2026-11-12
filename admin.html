@@ -604,7 +604,17 @@
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <p class="material-type-dialog-description">자료명, 짧은 설명과 보안 여부를 수정합니다.</p>
+        <p class="material-type-dialog-description">사업 카테고리, 자료 유형과 자료 정보를 수정합니다.</p>
+        <div class="edit-content-classification">
+          <div class="field-group">
+            <label for="editMaterialCategory">사업 카테고리 <span aria-hidden="true">*</span></label>
+            <select id="editMaterialCategory" name="editMaterialCategory" required></select>
+          </div>
+          <div class="field-group">
+            <label for="editMaterialType">자료 유형 <span aria-hidden="true">*</span></label>
+            <select id="editMaterialType" name="editMaterialType" required></select>
+          </div>
+        </div>
         <div class="field-group">
           <label for="editMaterialTitle">자료명 <span aria-hidden="true">*</span></label>
           <input id="editMaterialTitle" name="editMaterialTitle" type="text" maxlength="120" required />

@@ -2150,13 +2150,20 @@ fieldset:disabled {
   margin: 0;
 }
 
+.edit-content-classification {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .edit-content-dialog .field-group label:not(.file-picker),
 .edit-content-dialog .video-source-fields legend {
   margin-bottom: 5px;
   font-size: 0.8rem;
 }
 
-.edit-content-dialog .field-group input:not([type="file"]) {
+.edit-content-dialog .field-group input:not([type="file"]),
+.edit-content-dialog .field-group select {
   min-height: 42px;
   padding-block: 7px;
 }
@@ -2474,6 +2481,10 @@ fieldset:disabled {
   .admin-card {
     padding: 21px 17px;
     border-radius: 16px;
+  }
+
+  .edit-content-classification {
+    grid-template-columns: 1fr;
   }
 
   .connection-actions {
