@@ -798,16 +798,33 @@
     const footerRect = elements.footer.getBoundingClientRect();
     const footerLift = Math.max(0, Math.min(footerRect.height, window.innerHeight - footerRect.top));
     const footerVisible = footerRect.top < window.innerHeight && footerRect.bottom > 0;
-    elements.openQuickFilter.hidden = controlsRect.bottom >= 12;
+    const floatingToolsHidden = controlsRect.bottom >= 12;
+    elements.openQuickFilter.hidden = floatingToolsHidden;
     elements.openQuickFilter.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
-    elements.scrollToTop.hidden = window.scrollY < Math.max(360, window.innerHeight * 0.55);
+    elements.scrollToTop.hidden = floatingToolsHidden;
     elements.scrollToTop.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
-    elements.floatingUtilityDock.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.scrollToTop.style.setProperty(
       "--quick-filter-button-width",
       `${elements.openQuickFilter.hidden ? 0 : elements.openQuickFilter.getBoundingClientRect().width}px`,
     );
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
+    const dockRect = elements.floatingUtilityDock.getBoundingClientRect();
+    const lastCardRect = elements.grid.lastElementChild?.getBoundingClientRect();
+    if (dockRect.width > 0 && dockRect.height > 0) {
+      const gridRect = elements.grid.getBoundingClientRect();
+      const sideGap = 10;
+      const viewportGap = 18;
+      const desiredLeft = gridRect.right + sideGap;
+      const maximumLeft = window.innerWidth - dockRect.width - viewportGap;
+      const hasSideRoom = desiredLeft <= maximumLeft;
+      const dockLeft = Math.max(viewportGap, Math.min(desiredLeft, maximumLeft));
+      const viewportDockTop = window.innerHeight - dockRect.height - 22;
+      const cardAlignedTop = lastCardRect ? lastCardRect.bottom - dockRect.height : viewportDockTop;
+      const belowCardTop = lastCardRect ? lastCardRect.bottom + sideGap : viewportDockTop;
+      const dockTop = Math.max(16, Math.min(viewportDockTop, hasSideRoom ? cardAlignedTop : belowCardTop));
+      elements.floatingUtilityDock.style.setProperty("--floating-utility-left", `${dockLeft}px`);
+      elements.floatingUtilityDock.style.setProperty("--floating-utility-top", `${dockTop}px`);
+    }
     elements.floatingFooterActions.style.setProperty("--floating-actions-top", `${Math.max(16, panelRect.top)}px`);
     elements.floatingFooterActions.classList.add("is-positioned");
     elements.floatingFooterActions.classList.toggle("is-footer-visible", footerVisible);

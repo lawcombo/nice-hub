@@ -670,8 +670,12 @@ a {
 }
 
 @media (min-width: 901px) {
+  .main-content {
+    padding-bottom: 22px;
+  }
+
   .main-content:has(.materials-pagination:not([hidden]) .materials-end-sentinel:not([hidden])) {
-    padding-bottom: 26px;
+    padding-bottom: 18px;
   }
 
   .materials-pagination:not([hidden]):has(.materials-more-button:not([hidden])) {
@@ -741,9 +745,10 @@ a {
   .floating-utility-dock {
     position: fixed;
     z-index: 90;
-    top: auto;
-    right: max(18px, calc((100vw - 1180px) / 2 - 164px));
-    bottom: calc(22px + var(--quick-filter-footer-lift, 0px));
+    top: var(--floating-utility-top, auto);
+    right: auto;
+    bottom: auto;
+    left: var(--floating-utility-left, auto);
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -754,7 +759,8 @@ a {
     box-shadow: 0 14px 36px rgba(7, 31, 61, 0.18);
     backdrop-filter: blur(12px);
     transition:
-      bottom 0.08s linear,
+      top 0.08s linear,
+      left 0.08s linear,
       box-shadow 160ms ease;
   }
 
