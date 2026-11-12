@@ -1984,6 +1984,62 @@ fieldset:disabled {
   gap: 9px;
 }
 
+.setting-add-dialog {
+  width: min(460px, calc(100% - 32px));
+}
+
+.setting-add-dialog form {
+  gap: 12px;
+  padding: 20px;
+}
+
+.setting-add-dialog .dialog-heading-row {
+  align-items: center;
+}
+
+.setting-add-dialog .section-kicker {
+  margin-bottom: 4px;
+  font-size: 0.68rem;
+}
+
+.setting-add-dialog .dialog-heading-row h2 {
+  margin-top: 0;
+  font-size: 1.18rem;
+}
+
+.setting-add-dialog .material-type-dialog-description {
+  margin: -2px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.setting-add-dialog .field-group {
+  margin: 0;
+}
+
+.setting-add-dialog .field-group label:not(.file-picker) {
+  margin-bottom: 5px;
+  font-size: 0.82rem;
+}
+
+.setting-add-dialog .field-group input:not([type="file"]) {
+  min-height: 42px;
+  padding-block: 7px;
+}
+
+.setting-add-dialog .dialog-status {
+  min-height: 0;
+  margin: 0;
+}
+
+.setting-add-dialog .dialog-status:empty {
+  display: none;
+}
+
+.setting-add-dialog .material-type-dialog-actions {
+  gap: 8px;
+}
+
 .settings-order-dialog {
   width: min(460px, calc(100% - 32px));
 }
