@@ -1153,13 +1153,38 @@
     input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  function openFilePickerWithoutScroll(zone, input) {
+    const scrollContainer = zone.closest(".upload-form-fields");
+    const dialog = zone.closest("dialog");
+    const scrollTop = scrollContainer?.scrollTop || 0;
+    const dialogScrollTop = dialog?.scrollTop || 0;
+    const restoreScrollPosition = () => {
+      if (scrollContainer) scrollContainer.scrollTop = scrollTop;
+      if (dialog) dialog.scrollTop = dialogScrollTop;
+    };
+
+    try {
+      if (typeof input.showPicker === "function") input.showPicker();
+      else input.click();
+    } catch (error) {
+      input.click();
+    } finally {
+      restoreScrollPosition();
+      window.requestAnimationFrame(restoreScrollPosition);
+    }
+  }
+
   function initializeDropZone(zone, input, status) {
     let dragDepth = 0;
 
+    zone.addEventListener("click", (event) => {
+      event.preventDefault();
+      openFilePickerWithoutScroll(zone, input);
+    });
     zone.addEventListener("keydown", (event) => {
       if (!["Enter", " "].includes(event.key)) return;
       event.preventDefault();
-      input.click();
+      openFilePickerWithoutScroll(zone, input);
     });
     zone.addEventListener("dragenter", (event) => {
       event.preventDefault();
