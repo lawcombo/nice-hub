@@ -42,6 +42,22 @@ body {
   word-break: keep-all;
 }
 
+body.library-page {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.library-page .main-content {
+  flex: 1 0 auto;
+}
+
+.library-page .site-footer {
+  width: 100%;
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
 body.modal-open {
   overflow: hidden;
 }
