@@ -13,6 +13,7 @@
     tabScrollArrows: [...document.querySelectorAll("[data-scroll-target][data-scroll-direction]")],
     materialControls: document.querySelector(".material-controls"),
     footer: document.querySelector(".site-footer"),
+    floatingFooterActions: document.querySelector("#floatingFooterActions"),
     viewModeButtons: document.querySelectorAll("[data-view-mode]"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
@@ -41,6 +42,7 @@
     applyQuickFilter: document.querySelector("#applyQuickFilter"),
     closeQuickFilter: document.querySelector("#closeQuickFilter"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
+    floatingOpenAdminAccess: document.querySelector("#floatingOpenAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
     adminAccessForm: document.querySelector("#adminAccessForm"),
     adminAccessPassword: document.querySelector("#adminAccessPassword"),
@@ -797,6 +799,10 @@
       `${elements.openQuickFilter.hidden ? 0 : elements.openQuickFilter.getBoundingClientRect().width}px`,
     );
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
+    elements.floatingFooterActions.classList.toggle(
+      "is-footer-visible",
+      footerRect.top < window.innerHeight && footerRect.bottom > 0,
+    );
     if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
   }
 
@@ -1920,6 +1926,7 @@
     .querySelector("[data-close-video-modal]")
     .addEventListener("click", () => requestModalClose("video", closeVideoPreview));
   elements.openAdminAccess.addEventListener("click", openAdminAccess);
+  elements.floatingOpenAdminAccess.addEventListener("click", openAdminAccess);
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
   elements.closeAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
   elements.cancelAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
