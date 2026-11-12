@@ -4,27 +4,34 @@
   const steps = [
     {
       image: "assets/images/guide/nice-hub-guide-step-01.png",
+      alt: "영업자가 사무실 PC의 NICE HUB에서 흩어져 있던 최신 영업자료를 한 번에 찾아 기뻐하는 모습",
+      title: "분산된 자료, NICE HUB에서 한 번에!",
+      description:
+        "여러 PC 폴더와 저장 위치를 뒤지지 않고 NICE HUB에서 사업·자료 유형별 최신 영업자료를 한 번에 검색하고 확인할 수 있습니다.",
+    },
+    {
+      image: "assets/images/guide/nice-hub-guide-step-02.png",
       alt: "영업자가 고객 미팅 중 스마트폰 NICE HUB에서 필요한 영업자료를 찾는 모습",
       title: "필요한 영업자료, 현장에서도 바로!",
       description:
         "외부 영업 현장에서도 스마트폰으로 NICE HUB에 접속해 브로슈어, 제품소개서, 제안자료 등 필요한 영업자료를 즉시 확인할 수 있습니다.",
     },
     {
-      image: "assets/images/guide/nice-hub-guide-step-02.png",
+      image: "assets/images/guide/nice-hub-guide-step-03.png",
       alt: "영업자가 스마트폰의 제품소개서를 고객에게 보여주며 설명하는 모습",
       title: "출력물 없이 스마트폰으로 간편하게!",
       description:
         "선택한 자료를 스마트폰 화면으로 보여주며 고객에게 제품과 서비스를 설명할 수 있어 무거운 출력물을 따로 준비하지 않아도 됩니다.",
     },
     {
-      image: "assets/images/guide/nice-hub-guide-step-03.png",
+      image: "assets/images/guide/nice-hub-guide-step-04.png",
       alt: "영업자 스마트폰의 자료 QR 코드를 고객이 자신의 스마트폰으로 스캔하는 모습",
       title: "QR코드 하나로 고객에게 바로 공유!",
       description:
         "자료 카드의 QR코드를 고객에게 보여주거나 링크 복사·모바일 공유 기능을 이용해 고객의 스마트폰으로 바로 전달할 수 있습니다.",
     },
     {
-      image: "assets/images/guide/nice-hub-guide-step-04.png",
+      image: "assets/images/guide/nice-hub-guide-step-05.png",
       alt: "고객이 자신의 스마트폰에서 공유받은 제품소개 자료를 직접 확인하는 모습",
       title: "고객도 본인 스마트폰으로 편리하게!",
       description:
