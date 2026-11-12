@@ -1188,6 +1188,15 @@ a {
   display: none;
 }
 
+.share-close-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.share-close-button[hidden] {
+  display: none;
+}
+
 @keyframes share-redirect-spin {
   to {
     transform: rotate(360deg);

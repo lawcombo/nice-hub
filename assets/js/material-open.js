@@ -11,6 +11,12 @@
     securitySubmit: document.querySelector("#shareSecurityForm button[type='submit']"),
     downloadFallback: document.querySelector("#shareDownloadFallback"),
   };
+  elements.closeButton = document.createElement("button");
+  elements.closeButton.type = "button";
+  elements.closeButton.className = "button button-secondary share-close-button";
+  elements.closeButton.textContent = "닫기";
+  elements.closeButton.hidden = true;
+  elements.downloadFallback.insertAdjacentElement("afterend", elements.closeButton);
   const securityPassword = "1004";
   let pendingTargetUrl = "";
   let pendingMaterial = null;
@@ -22,12 +28,14 @@
     elements.message.textContent = message;
     elements.securityForm.hidden = true;
     elements.downloadFallback.hidden = true;
+    elements.closeButton.hidden = true;
   }
 
   function openTarget(targetUrl) {
     elements.spinner.hidden = false;
     elements.securityForm.hidden = true;
     elements.downloadFallback.hidden = true;
+    elements.closeButton.hidden = true;
     elements.message.textContent = "현재 등록된 최신 파일로 이동합니다.";
     window.location.replace(targetUrl);
   }
@@ -61,6 +69,19 @@
     }, 800);
   }
 
+  function closeDownloadPage() {
+    window.close();
+    window.setTimeout(() => {
+      if (document.visibilityState === "hidden") return;
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+      elements.title.textContent = "다운로드가 완료되었습니다.";
+      elements.message.textContent = "브라우저의 닫기 또는 탭 닫기 버튼을 눌러 주세요.";
+    }, 150);
+  }
+
   async function downloadTarget(material, targetUrl) {
     const target = new URL(targetUrl);
     if (target.origin !== window.location.origin) {
@@ -71,6 +92,7 @@
     elements.spinner.hidden = false;
     elements.securityForm.hidden = true;
     elements.downloadFallback.hidden = true;
+    elements.closeButton.hidden = true;
     elements.title.textContent = material.title || "자료를 내려받고 있습니다.";
     elements.message.textContent = "최신 파일을 내려받을 준비 중입니다.";
 
@@ -98,6 +120,7 @@
     elements.downloadFallback.download = getFileName(material);
     elements.downloadFallback.textContent = "다시 다운로드";
     elements.downloadFallback.hidden = false;
+    elements.closeButton.hidden = false;
   }
 
   function performTarget(material, targetUrl) {
@@ -116,6 +139,7 @@
     elements.securityError.textContent = "";
     elements.securitySubmit.textContent = downloadMode && !isYouTubeMaterial(material) ? "확인 후 다운로드" : "보안 문서 열기";
     elements.securityForm.hidden = false;
+    elements.closeButton.hidden = true;
     window.requestAnimationFrame(() => elements.securityPassword.focus());
   }
 
@@ -187,5 +211,6 @@
   }
 
   elements.securityForm.addEventListener("submit", handleSecuritySubmit);
+  elements.closeButton.addEventListener("click", closeDownloadPage);
   openLatestMaterial();
 })();
