@@ -30,6 +30,7 @@
     searchInput: document.querySelector("#materialSearch"),
     clearSearch: document.querySelector("#clearMaterialSearch"),
     scrollToTop: document.querySelector("#scrollToTop"),
+    floatingUtilityDock: document.querySelector("#floatingUtilityDock"),
     openQuickFilter: document.querySelector("#openQuickFilter"),
     quickFilterActiveCount: document.querySelector("#quickFilterActiveCount"),
     quickFilterModal: document.querySelector("#quickFilterModal"),
@@ -800,6 +801,7 @@
     elements.openQuickFilter.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.scrollToTop.hidden = window.scrollY < Math.max(360, window.innerHeight * 0.55);
     elements.scrollToTop.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
+    elements.floatingUtilityDock.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.scrollToTop.style.setProperty(
       "--quick-filter-button-width",
       `${elements.openQuickFilter.hidden ? 0 : elements.openQuickFilter.getBoundingClientRect().width}px`,

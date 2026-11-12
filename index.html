@@ -129,8 +129,22 @@
           <div id="materialsGrid" class="materials-grid"></div>
 
           <div id="materialsPagination" class="materials-pagination" hidden>
-            <button id="loadMoreMaterials" class="button button-secondary materials-more-button" type="button">
-              더보기
+            <div class="materials-pagination-copy" aria-hidden="true">
+              <span class="materials-pagination-icon">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 7.5h14M7 12h10M9 16.5h6" />
+                </svg>
+              </span>
+              <span>
+                <strong>자료가 더 있습니다</strong>
+                <small>다음 자료를 이어서 확인해 보세요.</small>
+              </span>
+            </div>
+            <button id="loadMoreMaterials" class="button button-primary materials-more-button" type="button">
+              <span>자료 더 보기</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m7 9.5 5 5 5-5" />
+              </svg>
             </button>
             <div id="materialsEndSentinel" class="materials-end-sentinel" aria-hidden="true" hidden></div>
           </div>
@@ -152,24 +166,26 @@
       </section>
     </main>
 
-    <button id="scrollToTop" class="scroll-top-floating" type="button" aria-label="페이지 맨 위로 이동" hidden>
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="m6.5 14.5 5.5-5.5 5.5 5.5" />
-      </svg>
-    </button>
+    <div id="floatingUtilityDock" class="floating-utility-dock" role="toolbar" aria-label="페이지 도구">
+      <button id="scrollToTop" class="scroll-top-floating" type="button" aria-label="페이지 맨 위로 이동" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m6.5 14.5 5.5-5.5 5.5 5.5" />
+        </svg>
+      </button>
 
-    <button
-      id="openQuickFilter"
-      class="quick-filter-floating"
-      type="button"
-      aria-haspopup="dialog"
-      aria-controls="quickFilterModal"
-      hidden
-    >
-      <span class="quick-filter-floating-icon" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span>검색·필터</span>
-      <span id="quickFilterActiveCount" class="quick-filter-active-count" hidden></span>
-    </button>
+      <button
+        id="openQuickFilter"
+        class="quick-filter-floating"
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls="quickFilterModal"
+        hidden
+      >
+        <span class="quick-filter-floating-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>검색·필터</span>
+        <span id="quickFilterActiveCount" class="quick-filter-active-count" hidden></span>
+      </button>
+    </div>
 
     <div id="materialsEndToast" class="materials-end-toast" role="status" aria-live="polite" hidden>
       마지막 데이터입니다.
