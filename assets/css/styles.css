@@ -3535,6 +3535,528 @@ button.button {
   }
 }
 
+.library-page .header-copy {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.usage-guide-button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 12px 7px 8px;
+  border: 1px solid rgba(143, 197, 255, 0.55);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  font-size: 0.78rem;
+  font-weight: 850;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.usage-guide-button:hover {
+  border-color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.usage-guide-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(143, 197, 255, 0.5);
+}
+
+.usage-guide-button-icon {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  border-radius: 50%;
+  color: #dcecff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.usage-guide-button-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.usage-guide-button-short {
+  display: none;
+}
+
+.usage-guide-modal {
+  z-index: 1100;
+  padding: 18px;
+}
+
+.usage-guide-dialog {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(980px, 100%);
+  max-height: calc(100dvh - 36px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid rgba(188, 207, 228, 0.9);
+  border-radius: 22px;
+  color: var(--slate-900);
+  background: #fff;
+  box-shadow: 0 30px 90px rgba(3, 19, 37, 0.36);
+}
+
+.usage-guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 18px 15px 22px;
+  border-bottom: 1px solid #cbd9e8;
+  color: #fff;
+  background:
+    radial-gradient(circle at 85% 5%, rgba(85, 168, 255, 0.3), transparent 28%),
+    linear-gradient(125deg, var(--navy-950), #12467f 72%, #1e68b3);
+}
+
+.usage-guide-header h2 {
+  margin: 2px 0 0;
+  font-size: clamp(1.12rem, 2.5vw, 1.45rem);
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+}
+
+.usage-guide-header .modal-label {
+  color: #9dceff;
+}
+
+.usage-guide-header p {
+  margin: 4px 0 0;
+  color: #dcecff;
+  font-size: 0.78rem;
+}
+
+.usage-guide-header .icon-button {
+  border-color: rgba(255, 255, 255, 0.42);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.usage-guide-body {
+  min-height: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  padding: 18px 20px 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #fff 54%);
+}
+
+.usage-guide-slide {
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(280px, 0.84fr);
+  align-items: center;
+  gap: 22px;
+  touch-action: pan-y;
+}
+
+.usage-guide-slide.is-changing {
+  animation: usage-guide-slide-in 260ms ease-out both;
+}
+
+.usage-guide-media {
+  position: relative;
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #c9d9e9;
+  border-radius: 16px;
+  background: #eaf3ff;
+  box-shadow: 0 12px 28px rgba(7, 29, 55, 0.12);
+}
+
+.usage-guide-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.usage-guide-slide.is-loading .usage-guide-media::after {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  border-top-color: var(--blue-700);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.45);
+  animation: share-redirect-spin 780ms linear infinite;
+  content: "";
+}
+
+.usage-guide-image-fallback {
+  display: grid;
+  max-width: 300px;
+  place-items: center;
+  gap: 5px;
+  padding: 20px;
+  color: var(--slate-500);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.usage-guide-image-fallback[hidden] {
+  display: none;
+}
+
+.usage-guide-image-fallback > span {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  margin-bottom: 3px;
+  border-radius: 50%;
+  color: #9a4d00;
+  background: #fff1dc;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.usage-guide-image-fallback strong {
+  color: var(--navy-900);
+}
+
+.usage-guide-content {
+  min-width: 0;
+  padding-right: 4px;
+}
+
+.usage-guide-step-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.usage-guide-step {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--blue-700);
+  background: var(--blue-100);
+  font-size: 0.71rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.usage-guide-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.usage-guide-progress-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #cbd8e7;
+  cursor: pointer;
+  transition:
+    width 160ms ease,
+    background 160ms ease;
+}
+
+.usage-guide-progress-dot.is-active {
+  width: 24px;
+  background: var(--blue-700);
+}
+
+.usage-guide-progress-dot:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 3px;
+}
+
+.usage-guide-content h3 {
+  margin: 18px 0 9px;
+  color: var(--navy-900);
+  font-size: clamp(1.3rem, 2.7vw, 1.75rem);
+  line-height: 1.3;
+  letter-spacing: -0.045em;
+}
+
+.usage-guide-content > p:not(.usage-guide-swipe-hint) {
+  margin: 0;
+  color: var(--slate-600);
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+
+.usage-guide-swipe-hint {
+  display: none;
+  margin: 13px 0 0;
+  color: var(--slate-500);
+  font-size: 0.7rem;
+}
+
+.usage-guide-install {
+  margin-top: 16px;
+  border: 1px solid #cbd9e8;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.usage-guide-install summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  color: var(--navy-900);
+  list-style: none;
+  cursor: pointer;
+}
+
+.usage-guide-install summary::-webkit-details-marker {
+  display: none;
+}
+
+.usage-guide-install summary > span:last-child {
+  display: grid;
+  gap: 1px;
+}
+
+.usage-guide-install summary strong {
+  font-size: 0.8rem;
+}
+
+.usage-guide-install summary small {
+  color: var(--slate-500);
+  font-size: 0.68rem;
+}
+
+.usage-guide-install-icon {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--blue-700);
+  background: var(--blue-100);
+  font-size: 1rem;
+  font-weight: 800;
+  transition: transform 160ms ease;
+}
+
+.usage-guide-install[open] .usage-guide-install-icon {
+  transform: rotate(45deg);
+}
+
+.usage-guide-install-content {
+  padding: 0 13px 13px 51px;
+  color: var(--slate-600);
+  font-size: 0.75rem;
+}
+
+.usage-guide-install-content > p {
+  margin: 0 0 9px;
+}
+
+.usage-guide-install-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.usage-guide-install-grid > div {
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: var(--blue-50);
+}
+
+.usage-guide-install-grid strong {
+  color: var(--navy-900);
+}
+
+.usage-guide-install-grid p {
+  margin: 3px 0 0;
+}
+
+.usage-guide-install-content > small {
+  color: var(--slate-500);
+}
+
+.usage-guide-footer {
+  display: grid;
+  grid-template-columns: minmax(110px, 150px) 1fr minmax(140px, 190px);
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 14px;
+  border-top: 1px solid var(--slate-200);
+  background: #fff;
+}
+
+.usage-guide-footer .button {
+  min-height: 42px;
+}
+
+.usage-guide-counter {
+  color: var(--slate-500);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+@keyframes usage-guide-slide-in {
+  from {
+    opacity: 0.45;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .usage-guide-button-full {
+    display: none;
+  }
+
+  .usage-guide-button-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 620px) {
+  .library-page .header-copy {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .usage-guide-button {
+    min-height: 34px;
+    gap: 6px;
+    padding: 5px 10px 5px 6px;
+    font-size: 0.72rem;
+  }
+
+  .usage-guide-button-icon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+  }
+
+  .usage-guide-button-full {
+    display: none;
+  }
+
+  .usage-guide-button-short {
+    display: inline;
+  }
+
+  .usage-guide-modal {
+    padding: 0;
+  }
+
+  .usage-guide-dialog {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .usage-guide-header {
+    gap: 10px;
+    padding: 10px 10px 10px 14px;
+  }
+
+  .usage-guide-header h2 {
+    margin-top: 0;
+    font-size: 1rem;
+  }
+
+  .usage-guide-header p {
+    margin-top: 2px;
+    font-size: 0.68rem;
+  }
+
+  .usage-guide-body {
+    padding: 12px 13px;
+  }
+
+  .usage-guide-slide {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .usage-guide-media {
+    border-radius: 12px;
+  }
+
+  .usage-guide-content {
+    padding-right: 0;
+  }
+
+  .usage-guide-content h3 {
+    margin: 12px 0 6px;
+    font-size: 1.22rem;
+  }
+
+  .usage-guide-content > p:not(.usage-guide-swipe-hint) {
+    font-size: 0.82rem;
+    line-height: 1.62;
+  }
+
+  .usage-guide-swipe-hint {
+    display: block;
+  }
+
+  .usage-guide-install {
+    margin-top: 13px;
+  }
+
+  .usage-guide-install-content {
+    padding: 0 11px 11px;
+  }
+
+  .usage-guide-install-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usage-guide-footer {
+    grid-template-columns: minmax(88px, 0.8fr) auto minmax(120px, 1.2fr);
+    gap: 8px;
+    padding: 9px 10px calc(9px + env(safe-area-inset-bottom));
+  }
+
+  .usage-guide-footer .button {
+    min-height: 40px;
+    padding-inline: 10px;
+    font-size: 0.78rem;
+  }
+}
+
 @keyframes quick-filter-popover-in {
   from {
     opacity: 0;

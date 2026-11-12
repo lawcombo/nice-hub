@@ -18,6 +18,7 @@
     <script src="./assets/js/share-page-builder.js" defer></script>
     <script src="./assets/js/library-app.js" defer></script>
     <script src="./assets/js/pwa-install.js" defer></script>
+    <script src="./assets/js/usage-guide.js" defer></script>
   </head>
   <body class="library-page">
     <a class="skip-link" href="#materials">자료 목록으로 바로가기</a>
@@ -26,6 +27,23 @@
       <div class="shell header-inner">
         <div class="header-copy">
           <h1>NICE 허브</h1>
+          <button
+            id="openUsageGuide"
+            class="usage-guide-button"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="usageGuideModal"
+            aria-label="NICE HUB 활용 가이드 열기"
+          >
+            <span class="usage-guide-button-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M4.5 5.2A2.2 2.2 0 0 1 6.7 3H11a2 2 0 0 1 2 2v15a2.5 2.5 0 0 0-2.5-2.5h-6V5.2Z" />
+                <path d="M19.5 5.2A2.2 2.2 0 0 0 17.3 3H13v17a2.5 2.5 0 0 1 2.5-2.5h4V5.2Z" />
+              </svg>
+            </span>
+            <span class="usage-guide-button-full">NICE HUB 활용 가이드</span>
+            <span class="usage-guide-button-short">활용 가이드</span>
+          </button>
         </div>
         <div class="header-side">
           <button id="installPwaButton" class="pwa-install-button" type="button" hidden>
@@ -477,6 +495,81 @@
             <button id="confirmPwaInstall" class="button button-primary" type="button">확인</button>
           </div>
         </div>
+      </section>
+    </div>
+
+    <div id="usageGuideModal" class="modal usage-guide-modal" hidden>
+      <div class="modal-backdrop" data-close-usage-guide></div>
+      <section
+        class="usage-guide-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="usageGuideTitle"
+        aria-describedby="usageGuideSubtitle"
+      >
+        <header class="usage-guide-header">
+          <div>
+            <span class="modal-label">FIELD SALES GUIDE</span>
+            <h2 id="usageGuideTitle">NICE HUB, 이렇게 활용하세요!</h2>
+            <p id="usageGuideSubtitle">스마트폰 하나로 자료 확인부터 고객 공유까지!</p>
+          </div>
+          <button id="closeUsageGuide" class="icon-button" type="button" aria-label="활용 가이드 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+
+        <div class="usage-guide-body">
+          <article id="usageGuideSlide" class="usage-guide-slide" aria-live="polite">
+            <div class="usage-guide-media">
+              <img id="usageGuideImage" alt="" decoding="async" />
+              <div id="usageGuideImageFallback" class="usage-guide-image-fallback" hidden>
+                <span aria-hidden="true">!</span>
+                <strong>가이드 이미지를 불러오지 못했습니다.</strong>
+                <small>인터넷 연결을 확인한 뒤 다시 시도해 주세요.</small>
+              </div>
+            </div>
+
+            <div class="usage-guide-content">
+              <div class="usage-guide-step-row">
+                <span id="usageGuideStep" class="usage-guide-step">STEP 01 / 04</span>
+                <div id="usageGuideProgress" class="usage-guide-progress" role="group" aria-label="가이드 단계 선택"></div>
+              </div>
+              <h3 id="usageGuideStepTitle">필요한 영업자료, 현장에서도 바로!</h3>
+              <p id="usageGuideStepDescription"></p>
+              <p id="usageGuideSwipeHint" class="usage-guide-swipe-hint">화면을 좌우로 밀어서 단계를 이동할 수 있습니다.</p>
+            </div>
+          </article>
+
+          <details class="usage-guide-install">
+            <summary>
+              <span class="usage-guide-install-icon" aria-hidden="true">＋</span>
+              <span>
+                <strong>NICE HUB를 더 편리하게 사용하는 방법</strong>
+                <small>스마트폰 홈 화면에 추가하기</small>
+              </span>
+            </summary>
+            <div class="usage-guide-install-content">
+              <p>NICE HUB를 홈 화면에 추가하면 주소를 다시 입력하지 않고 앱처럼 빠르게 실행할 수 있습니다.</p>
+              <div class="usage-guide-install-grid">
+                <div>
+                  <strong>iPhone</strong>
+                  <p>Safari의 공유 메뉴에서 <b>홈 화면에 추가</b>를 선택하세요.</p>
+                </div>
+                <div>
+                  <strong>Android</strong>
+                  <p>Chrome 메뉴에서 <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 선택하세요.</p>
+                </div>
+              </div>
+              <small>브라우저와 기기 버전에 따라 메뉴 이름이나 위치가 다를 수 있습니다.</small>
+            </div>
+          </details>
+        </div>
+
+        <footer class="usage-guide-footer">
+          <button id="usageGuidePrevious" class="button button-secondary" type="button">이전</button>
+          <span id="usageGuideCounter" class="usage-guide-counter" aria-hidden="true">1 / 4</span>
+          <button id="usageGuideNext" class="button button-primary" type="button">다음</button>
+        </footer>
       </section>
     </div>
 
