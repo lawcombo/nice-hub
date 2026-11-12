@@ -1962,7 +1962,7 @@ button.button {
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  padding-block: 27px;
+  padding-block: 18px;
   font-size: 0.83rem;
 }
 
@@ -2030,6 +2030,119 @@ button.button {
 
 .footer-actions-grid .footer-admin-button {
   background: var(--blue-50);
+}
+
+.footer-actions-grid .footer-action-card {
+  --footer-action-accent: #2472d4;
+  --footer-action-soft: #edf5ff;
+  position: relative;
+  min-height: 58px;
+  justify-content: flex-start;
+  gap: 11px;
+  overflow: hidden;
+  padding: 8px 13px;
+  border-color: #c9d7e7;
+  border-radius: 13px;
+  color: var(--navy-900);
+  background: linear-gradient(135deg, #fff 0%, #f8fbff 72%, var(--footer-action-soft) 100%);
+  box-shadow:
+    0 5px 16px rgba(7, 29, 55, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  text-align: left;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.footer-actions-grid .footer-action-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--footer-action-accent);
+  content: "";
+}
+
+.footer-actions-grid .footer-action-blog {
+  --footer-action-accent: #119c69;
+  --footer-action-soft: #eaf9f3;
+}
+
+.footer-actions-grid .footer-action-admin {
+  --footer-action-accent: #173e73;
+  --footer-action-soft: #eaf1fa;
+}
+
+.footer-action-card-icon {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--footer-action-accent) 22%, white);
+  border-radius: 10px;
+  color: var(--footer-action-accent);
+  background: var(--footer-action-soft);
+}
+
+.footer-action-card-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.footer-action-card-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.footer-action-card-copy strong {
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.footer-action-card-copy small {
+  overflow: hidden;
+  color: var(--slate-500);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footer-action-card-arrow {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  place-items: center;
+  margin-left: auto;
+  border-radius: 50%;
+  color: var(--footer-action-accent);
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 0.8rem;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(7, 29, 55, 0.07);
+}
+
+.footer-actions-grid .footer-action-card:hover {
+  color: var(--navy-900);
+  border-color: color-mix(in srgb, var(--footer-action-accent) 42%, white);
+  background: linear-gradient(135deg, #fff 0%, var(--footer-action-soft) 100%);
+  box-shadow: 0 9px 22px rgba(7, 29, 55, 0.11);
+  transform: translateY(-2px);
+}
+
+.footer-actions-grid .footer-action-card:focus-visible {
+  border-color: var(--footer-action-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--footer-action-accent) 22%, transparent);
 }
 
 .footer-return-button {
@@ -3202,6 +3315,34 @@ button.button {
     min-height: 44px;
     padding-inline: 5px;
     font-size: 0.72rem;
+  }
+
+  .footer-actions-grid .footer-action-card {
+    min-height: 50px;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .footer-action-card-icon {
+    width: 31px;
+    height: 31px;
+    flex-basis: 31px;
+    border-radius: 9px;
+  }
+
+  .footer-action-card-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .footer-action-card-copy strong {
+    font-size: 0.72rem;
+  }
+
+  .footer-action-card-copy small,
+  .footer-action-card-arrow {
+    display: none;
   }
 
   .modal {
