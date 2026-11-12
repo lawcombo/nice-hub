@@ -15,6 +15,22 @@
     footer: document.querySelector(".site-footer"),
     floatingFooterActions: document.querySelector("#floatingFooterActions"),
     viewModeButtons: document.querySelectorAll("[data-view-mode]"),
+    openQrBundle: document.querySelector("#openQrBundle"),
+    qrBundleModal: document.querySelector("#qrBundleModal"),
+    qrBundleDialog: document.querySelector(".qr-bundle-dialog"),
+    qrBundleForm: document.querySelector("#qrBundleForm"),
+    qrBundleBoardTitle: document.querySelector("#qrBundleBoardTitle"),
+    qrBundleSearch: document.querySelector("#qrBundleSearch"),
+    qrBundleCategory: document.querySelector("#qrBundleCategory"),
+    qrBundleType: document.querySelector("#qrBundleType"),
+    qrBundleMaterials: document.querySelector("#qrBundleMaterials"),
+    qrBundleMatchCount: document.querySelector("#qrBundleMatchCount"),
+    qrBundleEmpty: document.querySelector("#qrBundleEmpty"),
+    qrBundleStatus: document.querySelector("#qrBundleStatus"),
+    clearQrBundleSelection: document.querySelector("#clearQrBundleSelection"),
+    generateQrBundle: document.querySelector("#generateQrBundle"),
+    closeQrBundle: document.querySelector("#closeQrBundle"),
+    cancelQrBundle: document.querySelector("#cancelQrBundle"),
     panel: document.querySelector("#materialsPanel"),
     grid: document.querySelector("#materialsGrid"),
     pagination: document.querySelector("#materialsPagination"),
@@ -125,6 +141,8 @@
   let quickFilterVisibilityFrame = 0;
   let descriptionTooltipMeasureFrame = 0;
   let activeDescriptionTooltipTarget = null;
+  let lastQrBundleFocusedElement = null;
+  const qrBundleSelectedIds = new Set();
 
   const adminAccessPassword = "5959";
   const materialSecurityPassword = "1004";
@@ -133,6 +151,7 @@
   const exitBaseHistoryKey = "niceHubExitBase";
   const viewModeStorageKey = "niceHubViewMode";
   const materialsPageSize = 12;
+  const qrBundleSelectionLimit = 10;
 
   function getSavedViewMode() {
     try {
@@ -262,6 +281,10 @@
   }
 
   function closeVisibleModal() {
+    if (!elements.qrBundleModal.hidden) {
+      closeQrBundle();
+      return true;
+    }
     if (!elements.quickFilterModal.hidden) {
       closeQuickFilter();
       return true;
@@ -778,6 +801,186 @@
 
     const focusable = [
       ...elements.quickFilterModal.querySelectorAll('button:not([disabled]), input:not([disabled])'),
+    ].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function populateQrBundleSelect(select, items, allLabel) {
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(new Option(allLabel, "all"));
+    items.forEach((item) => fragment.appendChild(new Option(item.label, item.id)));
+    select.replaceChildren(fragment);
+    select.value = "all";
+  }
+
+  function getQrBundleMatches() {
+    const search = elements.qrBundleSearch.value.trim().toLocaleLowerCase("ko");
+    const category = elements.qrBundleCategory.value || "all";
+    const type = elements.qrBundleType.value || "all";
+    return materials
+      .filter(isDisplayableMaterial)
+      .filter((material) => category === "all" || material.category === category)
+      .filter((material) => type === "all" || material.type === type)
+      .filter((material) => materialMatchesSearch(material, search))
+      .sort((a, b) => {
+        const registrationDifference = getRegistrationTime(b) - getRegistrationTime(a);
+        return registrationDifference || String(b.id || "").localeCompare(String(a.id || ""), "ko");
+      });
+  }
+
+  function updateQrBundleStatus(message = "") {
+    const selectedCount = qrBundleSelectedIds.size;
+    const reachedLimit = selectedCount >= qrBundleSelectionLimit;
+    const strong = elements.qrBundleStatus.querySelector("strong");
+    const detail = elements.qrBundleStatus.querySelector("span");
+    strong.textContent = `${selectedCount}개 선택됨`;
+    detail.textContent = message || (reachedLimit ? "최대 10개를 모두 선택했습니다." : "최대 10개까지 선택할 수 있습니다.");
+    elements.qrBundleStatus.classList.toggle("is-limit", reachedLimit || Boolean(message));
+    elements.generateQrBundle.disabled = selectedCount === 0;
+    elements.clearQrBundleSelection.disabled = selectedCount === 0;
+  }
+
+  function toggleQrBundleMaterial(materialId, button) {
+    if (qrBundleSelectedIds.has(materialId)) {
+      qrBundleSelectedIds.delete(materialId);
+    } else if (qrBundleSelectedIds.size >= qrBundleSelectionLimit) {
+      updateQrBundleStatus("최대 10개까지 선택할 수 있습니다.");
+      return;
+    } else {
+      qrBundleSelectedIds.add(materialId);
+    }
+
+    const selected = qrBundleSelectedIds.has(materialId);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+    const materialTitle = button.querySelector(".qr-bundle-material-copy strong")?.textContent || "자료";
+    button.setAttribute("aria-label", `${materialTitle} ${selected ? "선택 해제" : "선택"}`);
+    button.querySelector(".qr-bundle-material-check").textContent = selected ? "✓" : "";
+    updateQrBundleStatus();
+  }
+
+  function createQrBundleMaterialOption(material) {
+    const selected = qrBundleSelectedIds.has(material.id);
+    const button = createElement("button", "qr-bundle-material-option");
+    button.type = "button";
+    button.dataset.materialId = material.id;
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+    button.setAttribute("aria-label", `${material.title} ${selected ? "선택 해제" : "선택"}`);
+
+    const thumbnail = document.createElement("img");
+    thumbnail.className = "qr-bundle-material-thumbnail";
+    thumbnail.src = resolveUrl(material.thumbnail || "assets/icons/app-icon-192.png");
+    thumbnail.alt = "";
+    thumbnail.loading = "lazy";
+    thumbnail.addEventListener("error", () => {
+      thumbnail.src = resolveUrl("assets/icons/app-icon-192.png");
+    }, { once: true });
+
+    const copy = createElement("span", "qr-bundle-material-copy");
+    const meta = `${getCategoryLabel(material.category)} · ${getTypeLabel(material.type)}${isSecureMaterial(material) ? " · 보안 문서" : ""}`;
+    copy.append(createElement("strong", "", material.title), createElement("small", "", meta));
+    const check = createElement("span", "qr-bundle-material-check", selected ? "✓" : "");
+    check.setAttribute("aria-hidden", "true");
+    button.append(thumbnail, copy, check);
+    button.addEventListener("click", () => toggleQrBundleMaterial(material.id, button));
+    return button;
+  }
+
+  function renderQrBundleMaterials() {
+    const matches = getQrBundleMatches();
+    const fragment = document.createDocumentFragment();
+    matches.forEach((material) => fragment.appendChild(createQrBundleMaterialOption(material)));
+    elements.qrBundleMaterials.replaceChildren(fragment);
+    elements.qrBundleMatchCount.textContent = `${matches.length}건`;
+    elements.qrBundleMaterials.hidden = matches.length === 0;
+    elements.qrBundleEmpty.hidden = matches.length !== 0;
+    updateQrBundleStatus();
+  }
+
+  function syncQrBundleDialog() {
+    elements.qrBundleBoardTitle.value = "NICE HUB 추천자료";
+    elements.qrBundleSearch.value = "";
+    populateQrBundleSelect(elements.qrBundleCategory, categories, "전체 사업");
+    populateQrBundleSelect(elements.qrBundleType, materialTypes, "전체 자료");
+    qrBundleSelectedIds.clear();
+    renderQrBundleMaterials();
+  }
+
+  function openQrBundle() {
+    if (!elements.qrBundleModal.hidden) return;
+    pushModalHistory("qr-bundle");
+    lastQrBundleFocusedElement = document.activeElement;
+    syncQrBundleDialog();
+    elements.qrBundleModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleQrBundleKeydown);
+    window.requestAnimationFrame(() => elements.qrBundleBoardTitle.focus());
+  }
+
+  function closeQrBundle() {
+    if (elements.qrBundleModal.hidden) return;
+    elements.qrBundleModal.hidden = true;
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleQrBundleKeydown);
+    if (lastQrBundleFocusedElement && document.contains(lastQrBundleFocusedElement)) {
+      lastQrBundleFocusedElement.focus();
+    }
+    lastQrBundleFocusedElement = null;
+  }
+
+  function clearQrBundleSelection() {
+    qrBundleSelectedIds.clear();
+    elements.qrBundleMaterials.querySelectorAll(".qr-bundle-material-option").forEach((button) => {
+      button.setAttribute("aria-pressed", "false");
+      const materialTitle = button.querySelector(".qr-bundle-material-copy strong")?.textContent || "자료";
+      button.setAttribute("aria-label", `${materialTitle} 선택`);
+      button.querySelector(".qr-bundle-material-check").textContent = "";
+    });
+    updateQrBundleStatus();
+  }
+
+  function generateQrBundle(event) {
+    event.preventDefault();
+    const selectedIds = [...qrBundleSelectedIds].filter((id) =>
+      materials.some((material) => material.id === id && isDisplayableMaterial(material)),
+    );
+    if (!selectedIds.length) {
+      updateQrBundleStatus("QR로 만들 자료를 먼저 선택해 주세요.");
+      return;
+    }
+
+    const url = new URL("qr-bundle.html", document.baseURI);
+    url.searchParams.set("ids", selectedIds.join(","));
+    const boardTitle = elements.qrBundleBoardTitle.value.trim();
+    if (boardTitle) url.searchParams.set("title", boardTitle);
+
+    const bundleWindow = window.open(url.href, "_blank");
+    if (bundleWindow) {
+      bundleWindow.opener = null;
+      requestModalClose("qr-bundle", closeQrBundle);
+    } else {
+      window.location.assign(url.href);
+    }
+  }
+
+  function handleQrBundleKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      requestModalClose("qr-bundle", closeQrBundle);
+      return;
+    }
+    if (event.key !== "Tab") return;
+
+    const focusable = [
+      ...elements.qrBundleDialog.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled])'),
     ].filter((element) => element.offsetParent !== null);
     if (!focusable.length) return;
     const first = focusable[0];
@@ -1999,6 +2202,7 @@
       renderMaterialTypeTabs();
       renderMaterials();
       updateQuickFilterActiveCount();
+      if (!elements.qrBundleModal.hidden) syncQrBundleDialog();
       window.requestAnimationFrame(() => {
         updateAllTabScrollers();
         updateQuickFilterFloatingVisibility();
@@ -2052,6 +2256,15 @@
   elements.searchInput.addEventListener("search", updateSearch);
   elements.clearSearch.addEventListener("click", clearSearch);
   elements.scrollToTop.addEventListener("click", scrollPageToTop);
+  elements.openQrBundle.addEventListener("click", openQrBundle);
+  elements.closeQrBundle.addEventListener("click", () => requestModalClose("qr-bundle", closeQrBundle));
+  elements.cancelQrBundle.addEventListener("click", () => requestModalClose("qr-bundle", closeQrBundle));
+  elements.qrBundleForm.addEventListener("submit", generateQrBundle);
+  elements.qrBundleSearch.addEventListener("input", renderQrBundleMaterials);
+  elements.qrBundleSearch.addEventListener("search", renderQrBundleMaterials);
+  elements.qrBundleCategory.addEventListener("change", renderQrBundleMaterials);
+  elements.qrBundleType.addEventListener("change", renderQrBundleMaterials);
+  elements.clearQrBundleSelection.addEventListener("click", clearQrBundleSelection);
   elements.openQuickFilter.addEventListener("click", openQuickFilter);
   elements.closeQuickFilter.addEventListener("click", () => requestModalClose("quick-filter", closeQuickFilter));
   elements.quickFilterModal

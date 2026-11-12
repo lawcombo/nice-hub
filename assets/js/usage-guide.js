@@ -62,6 +62,7 @@
   let touchStartY = null;
   let pendingHistoryClose = false;
   let historyCloseTimer = 0;
+  const preloadedImages = new Map();
 
   const modalHistoryKey = "niceHubModal";
   const modalHistoryValue = "usage-guide";
@@ -98,9 +99,32 @@
   }
 
   function preloadStep(index) {
-    if (index < 0 || index >= steps.length) return;
+    if (index < 0 || index >= steps.length || preloadedImages.has(index)) return;
     const image = new Image();
+    image.decoding = "async";
+    image.fetchPriority = index === 0 ? "high" : "low";
     image.src = resolveAsset(steps[index].image);
+    preloadedImages.set(index, image);
+  }
+
+  function preloadGuideImages() {
+    steps.forEach((step, index) => {
+      window.setTimeout(() => preloadStep(index), index * 120);
+    });
+  }
+
+  function scheduleGuideImagePreload() {
+    preloadStep(0);
+    const startBackgroundPreload = () => {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(preloadGuideImages, { timeout: 1200 });
+      } else {
+        window.setTimeout(preloadGuideImages, 250);
+      }
+    };
+
+    if (document.readyState === "complete") startBackgroundPreload();
+    else window.addEventListener("load", startBackgroundPreload, { once: true });
   }
 
   function animateSlide() {
@@ -247,6 +271,7 @@
   }
 
   createProgressButtons();
+  scheduleGuideImagePreload();
   elements.openButton.addEventListener("click", openGuide);
   elements.closeButton.addEventListener("click", closeGuide);
   elements.modal.querySelector("[data-close-usage-guide]").addEventListener("click", closeGuide);

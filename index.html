@@ -131,15 +131,32 @@
               <div class="tab-scroll-progress" aria-hidden="true"><span id="materialTypeTabsProgress"></span></div>
             </div>
           </div>
-          <div class="view-mode-toggle" role="group" aria-label="자료 보기 방식">
-            <button class="view-mode-button" type="button" data-view-mode="card" aria-pressed="true">
-              <span class="view-mode-icon view-mode-icon-card" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-              카드형
+          <div class="material-view-actions">
+            <button
+              id="openQrBundle"
+              class="qr-bundle-open-button"
+              type="button"
+              aria-haspopup="dialog"
+              aria-controls="qrBundleModal"
+            >
+              <span class="qr-bundle-open-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
+                  <path d="M15 14h2v2h-2zM19 14h1v3h-3v3h-3v-2M19 19h1v1h-1z" />
+                </svg>
+              </span>
+              <span>묶음 QR 생성</span>
             </button>
-            <button class="view-mode-button" type="button" data-view-mode="list" aria-pressed="false">
-              <span class="view-mode-icon view-mode-icon-list" aria-hidden="true"><i></i><i></i><i></i></span>
-              목록형
-            </button>
+            <div class="view-mode-toggle" role="group" aria-label="자료 보기 방식">
+              <button class="view-mode-button" type="button" data-view-mode="card" aria-pressed="true">
+                <span class="view-mode-icon view-mode-icon-card" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                카드형
+              </button>
+              <button class="view-mode-button" type="button" data-view-mode="list" aria-pressed="false">
+                <span class="view-mode-icon view-mode-icon-list" aria-hidden="true"><i></i><i></i><i></i></span>
+                목록형
+              </button>
+            </div>
           </div>
         </div>
 
@@ -382,6 +399,78 @@
             <button id="resetQuickFilter" class="button button-secondary" type="button">초기화</button>
             <button id="applyQuickFilter" class="button button-primary" type="submit">자료 보기</button>
           </div>
+        </form>
+      </section>
+    </div>
+
+    <div id="qrBundleModal" class="modal qr-bundle-modal" hidden>
+      <div class="modal-backdrop"></div>
+      <section
+        class="qr-bundle-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="qrBundleTitle"
+        aria-describedby="qrBundleDescription"
+      >
+        <header class="qr-bundle-header">
+          <div>
+            <span class="modal-label">QR MATERIAL BOARD</span>
+            <h2 id="qrBundleTitle">묶음 QR 생성</h2>
+            <p id="qrBundleDescription">필요한 자료를 골라 하나의 QR 모음판으로 만드세요.</p>
+          </div>
+          <button id="closeQrBundle" class="icon-button" type="button" aria-label="묶음 QR 생성 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+
+        <form id="qrBundleForm" class="qr-bundle-form" autocomplete="off">
+          <div class="qr-bundle-toolbar">
+            <label class="qr-bundle-title-field" for="qrBundleBoardTitle">
+              <span>모음판 제목</span>
+              <input
+                id="qrBundleBoardTitle"
+                type="text"
+                value="NICE HUB 추천자료"
+                maxlength="80"
+                placeholder="예: 무인숙박 고객 상담자료"
+              />
+            </label>
+            <label class="qr-bundle-search-field" for="qrBundleSearch">
+              <span>자료명 검색</span>
+              <input id="qrBundleSearch" type="search" maxlength="120" placeholder="자료명을 검색해 주세요" />
+            </label>
+            <label for="qrBundleCategory">
+              <span>사업 카테고리</span>
+              <select id="qrBundleCategory"></select>
+            </label>
+            <label for="qrBundleType">
+              <span>자료 유형</span>
+              <select id="qrBundleType"></select>
+            </label>
+          </div>
+
+          <div class="qr-bundle-list-heading">
+            <div>
+              <strong>자료 선택</strong>
+              <span id="qrBundleMatchCount">0건</span>
+            </div>
+            <button id="clearQrBundleSelection" class="qr-bundle-clear-button" type="button">선택 전체 해제</button>
+          </div>
+          <div id="qrBundleMaterials" class="qr-bundle-materials" role="group" aria-label="QR로 만들 자료 선택"></div>
+          <p id="qrBundleEmpty" class="qr-bundle-empty" hidden>조건에 맞는 자료가 없습니다.</p>
+
+          <footer class="qr-bundle-footer">
+            <p id="qrBundleStatus" class="qr-bundle-status" aria-live="polite">
+              <strong>0개 선택됨</strong>
+              <span>최대 10개까지 선택할 수 있습니다.</span>
+            </p>
+            <div class="qr-bundle-actions">
+              <button id="cancelQrBundle" class="button button-secondary" type="button">취소</button>
+              <button id="generateQrBundle" class="button button-primary" type="submit" disabled>
+                QR 자료 생성
+              </button>
+            </div>
+          </footer>
         </form>
       </section>
     </div>

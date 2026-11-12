@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b2e59" />
+    <meta name="description" content="선택한 NICE HUB 자료를 한눈에 확인하는 QR 자료 모음판입니다." />
+    <title>QR 자료 모음판 | NICE HUB</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/app-icon-192.png" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+    <link rel="stylesheet" href="./assets/css/qr-bundle.css" />
+    <script src="./assets/vendor/qrcode-generator.js" defer></script>
+    <script src="./assets/js/share-page-builder.js" defer></script>
+    <script src="./assets/js/qr-bundle.js" defer></script>
+  </head>
+  <body class="qr-bundle-page-body">
+    <header class="qr-board-header">
+      <div class="qr-board-shell qr-board-header-inner">
+        <div class="qr-board-heading">
+          <p>NICE HUB · QR MATERIAL BOARD</p>
+          <h1 id="qrBoardTitle">QR 자료 모음판</h1>
+          <span id="qrBoardSubtitle">선택한 자료의 QR 코드를 준비하고 있습니다.</span>
+        </div>
+        <div class="qr-board-header-actions">
+          <button id="printQrBoard" class="qr-board-action qr-board-print" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 8V3.5h10V8M7 17H4.5A1.5 1.5 0 0 1 3 15.5v-5A1.5 1.5 0 0 1 4.5 9h15a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5H17" />
+              <path d="M7 14h10v6.5H7z" />
+            </svg>
+            인쇄·PDF 저장
+          </button>
+          <a class="qr-board-action qr-board-return" href="./index.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.5 6-6 6 6 6" /></svg>
+            자료 목록
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="qr-board-shell qr-board-main">
+      <div id="qrBoardLoading" class="qr-board-loading" role="status" aria-live="polite">
+        <span class="qr-board-spinner" aria-hidden="true"></span>
+        QR 자료 모음판을 만들고 있습니다.
+      </div>
+
+      <section id="qrBoardGrid" class="qr-board-grid" aria-label="선택한 자료 QR 코드" hidden></section>
+
+      <section id="qrBoardEmpty" class="qr-board-empty" hidden>
+        <span aria-hidden="true">!</span>
+        <h2>표시할 자료가 없습니다.</h2>
+        <p>자료가 비공개되었거나 주소가 올바르지 않습니다.</p>
+        <a class="button button-primary" href="./index.html">자료 목록으로 돌아가기</a>
+      </section>
+    </main>
+
+    <footer class="qr-board-footer">
+      <div class="qr-board-shell">
+        <strong>NICE HUB</strong>
+        <p>각 QR 코드는 현재 등록된 최신 자료로 연결됩니다.</p>
+      </div>
+    </footer>
+  </body>
+</html>
