@@ -670,6 +670,10 @@ a {
 }
 
 @media (min-width: 901px) {
+  .main-content:has(.materials-pagination:not([hidden]) .materials-end-sentinel:not([hidden])) {
+    padding-bottom: 26px;
+  }
+
   .materials-pagination:not([hidden]):has(.materials-more-button:not([hidden])) {
     display: flex;
     width: min(100%, 680px);
@@ -737,9 +741,9 @@ a {
   .floating-utility-dock {
     position: fixed;
     z-index: 90;
-    top: var(--floating-utility-top, 16px);
+    top: auto;
     right: max(18px, calc((100vw - 1180px) / 2 - 164px));
-    bottom: auto;
+    bottom: calc(22px + var(--quick-filter-footer-lift, 0px));
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -750,21 +754,12 @@ a {
     box-shadow: 0 14px 36px rgba(7, 31, 61, 0.18);
     backdrop-filter: blur(12px);
     transition:
-      top 0.08s linear,
-      opacity 180ms ease,
-      visibility 180ms ease,
-      transform 180ms ease;
+      bottom 0.08s linear,
+      box-shadow 160ms ease;
   }
 
   .floating-utility-dock:not(:has(button:not([hidden]))) {
     display: none;
-  }
-
-  .floating-utility-dock.is-footer-visible {
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(14px);
   }
 
   .floating-utility-dock .scroll-top-floating,
