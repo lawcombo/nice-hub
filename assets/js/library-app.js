@@ -27,6 +27,7 @@
     qrBundleMatchCount: document.querySelector("#qrBundleMatchCount"),
     qrBundleEmpty: document.querySelector("#qrBundleEmpty"),
     qrBundleStatus: document.querySelector("#qrBundleStatus"),
+    qrBundleToast: document.querySelector("#qrBundleToast"),
     clearQrBundleSelection: document.querySelector("#clearQrBundleSelection"),
     generateQrBundle: document.querySelector("#generateQrBundle"),
     closeQrBundle: document.querySelector("#closeQrBundle"),
@@ -142,6 +143,7 @@
   let descriptionTooltipMeasureFrame = 0;
   let activeDescriptionTooltipTarget = null;
   let lastQrBundleFocusedElement = null;
+  let qrBundleToastTimer = 0;
   const qrBundleSelectedIds = new Set();
 
   const adminAccessPassword = "5959";
@@ -845,15 +847,30 @@
     strong.textContent = `${selectedCount}개 선택됨`;
     detail.textContent = message || (reachedLimit ? "최대 10개를 모두 선택했습니다." : "최대 10개까지 선택할 수 있습니다.");
     elements.qrBundleStatus.classList.toggle("is-limit", reachedLimit || Boolean(message));
-    elements.generateQrBundle.disabled = selectedCount === 0;
     elements.clearQrBundleSelection.disabled = selectedCount === 0;
   }
 
+  function hideQrBundleToast() {
+    window.clearTimeout(qrBundleToastTimer);
+    elements.qrBundleToast.hidden = true;
+  }
+
+  function showQrBundleToast(message) {
+    window.clearTimeout(qrBundleToastTimer);
+    elements.qrBundleToast.textContent = message;
+    elements.qrBundleToast.hidden = false;
+    qrBundleToastTimer = window.setTimeout(() => {
+      elements.qrBundleToast.hidden = true;
+    }, 2200);
+  }
+
   function toggleQrBundleMaterial(materialId, button) {
+    hideQrBundleToast();
     if (qrBundleSelectedIds.has(materialId)) {
       qrBundleSelectedIds.delete(materialId);
     } else if (qrBundleSelectedIds.size >= qrBundleSelectionLimit) {
       updateQrBundleStatus("최대 10개까지 선택할 수 있습니다.");
+      showQrBundleToast("자료는 최대 10개까지 선택할 수 있습니다.");
       return;
     } else {
       qrBundleSelectedIds.add(materialId);
@@ -900,6 +917,7 @@
     matches.forEach((material) => fragment.appendChild(createQrBundleMaterialOption(material)));
     elements.qrBundleMaterials.replaceChildren(fragment);
     elements.qrBundleMatchCount.textContent = `${matches.length}건`;
+    elements.qrBundleMaterials.classList.toggle("is-scrollable", matches.length > 10);
     elements.qrBundleMaterials.hidden = matches.length === 0;
     elements.qrBundleEmpty.hidden = matches.length !== 0;
     updateQrBundleStatus();
@@ -919,6 +937,7 @@
     pushModalHistory("qr-bundle");
     lastQrBundleFocusedElement = document.activeElement;
     syncQrBundleDialog();
+    hideQrBundleToast();
     elements.qrBundleModal.hidden = false;
     document.body.classList.add("modal-open");
     document.addEventListener("keydown", handleQrBundleKeydown);
@@ -928,6 +947,7 @@
   function closeQrBundle() {
     if (elements.qrBundleModal.hidden) return;
     elements.qrBundleModal.hidden = true;
+    hideQrBundleToast();
     document.body.classList.remove("modal-open");
     document.removeEventListener("keydown", handleQrBundleKeydown);
     if (lastQrBundleFocusedElement && document.contains(lastQrBundleFocusedElement)) {
@@ -953,7 +973,7 @@
       materials.some((material) => material.id === id && isDisplayableMaterial(material)),
     );
     if (!selectedIds.length) {
-      updateQrBundleStatus("QR로 만들 자료를 먼저 선택해 주세요.");
+      showQrBundleToast("자료를 선택해 주세요.");
       return;
     }
 

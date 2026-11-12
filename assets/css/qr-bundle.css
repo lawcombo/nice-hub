@@ -110,6 +110,12 @@
   font-size: 0.84rem;
 }
 
+.qr-board-loading[hidden],
+.qr-board-grid[hidden],
+.qr-board-empty[hidden] {
+  display: none !important;
+}
+
 .qr-board-spinner {
   width: 34px;
   height: 34px;

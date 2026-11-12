@@ -460,13 +460,16 @@
           <p id="qrBundleEmpty" class="qr-bundle-empty" hidden>조건에 맞는 자료가 없습니다.</p>
 
           <footer class="qr-bundle-footer">
+            <div id="qrBundleToast" class="qr-bundle-toast" role="status" aria-live="polite" hidden>
+              자료를 선택해 주세요.
+            </div>
             <p id="qrBundleStatus" class="qr-bundle-status" aria-live="polite">
               <strong>0개 선택됨</strong>
               <span>최대 10개까지 선택할 수 있습니다.</span>
             </p>
             <div class="qr-bundle-actions">
               <button id="cancelQrBundle" class="button button-secondary" type="button">취소</button>
-              <button id="generateQrBundle" class="button button-primary" type="submit" disabled>
+              <button id="generateQrBundle" class="button button-primary" type="submit">
                 QR 자료 생성
               </button>
             </div>
