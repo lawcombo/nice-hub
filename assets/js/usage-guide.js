@@ -60,6 +60,26 @@
   let lastFocusedElement = null;
   let touchStartX = null;
   let touchStartY = null;
+  let pendingHistoryClose = false;
+  let historyCloseTimer = 0;
+
+  const modalHistoryKey = "niceHubModal";
+  const modalHistoryValue = "usage-guide";
+
+  function getHistoryState() {
+    return history.state && typeof history.state === "object" ? history.state : {};
+  }
+
+  function pushGuideHistory() {
+    if (getHistoryState()[modalHistoryKey] === modalHistoryValue) return true;
+    try {
+      history.pushState({ ...getHistoryState(), [modalHistoryKey]: modalHistoryValue }, "", window.location.href);
+      return true;
+    } catch (error) {
+      console.warn("활용 가이드 뒤로가기 기록을 추가하지 못했습니다.", error);
+      return false;
+    }
+  }
 
   function resolveAsset(path) {
     return new URL(path, document.baseURI).href;
@@ -135,19 +155,42 @@
     if (!elements.modal.hidden) return;
     lastFocusedElement = document.activeElement;
     showStep(0, { animate: false });
+    pushGuideHistory();
     elements.modal.hidden = false;
     document.body.classList.add("modal-open");
     document.addEventListener("keydown", handleKeydown);
     window.requestAnimationFrame(() => elements.closeButton.focus());
   }
 
-  function closeGuide() {
+  function finishClosingGuide() {
     if (elements.modal.hidden) return;
+    window.clearTimeout(historyCloseTimer);
+    pendingHistoryClose = false;
     elements.modal.hidden = true;
     document.body.classList.remove("modal-open");
     document.removeEventListener("keydown", handleKeydown);
     if (lastFocusedElement && document.contains(lastFocusedElement)) lastFocusedElement.focus();
     lastFocusedElement = null;
+  }
+
+  function closeGuide() {
+    if (elements.modal.hidden || pendingHistoryClose) return;
+    if (getHistoryState()[modalHistoryKey] !== modalHistoryValue) {
+      finishClosingGuide();
+      return;
+    }
+
+    pendingHistoryClose = true;
+    history.back();
+    historyCloseTimer = window.setTimeout(() => {
+      if (!pendingHistoryClose) return;
+      finishClosingGuide();
+    }, 500);
+  }
+
+  function handleBrowserBack() {
+    if (elements.modal.hidden) return;
+    finishClosingGuide();
   }
 
   function trapFocus(event) {
@@ -211,4 +254,5 @@
   elements.nextButton.addEventListener("click", showNextStep);
   elements.slide.addEventListener("touchstart", handleTouchStart, { passive: true });
   elements.slide.addEventListener("touchend", handleTouchEnd, { passive: true });
+  window.addEventListener("popstate", handleBrowserBack);
 })();

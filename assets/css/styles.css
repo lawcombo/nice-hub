@@ -333,7 +333,12 @@ a {
   overflow-x: auto;
   margin: 0;
   padding: 4px;
-  scrollbar-width: thin;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .category-tabs-shell {
@@ -3109,6 +3114,10 @@ button.button {
   .tab-scroll-arrow {
     width: 28px;
     height: 28px;
+  }
+
+  .tab-scroll-shell.is-scrollable .tab-scroll-progress {
+    display: none;
   }
 
   .quick-filter-floating {
