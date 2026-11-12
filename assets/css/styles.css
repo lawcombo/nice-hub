@@ -1301,6 +1301,76 @@ a {
   -webkit-line-clamp: 2;
 }
 
+.material-description.has-description-tooltip {
+  cursor: help;
+}
+
+.material-description.has-description-tooltip:hover,
+.material-description.has-description-tooltip:focus-visible {
+  color: var(--navy-900);
+}
+
+.material-description.has-description-tooltip:focus-visible {
+  border-radius: 5px;
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.material-description-tooltip {
+  position: fixed;
+  z-index: 950;
+  width: max-content;
+  max-width: min(380px, calc(100vw - 24px));
+  padding: 11px 13px;
+  border: 1px solid rgba(143, 197, 255, 0.38);
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(135deg, #0b2e59, #164d85);
+  box-shadow: 0 14px 36px rgba(7, 29, 55, 0.28);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.62;
+  letter-spacing: -0.01em;
+  white-space: pre-line;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px) scale(0.985);
+  transform-origin: top center;
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease;
+}
+
+.material-description-tooltip[hidden] {
+  display: none;
+}
+
+.material-description-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.material-description-tooltip.is-above {
+  transform-origin: bottom center;
+}
+
+.material-description-tooltip::after {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #0e3765;
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.material-description-tooltip.is-above::after {
+  top: auto;
+  bottom: -5px;
+  background: #164d85;
+}
+
 .material-detail-row {
   display: flex;
   align-items: baseline;

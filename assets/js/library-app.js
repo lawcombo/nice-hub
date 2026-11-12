@@ -22,6 +22,7 @@
     endSentinel: document.querySelector("#materialsEndSentinel"),
     endToast: document.querySelector("#materialsEndToast"),
     shareFeedbackToast: document.querySelector("#shareFeedbackToast"),
+    materialDescriptionTooltip: document.querySelector("#materialDescriptionTooltip"),
     empty: document.querySelector("#emptyState"),
     emptyTitle: document.querySelector("#emptyState h3"),
     emptyMessage: document.querySelector("#emptyState p"),
@@ -121,6 +122,8 @@
   let quickFilterDraftType = "all";
   let lastQuickFilterFocusedElement = null;
   let quickFilterVisibilityFrame = 0;
+  let descriptionTooltipMeasureFrame = 0;
+  let activeDescriptionTooltipTarget = null;
 
   const adminAccessPassword = "5959";
   const materialSecurityPassword = "1004";
@@ -139,11 +142,13 @@
   }
 
   function setViewMode(viewMode, persist = true) {
+    hideMaterialDescriptionTooltip();
     activeViewMode = viewMode === "list" ? "list" : "card";
     elements.grid.classList.toggle("is-list-view", activeViewMode === "list");
     elements.viewModeButtons.forEach((button) => {
       button.setAttribute("aria-pressed", button.dataset.viewMode === activeViewMode ? "true" : "false");
     });
+    scheduleDescriptionTooltipMeasurement();
 
     if (!persist) return;
     try {
@@ -841,6 +846,7 @@
   }
 
   function renderMaterials() {
+    hideMaterialDescriptionTooltip();
     const filteredMaterials = getVisibleMaterials();
     const visibleMaterials = filteredMaterials.slice(0, visibleMaterialCount);
     const fragment = document.createDocumentFragment();
@@ -865,6 +871,77 @@
     elements.summary.textContent = activeSearch
       ? `‘${elements.searchInput.value.trim()}’ 검색 결과 ${filteredMaterials.length}건`
       : `${categoryLabel} · ${typeLabel} 자료 ${filteredMaterials.length}건`;
+    scheduleDescriptionTooltipMeasurement();
+  }
+
+  function supportsDescriptionHover() {
+    return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  }
+
+  function isDescriptionTruncated(description) {
+    return description.scrollHeight > description.clientHeight + 1 || description.scrollWidth > description.clientWidth + 1;
+  }
+
+  function hideMaterialDescriptionTooltip(target = activeDescriptionTooltipTarget) {
+    if (!activeDescriptionTooltipTarget || (target && target !== activeDescriptionTooltipTarget)) return;
+    activeDescriptionTooltipTarget.removeAttribute("aria-describedby");
+    activeDescriptionTooltipTarget = null;
+    elements.materialDescriptionTooltip.classList.remove("is-visible", "is-above");
+    elements.materialDescriptionTooltip.hidden = true;
+  }
+
+  function positionMaterialDescriptionTooltip(target) {
+    if (!target || target !== activeDescriptionTooltipTarget || elements.materialDescriptionTooltip.hidden) return;
+    const targetRect = target.getBoundingClientRect();
+    const tooltipRect = elements.materialDescriptionTooltip.getBoundingClientRect();
+    const viewportGap = 12;
+    const targetGap = 9;
+    const showAbove = targetRect.bottom + targetGap + tooltipRect.height > window.innerHeight - viewportGap;
+    const top = showAbove
+      ? Math.max(viewportGap, targetRect.top - tooltipRect.height - targetGap)
+      : Math.min(window.innerHeight - tooltipRect.height - viewportGap, targetRect.bottom + targetGap);
+    const centeredLeft = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
+    const left = Math.min(
+      window.innerWidth - tooltipRect.width - viewportGap,
+      Math.max(viewportGap, centeredLeft),
+    );
+    elements.materialDescriptionTooltip.classList.toggle("is-above", showAbove);
+    elements.materialDescriptionTooltip.style.left = `${left}px`;
+    elements.materialDescriptionTooltip.style.top = `${top}px`;
+  }
+
+  function showMaterialDescriptionTooltip(target) {
+    if (!supportsDescriptionHover() || !target.classList.contains("has-description-tooltip")) return;
+    if (activeDescriptionTooltipTarget && activeDescriptionTooltipTarget !== target) {
+      activeDescriptionTooltipTarget.removeAttribute("aria-describedby");
+    }
+    activeDescriptionTooltipTarget = target;
+    elements.materialDescriptionTooltip.textContent = target.dataset.fullDescription || target.textContent.trim();
+    elements.materialDescriptionTooltip.hidden = false;
+    target.setAttribute("aria-describedby", "materialDescriptionTooltip");
+    positionMaterialDescriptionTooltip(target);
+    window.requestAnimationFrame(() => {
+      if (activeDescriptionTooltipTarget === target && !elements.materialDescriptionTooltip.hidden) {
+        elements.materialDescriptionTooltip.classList.add("is-visible");
+      }
+    });
+  }
+
+  function updateDescriptionTooltipTargets() {
+    descriptionTooltipMeasureFrame = 0;
+    const hoverSupported = supportsDescriptionHover();
+    elements.grid.querySelectorAll(".material-description").forEach((description) => {
+      const truncated = hoverSupported && isDescriptionTruncated(description);
+      description.classList.toggle("has-description-tooltip", truncated);
+      if (truncated) description.tabIndex = 0;
+      else description.removeAttribute("tabindex");
+      if (!truncated && activeDescriptionTooltipTarget === description) hideMaterialDescriptionTooltip(description);
+    });
+  }
+
+  function scheduleDescriptionTooltipMeasurement() {
+    if (descriptionTooltipMeasureFrame) window.cancelAnimationFrame(descriptionTooltipMeasureFrame);
+    descriptionTooltipMeasureFrame = window.requestAnimationFrame(updateDescriptionTooltipTargets);
   }
 
   function updateSearch() {
@@ -979,6 +1056,11 @@
       createElement("p", "material-description"),
       material.description || "자료의 자세한 내용은 파일에서 확인해 주세요.",
     );
+    description.dataset.fullDescription = material.description || "자료의 자세한 내용은 파일에서 확인해 주세요.";
+    description.addEventListener("mouseenter", () => showMaterialDescriptionTooltip(description));
+    description.addEventListener("mouseleave", () => hideMaterialDescriptionTooltip(description));
+    description.addEventListener("focus", () => showMaterialDescriptionTooltip(description));
+    description.addEventListener("blur", () => hideMaterialDescriptionTooltip(description));
     const fileInfo = createElement("p", "material-file-info", getMaterialFileInfo(material));
     const dateInfo = getMaterialDateInfo(material);
     const date = createElement("p", "material-date", `${dateInfo.label} ${dateInfo.text}`);
@@ -1971,11 +2053,20 @@
   window.addEventListener("resize", () => {
     updateAllTabScrollers();
     scheduleQuickFilterFloatingVisibility();
+    scheduleDescriptionTooltipMeasurement();
+    if (activeDescriptionTooltipTarget) positionMaterialDescriptionTooltip(activeDescriptionTooltipTarget);
     if (elements.modal.hidden || elements.pdfCanvasViewer.hidden || !pdfDocument) return;
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => renderPdfPage(currentPdfPage), 180);
   });
   window.addEventListener("scroll", scheduleQuickFilterFloatingVisibility, { passive: true });
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (activeDescriptionTooltipTarget) positionMaterialDescriptionTooltip(activeDescriptionTooltipTarget);
+    },
+    { passive: true },
+  );
   initializeBackNavigation();
   initializeMaterialEndObserver();
   setViewMode(activeViewMode, false);
