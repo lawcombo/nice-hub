@@ -1819,24 +1819,31 @@ button.button {
   .floating-footer-actions {
     position: fixed;
     z-index: 90;
-    top: 50%;
+    top: var(--floating-actions-top, 16px);
     right: max(18px, calc((100vw - 1180px) / 2 - 164px));
     display: flex;
     flex-direction: column;
     gap: 8px;
-    opacity: 1;
-    transform: translateY(-50%);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(14px);
     transition:
       opacity 180ms ease,
       visibility 180ms ease,
       transform 180ms ease;
   }
 
+  .floating-footer-actions.is-positioned {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
   .floating-footer-actions.is-footer-visible {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
-    transform: translate(14px, -50%);
+    transform: translateX(14px);
   }
 
   .floating-footer-action {

@@ -788,6 +788,7 @@
   function updateQuickFilterFloatingVisibility() {
     quickFilterVisibilityFrame = 0;
     const controlsRect = elements.materialControls.getBoundingClientRect();
+    const panelRect = elements.panel.getBoundingClientRect();
     const footerRect = elements.footer.getBoundingClientRect();
     const footerLift = Math.max(0, Math.min(footerRect.height, window.innerHeight - footerRect.top));
     elements.openQuickFilter.hidden = controlsRect.bottom >= 12;
@@ -799,6 +800,8 @@
       `${elements.openQuickFilter.hidden ? 0 : elements.openQuickFilter.getBoundingClientRect().width}px`,
     );
     elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
+    elements.floatingFooterActions.style.setProperty("--floating-actions-top", `${Math.max(16, panelRect.top)}px`);
+    elements.floatingFooterActions.classList.add("is-positioned");
     elements.floatingFooterActions.classList.toggle(
       "is-footer-visible",
       footerRect.top < window.innerHeight && footerRect.bottom > 0,
