@@ -2495,6 +2495,10 @@ button.button {
   box-shadow: 0 28px 90px rgba(3, 19, 37, 0.34);
 }
 
+.qr-bundle-dialog:focus {
+  outline: none;
+}
+
 .qr-bundle-header {
   display: flex;
   align-items: center;

@@ -941,7 +941,7 @@
     elements.qrBundleModal.hidden = false;
     document.body.classList.add("modal-open");
     document.addEventListener("keydown", handleQrBundleKeydown);
-    window.requestAnimationFrame(() => elements.qrBundleBoardTitle.focus());
+    window.requestAnimationFrame(() => elements.qrBundleDialog.focus({ preventScroll: true }));
   }
 
   function closeQrBundle() {
