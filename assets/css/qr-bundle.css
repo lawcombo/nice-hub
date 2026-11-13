@@ -45,11 +45,6 @@
   letter-spacing: -0.045em;
 }
 
-.qr-board-heading span {
-  color: #dcecff;
-  font-size: 0.8rem;
-}
-
 .qr-board-header-actions {
   display: flex;
   flex: 0 0 auto;
@@ -136,9 +131,9 @@
   display: grid;
   min-width: 0;
   grid-template-columns: 178px minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 18px;
-  padding: 20px;
+  padding: 38px 20px 20px;
   border: 1px solid #cad8e8;
   border-radius: 18px;
   background: #fff;
@@ -154,6 +149,20 @@
   font-size: 0.7rem;
   font-weight: 900;
   letter-spacing: 0.08em;
+}
+
+.qr-board-security-badge {
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  padding: 3px 7px;
+  border: 1px solid #f0c58d;
+  border-radius: 999px;
+  color: #98470e;
+  background: #fff0dc;
+  font-size: 0.64rem;
+  font-weight: 850;
+  line-height: 1.2;
 }
 
 .qr-board-code {
@@ -181,6 +190,7 @@
 
 .qr-board-card-copy {
   min-width: 0;
+  padding-top: 7px;
 }
 
 .qr-board-tags {
@@ -204,28 +214,12 @@
   background: var(--blue-100);
 }
 
-.qr-board-secure {
-  color: #9a4a11;
-  background: #fff0dc;
-}
-
 .qr-board-card h2 {
   margin: 0;
   color: var(--navy-900);
   font-size: 1rem;
   line-height: 1.45;
   letter-spacing: -0.025em;
-}
-
-.qr-board-card p {
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 7px 0 0;
-  color: var(--slate-500);
-  font-size: 0.72rem;
-  line-height: 1.55;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .qr-board-open-link {
@@ -321,8 +315,11 @@
   }
 
   .qr-board-header-actions {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    display: block;
+  }
+
+  .qr-board-header-actions .qr-board-action {
+    width: 100%;
   }
 
   .qr-board-main {
@@ -337,8 +334,18 @@
   .qr-board-card {
     grid-template-columns: 124px minmax(0, 1fr);
     gap: 13px;
-    padding: 14px;
+    padding: 34px 14px 14px;
     border-radius: 15px;
+  }
+
+  .qr-board-security-badge {
+    top: 10px;
+    left: 14px;
+  }
+
+  .qr-board-number {
+    top: 11px;
+    right: 13px;
   }
 
   .qr-board-code {
@@ -348,10 +355,6 @@
 
   .qr-board-card h2 {
     font-size: 0.9rem;
-  }
-
-  .qr-board-card p {
-    display: none;
   }
 
   .qr-board-open-link {
@@ -387,8 +390,7 @@
     border-bottom: 2px solid var(--navy-900);
   }
 
-  .qr-board-heading p,
-  .qr-board-heading span {
+  .qr-board-heading p {
     color: var(--slate-500);
   }
 
@@ -414,11 +416,21 @@
   .qr-board-card {
     grid-template-columns: 42mm minmax(0, 1fr);
     gap: 5mm;
-    padding: 5mm;
+    padding: 9mm 5mm 5mm;
     border: 1px solid #aab8c8;
     border-radius: 4mm;
     box-shadow: none;
     page-break-inside: avoid;
+  }
+
+  .qr-board-security-badge {
+    top: 3mm;
+    left: 5mm;
+  }
+
+  .qr-board-number {
+    top: 3mm;
+    right: 5mm;
   }
 
   .qr-board-code {

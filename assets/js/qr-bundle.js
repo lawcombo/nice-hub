@@ -3,7 +3,6 @@
 
   const elements = {
     title: document.querySelector("#qrBoardTitle"),
-    subtitle: document.querySelector("#qrBoardSubtitle"),
     loading: document.querySelector("#qrBoardLoading"),
     grid: document.querySelector("#qrBoardGrid"),
     empty: document.querySelector("#qrBoardEmpty"),
@@ -95,11 +94,9 @@
       createElement("span", "qr-board-tag qr-board-category", categoryMap.get(material.category) || "기타"),
       createElement("span", "qr-board-tag", typeMap.get(material.type) || "자료"),
     );
-    if (material.isSecure === true) tags.appendChild(createElement("span", "qr-board-tag qr-board-secure", "보안 문서"));
 
     const copy = createElement("div", "qr-board-card-copy");
     copy.append(tags, createElement("h2", "", material.title));
-    if (material.description) copy.appendChild(createElement("p", "", material.description));
 
     const link = createElement("a", "qr-board-open-link", "자료 링크 열기");
     link.href = targetUrl;
@@ -107,7 +104,11 @@
     link.rel = "noopener noreferrer";
     copy.appendChild(link);
 
-    article.append(number, createQrCode(targetUrl, material.title), copy);
+    article.appendChild(number);
+    if (material.isSecure === true) {
+      article.appendChild(createElement("span", "qr-board-security-badge", "보안 문서"));
+    }
+    article.append(createQrCode(targetUrl, material.title), copy);
     return article;
   }
 
@@ -144,7 +145,6 @@
         fragment.appendChild(createMaterialCard(material, index, categoryMap, typeMap));
       });
       elements.grid.replaceChildren(fragment);
-      elements.subtitle.textContent = `선택한 자료 ${selectedMaterials.length}개의 QR 코드를 한곳에 모았습니다.`;
       elements.loading.hidden = true;
       elements.empty.hidden = true;
       elements.grid.hidden = false;

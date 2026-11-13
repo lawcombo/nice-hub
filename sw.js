@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "nice-hub-shell-v77";
+const CACHE_NAME = "nice-hub-shell-v78";
 const APP_SHELL = [
   "./",
   "./index.html",
