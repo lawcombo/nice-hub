@@ -32,6 +32,13 @@
     },
     {
       image: "assets/images/guide/nice-hub-guide-step-05.png",
+      alt: "영업자가 여러 자료의 QR 모음판을 고객에게 보여주고 고객이 원하는 자료의 QR 코드를 스마트폰으로 스캔하는 모습",
+      title: "묶음 QR로 원하는 자료를 한눈에!",
+      description:
+        "영업자가 필요한 자료의 QR을 한 화면에 모아 고객에게 보여주면, 고객은 원하는 자료를 직접 골라 QR코드를 스캔하고 바로 확인할 수 있습니다.",
+    },
+    {
+      image: "assets/images/guide/nice-hub-guide-step-06.png",
       alt: "고객이 자신의 스마트폰에서 공유받은 제품소개 자료를 직접 확인하는 모습",
       title: "고객도 본인 스마트폰으로 편리하게!",
       description:
