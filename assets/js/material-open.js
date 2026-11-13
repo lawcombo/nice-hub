@@ -50,13 +50,25 @@
     }
   }
 
-  function getFileName(material) {
+  function getFileExtension(path) {
     try {
-      const fileName = decodeURIComponent(new URL(material?.file || "", document.baseURI).pathname.split("/").pop());
-      return fileName || material?.title || "NICE-자료";
+      const fileName = decodeURIComponent(new URL(path || "", document.baseURI).pathname.split("/").pop() || "");
+      return fileName.match(/\.[a-z0-9]{1,10}$/i)?.[0]?.toLowerCase() || "";
     } catch (error) {
-      return material?.title || "NICE-자료";
+      return "";
     }
+  }
+
+  function getMaterialDownloadName(material) {
+    const extension = getFileExtension(material?.file);
+    const fallbackName = `NICE-자료${extension}`;
+    const safeTitle = String(material?.title || "NICE-자료")
+      .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/[. ]+$/g, "")
+      .trim();
+    if (!safeTitle) return fallbackName;
+    return extension && safeTitle.toLowerCase().endsWith(extension) ? safeTitle : `${safeTitle}${extension}`;
   }
 
   function finishDownload() {
@@ -102,7 +114,7 @@
       const objectUrl = URL.createObjectURL(await response.blob());
       const link = document.createElement("a");
       link.href = objectUrl;
-      link.download = getFileName(material);
+      link.download = getMaterialDownloadName(material);
       link.hidden = true;
       document.body.appendChild(link);
       link.click();
@@ -117,7 +129,7 @@
     }
 
     elements.downloadFallback.href = targetUrl;
-    elements.downloadFallback.download = getFileName(material);
+    elements.downloadFallback.download = getMaterialDownloadName(material);
     elements.downloadFallback.textContent = "다시 다운로드";
     elements.downloadFallback.hidden = false;
     elements.closeButton.hidden = false;

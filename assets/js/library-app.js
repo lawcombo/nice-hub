@@ -1501,7 +1501,7 @@
   function createDownloadLink(material) {
     const link = document.createElement("a");
     link.href = resolveUrl(material.file);
-    link.download = getFileName(material.file, material.title);
+    link.download = getMaterialDownloadName(material);
     return link;
   }
 
@@ -1669,13 +1669,27 @@
     }, 2000);
   }
 
-  function getFileName(path, fallbackTitle) {
+  function getFileExtension(path) {
     try {
       const pathname = new URL(path, document.baseURI).pathname;
-      return decodeURIComponent(pathname.split("/").pop()) || fallbackTitle;
+      const fileName = decodeURIComponent(pathname.split("/").pop() || "");
+      const extension = fileName.match(/\.[a-z0-9]{1,10}$/i)?.[0] || "";
+      return extension.toLowerCase();
     } catch (error) {
-      return fallbackTitle;
+      return "";
     }
+  }
+
+  function getMaterialDownloadName(material) {
+    const extension = getFileExtension(material?.file);
+    const fallbackName = `NICE-자료${extension}`;
+    const safeTitle = String(material?.title || "NICE-자료")
+      .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/[. ]+$/g, "")
+      .trim();
+    if (!safeTitle) return fallbackName;
+    return extension && safeTitle.toLowerCase().endsWith(extension) ? safeTitle : `${safeTitle}${extension}`;
   }
 
   function formatDateOnly(value) {
@@ -1927,7 +1941,7 @@
     elements.previewTypeLabel.textContent = imageMaterial ? "IMAGE 미리보기" : "PDF 미리보기";
     elements.modalTitle.textContent = material.title;
     elements.downloadPreview.href = fileUrl;
-    elements.downloadPreview.download = getFileName(material.file, material.title);
+    elements.downloadPreview.download = getMaterialDownloadName(material);
     elements.openPreviewNewTab.href = fileUrl;
     elements.modal.hidden = false;
     document.body.classList.add("modal-open");
@@ -1990,7 +2004,7 @@
     elements.videoTitle.textContent = material.title;
     elements.videoPlayer.src = fileUrl;
     elements.downloadVideo.href = fileUrl;
-    elements.downloadVideo.download = getFileName(material.file, material.title);
+    elements.downloadVideo.download = getMaterialDownloadName(material);
     elements.openVideoNewTab.href = fileUrl;
     elements.videoModal.hidden = false;
     document.body.classList.add("modal-open");
