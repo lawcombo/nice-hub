@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "nice-hub-shell-v83";
+const CACHE_NAME = "nice-hub-shell-v84";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -67,13 +67,48 @@ async function cacheFirst(request) {
   return response;
 }
 
+function encodeContentDispositionFileName(value) {
+  return encodeURIComponent(value).replace(/['()*]/g, (character) =>
+    `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+async function serveMaterialWithSuggestedName(request) {
+  const response = await fetch(request);
+  if (!response.ok) return response;
+
+  const url = new URL(request.url);
+  const requestedName = String(url.searchParams.get("filename") || "")
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/[. ]+$/g, "")
+    .trim()
+    .slice(0, 180);
+  if (!requestedName) return response;
+
+  const extension = requestedName.match(/\.[a-z0-9]{1,10}$/i)?.[0] || "";
+  const headers = new Headers(response.headers);
+  headers.set(
+    "Content-Disposition",
+    `inline; filename="NICE-material${extension}"; filename*=UTF-8''${encodeContentDispositionFileName(requestedName)}`,
+  );
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.includes("/assets/materials/")) return;
+  if (url.pathname.includes("/assets/materials/")) {
+    if (url.searchParams.has("filename")) event.respondWith(serveMaterialWithSuggestedName(request));
+    return;
+  }
 
   const isIcon = url.pathname.includes("/assets/icons/");
   const isPdfViewer = url.pathname.includes("/assets/vendor/pdfjs/");

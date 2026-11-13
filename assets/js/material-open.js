@@ -22,6 +22,34 @@
   let pendingMaterial = null;
   const downloadMode = new URLSearchParams(window.location.search).get("mode") === "download";
 
+  async function prepareFileNameServiceWorker() {
+    if (!("serviceWorker" in navigator) || !window.isSecureContext) return false;
+    try {
+      const serviceWorkerUrl = new URL("sw.js", document.baseURI);
+      const scope = new URL("./", document.baseURI).pathname;
+      const registration = await navigator.serviceWorker.register(serviceWorkerUrl, { scope });
+      await registration.update();
+      await navigator.serviceWorker.ready;
+      if (navigator.serviceWorker.controller && !registration.installing && !registration.waiting) return true;
+
+      await new Promise((resolve) => {
+        const timeout = window.setTimeout(resolve, 1800);
+        navigator.serviceWorker.addEventListener(
+          "controllerchange",
+          () => {
+            window.clearTimeout(timeout);
+            resolve();
+          },
+          { once: true },
+        );
+      });
+      return Boolean(navigator.serviceWorker.controller);
+    } catch (error) {
+      console.warn("자료 파일명 적용 기능을 준비하지 못했습니다.", error);
+      return false;
+    }
+  }
+
   function showError(title, message) {
     elements.spinner.hidden = true;
     elements.title.textContent = title;
@@ -173,11 +201,13 @@
     if (target.origin === window.location.origin) {
       const version = material.modifiedAt || material.updatedAt || material.registeredAt;
       if (version) target.searchParams.set("v", version);
+      target.searchParams.set("filename", getMaterialDownloadName(material));
     }
     return target.href;
   }
 
   async function openLatestMaterial() {
+    const fileNameServiceWorkerReady = prepareFileNameServiceWorker();
     const queryId = new URLSearchParams(window.location.search).get("id")?.trim();
     const pageId = document.querySelector('meta[name="nice-material-id"]')?.content?.trim();
     const materialId = queryId || pageId;
@@ -215,6 +245,7 @@
       }
 
       elements.title.textContent = material.title || "최신 자료를 여는 중입니다.";
+      if (!downloadMode && !isYouTubeMaterial(material)) await fileNameServiceWorkerReady;
       await performTarget(material, targetUrl);
     } catch (error) {
       console.error("최신 자료를 확인하지 못했습니다.", error);

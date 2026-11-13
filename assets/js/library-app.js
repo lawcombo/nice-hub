@@ -1323,7 +1323,7 @@
       actions.appendChild(previewButton);
 
       const openLink = createElement("a", "button button-primary desktop-open-action", "문서보기");
-      openLink.href = resolveUrl(material.file);
+      openLink.href = getMaterialOpenUrl(material);
       openLink.target = "_blank";
       openLink.rel = "noopener";
       protectOpenLink(openLink, material);
@@ -1338,7 +1338,7 @@
     } else if (material.type === "video" && isYouTubeMaterial(material)) {
       actions.classList.add("youtube-actions");
       const openLink = createElement("a", "button button-primary", "YouTube에서 보기");
-      openLink.href = resolveUrl(material.file);
+      openLink.href = getMaterialOpenUrl(material);
       openLink.target = "_blank";
       openLink.rel = "noopener";
       protectOpenLink(openLink, material);
@@ -1505,6 +1505,19 @@
     return link;
   }
 
+  function getMaterialOpenUrl(material) {
+    if (isYouTubeMaterial(material)) return resolveUrl(material.file);
+    try {
+      const target = new URL(material.file, document.baseURI);
+      if (target.origin === window.location.origin) {
+        target.searchParams.set("filename", getMaterialDownloadName(material));
+      }
+      return target.href;
+    } catch (error) {
+      return resolveUrl(material.file);
+    }
+  }
+
   function downloadMaterial(material) {
     const link = createDownloadLink(material);
     link.hidden = true;
@@ -1520,7 +1533,7 @@
 
   function protectOpenLink(link, material) {
     if (!isSecureMaterial(material)) return;
-    const targetUrl = resolveUrl(material.file);
+    const targetUrl = getMaterialOpenUrl(material);
     convertSecureLinkToButton(link, material, () => {
       const opened = window.open(targetUrl, "_blank", "noopener");
       if (opened) opened.opener = null;
