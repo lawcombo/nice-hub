@@ -2476,13 +2476,17 @@ button.button {
   padding: 0;
 }
 
+.qr-bundle-modal {
+  padding: 8px 24px;
+}
+
 .qr-bundle-dialog {
   position: relative;
   z-index: 1;
   display: grid;
   width: min(1040px, 100%);
-  height: min(700px, calc(100dvh - 48px));
-  max-height: calc(100dvh - 48px);
+  height: min(700px, calc(100dvh - 16px));
+  max-height: calc(100dvh - 16px);
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid #a9c0dc;
@@ -2529,7 +2533,7 @@ button.button {
 .qr-bundle-form {
   display: grid;
   min-height: 0;
-  grid-template-rows: auto auto minmax(160px, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   background: #f8fbff;
 }
 
@@ -2537,7 +2541,7 @@ button.button {
   display: grid;
   grid-template-columns: minmax(180px, 1.35fr) minmax(180px, 1.35fr) minmax(130px, 0.8fr) minmax(130px, 0.8fr);
   gap: 10px;
-  padding: 14px 18px;
+  padding: 10px 18px 12px;
   border-bottom: 1px solid var(--slate-200);
   background: #fff;
 }
@@ -2621,11 +2625,11 @@ button.button {
   max-height: 416px;
   align-content: start;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 72px;
+  grid-auto-rows: 68px;
   gap: 8px;
   overflow: hidden;
   overscroll-behavior: contain;
-  padding: 12px 18px 16px;
+  padding: 10px 18px 12px;
 }
 
 .qr-bundle-materials.is-scrollable {
@@ -2638,7 +2642,7 @@ button.button {
   grid-template-columns: 62px minmax(0, 1fr) 24px;
   align-items: center;
   gap: 10px;
-  padding: 9px;
+  padding: 8px 9px;
   border: 1px solid #d4deea;
   border-radius: 12px;
   color: var(--slate-900);
@@ -2724,6 +2728,7 @@ button.button {
 
 .qr-bundle-footer {
   position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;

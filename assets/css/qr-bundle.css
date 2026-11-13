@@ -130,51 +130,157 @@
   position: relative;
   display: grid;
   min-width: 0;
-  grid-template-columns: 178px minmax(0, 1fr);
+  grid-template-columns: 184px minmax(0, 1fr);
   align-items: start;
   gap: 18px;
+  overflow: hidden;
   padding: 38px 20px 20px;
-  border: 1px solid #cad8e8;
+  border: 1px solid #b8cde4;
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 9px 26px rgba(7, 29, 55, 0.07);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(36, 114, 212, 0.11), transparent 33%),
+    linear-gradient(145deg, #fff 0%, #fbfdff 62%, #f3f8fe 100%);
+  box-shadow:
+    0 13px 32px rgba(7, 29, 55, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
   break-inside: avoid;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.qr-board-card::before {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--navy-900), var(--blue-600) 68%, #62b7ff);
+  content: "";
+}
+
+.qr-board-card::after {
+  position: absolute;
+  right: -58px;
+  bottom: -76px;
+  width: 160px;
+  height: 160px;
+  border: 1px solid rgba(36, 114, 212, 0.1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 22px rgba(36, 114, 212, 0.035);
+  content: "";
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .qr-board-card:hover {
+    border-color: #8fb4dd;
+    box-shadow:
+      0 18px 40px rgba(7, 29, 55, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.98);
+    transform: translateY(-3px);
+  }
 }
 
 .qr-board-number {
   position: absolute;
+  z-index: 2;
   top: 13px;
   right: 15px;
-  color: #adc0d6;
-  font-size: 0.7rem;
+  min-width: 28px;
+  padding: 3px 6px;
+  border: 1px solid #d4e2f1;
+  border-radius: 999px;
+  color: #6180a4;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 0.64rem;
   font-weight: 900;
   letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .qr-board-security-badge {
   position: absolute;
+  z-index: 2;
   top: 12px;
   left: 20px;
   padding: 3px 7px;
   border: 1px solid #f0c58d;
   border-radius: 999px;
   color: #98470e;
-  background: #fff0dc;
+  background: linear-gradient(135deg, #fff8ed, #ffe9ca);
+  box-shadow: 0 3px 8px rgba(152, 71, 14, 0.08);
   font-size: 0.64rem;
   font-weight: 850;
   line-height: 1.2;
 }
 
+.qr-board-qr-panel {
+  position: relative;
+  z-index: 1;
+  width: 184px;
+  padding: 8px;
+  border: 1px solid #153e6d;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(77, 169, 255, 0.24), transparent 33%),
+    linear-gradient(145deg, #071d37, #0b3b70 70%, #175ba5);
+  box-shadow:
+    0 10px 22px rgba(7, 29, 55, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+.qr-board-qr-panel-header {
+  display: flex;
+  min-height: 22px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  padding: 0 3px 6px;
+  color: #fff;
+}
+
+.qr-board-qr-brand {
+  color: #9dceff;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.qr-board-qr-scan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  opacity: 0.9;
+}
+
+.qr-board-qr-scan::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #52d9a0;
+  box-shadow: 0 0 0 3px rgba(82, 217, 160, 0.13);
+  content: "";
+}
+
 .qr-board-code {
   display: grid;
-  width: 178px;
+  width: 100%;
   aspect-ratio: 1;
   place-items: center;
   padding: 7px;
-  border: 1px solid var(--slate-200);
-  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 11px;
   background: #fff;
-  box-shadow: 0 5px 14px rgba(7, 29, 55, 0.08);
+  box-shadow:
+    0 5px 14px rgba(3, 15, 29, 0.24),
+    inset 0 0 0 1px #e4ebf3;
 }
 
 .qr-board-code svg {
@@ -189,15 +295,18 @@
 }
 
 .qr-board-card-copy {
+  position: relative;
+  z-index: 1;
   min-width: 0;
-  padding-top: 7px;
+  padding-top: 10px;
 }
 
 .qr-board-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  margin-bottom: 8px;
+  min-height: 23px;
+  margin-bottom: 10px;
 }
 
 .qr-board-tag {
@@ -217,17 +326,37 @@
 .qr-board-card h2 {
   margin: 0;
   color: var(--navy-900);
-  font-size: 1rem;
+  font-size: 1.02rem;
   line-height: 1.45;
   letter-spacing: -0.025em;
 }
 
 .qr-board-open-link {
-  display: inline-block;
-  margin-top: 12px;
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 7px 10px;
+  border: 1px solid #b9cee5;
+  border-radius: 9px;
   color: var(--blue-700);
-  font-size: 0.72rem;
-  font-weight: 800;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 4px 12px rgba(7, 29, 55, 0.06);
+  font-size: 0.7rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.qr-board-open-link::after {
+  content: "↗";
+  font-size: 0.78rem;
+}
+
+.qr-board-open-link:hover {
+  color: var(--navy-900);
+  border-color: var(--blue-600);
+  background: var(--blue-50);
 }
 
 .qr-board-empty {
@@ -293,11 +422,11 @@
 
 @media (max-width: 850px) {
   .qr-board-card {
-    grid-template-columns: 145px minmax(0, 1fr);
+    grid-template-columns: 152px minmax(0, 1fr);
   }
 
-  .qr-board-code {
-    width: 145px;
+  .qr-board-qr-panel {
+    width: 152px;
   }
 }
 
@@ -332,7 +461,7 @@
   }
 
   .qr-board-card {
-    grid-template-columns: 124px minmax(0, 1fr);
+    grid-template-columns: 132px minmax(0, 1fr);
     gap: 13px;
     padding: 34px 14px 14px;
     border-radius: 15px;
@@ -348,9 +477,17 @@
     right: 13px;
   }
 
-  .qr-board-code {
-    width: 124px;
-    border-radius: 11px;
+  .qr-board-qr-panel {
+    width: 132px;
+    border-radius: 13px;
+  }
+
+  .qr-board-qr-panel-header {
+    min-height: 19px;
+  }
+
+  .qr-board-qr-scan {
+    display: none;
   }
 
   .qr-board-card h2 {
@@ -358,7 +495,9 @@
   }
 
   .qr-board-open-link {
-    margin-top: 9px;
+    min-height: 31px;
+    margin-top: 11px;
+    padding: 5px 8px;
   }
 
   .qr-board-footer .qr-board-shell {
@@ -421,6 +560,8 @@
     border-radius: 4mm;
     box-shadow: none;
     page-break-inside: avoid;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .qr-board-security-badge {
@@ -433,7 +574,7 @@
     right: 5mm;
   }
 
-  .qr-board-code {
+  .qr-board-qr-panel {
     width: 42mm;
     box-shadow: none;
   }

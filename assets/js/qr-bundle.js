@@ -85,6 +85,17 @@
     return container;
   }
 
+  function createQrPanel(targetUrl, title) {
+    const panel = createElement("div", "qr-board-qr-panel");
+    const panelHeader = createElement("div", "qr-board-qr-panel-header");
+    panelHeader.append(
+      createElement("span", "qr-board-qr-brand", "NICE HUB"),
+      createElement("span", "qr-board-qr-scan", "SCAN TO OPEN"),
+    );
+    panel.append(panelHeader, createQrCode(targetUrl, title));
+    return panel;
+  }
+
   function createMaterialCard(material, index, categoryMap, typeMap) {
     const targetUrl = getMaterialQrUrl(material);
     const article = createElement("article", "qr-board-card");
@@ -108,7 +119,7 @@
     if (material.isSecure === true) {
       article.appendChild(createElement("span", "qr-board-security-badge", "보안 문서"));
     }
-    article.append(createQrCode(targetUrl, material.title), copy);
+    article.append(createQrPanel(targetUrl, material.title), copy);
     return article;
   }
 
