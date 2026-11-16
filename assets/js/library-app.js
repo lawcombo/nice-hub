@@ -112,11 +112,12 @@
   function scheduleAppSplashClose() {
     if (!elements.appSplash || elements.appSplash.hidden || !appSplashCanClose || !appSplashFirstPaintAt) return;
     window.clearTimeout(appSplashCloseTimer);
-    const remainingDelay = Math.max(0, 5000 - (performance.now() - appSplashFirstPaintAt));
+    const remainingDelay = Math.max(0, 3000 - (performance.now() - appSplashFirstPaintAt));
     appSplashCloseTimer = window.setTimeout(() => {
       elements.appSplash.classList.add("is-leaving");
       window.setTimeout(() => {
         elements.appSplash.hidden = true;
+        document.documentElement.classList.remove("app-splash-scroll-lock");
       }, 440);
     }, remainingDelay);
   }
@@ -127,6 +128,11 @@
   }
 
   if (elements.appSplash) {
+    const isMobileAppLaunch =
+      window.matchMedia("(max-width: 767px)").matches &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        document.documentElement.classList.contains("pwa-launch"));
+    if (isMobileAppLaunch) document.documentElement.classList.add("app-splash-scroll-lock");
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         appSplashFirstPaintAt = performance.now();

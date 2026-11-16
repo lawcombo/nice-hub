@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script>
       if (new URLSearchParams(window.location.search).get("source") === "pwa") {
-        document.documentElement.classList.add("pwa-launch");
+        document.documentElement.classList.add("pwa-launch", "app-splash-scroll-lock");
+        window.setTimeout(() => document.documentElement.classList.remove("app-splash-scroll-lock"), 15000);
       }
     </script>
     <meta name="theme-color" content="#061a31" />

@@ -105,6 +105,18 @@ a {
 }
 
 @media (max-width: 767px) {
+  html.app-splash-scroll-lock,
+  html.app-splash-scroll-lock body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  html.app-splash-scroll-lock body {
+    touch-action: none;
+  }
+
   .app-splash {
     position: fixed;
     z-index: 5000;
