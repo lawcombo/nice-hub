@@ -552,10 +552,31 @@ a {
   background: var(--blue-50);
 }
 
+.material-type-button.is-empty {
+  color: var(--slate-400);
+  border-color: var(--slate-200);
+  background: #f7f9fc;
+  opacity: 0.6;
+}
+
+.material-type-button.is-empty:hover {
+  color: var(--slate-500);
+  border-color: var(--slate-300);
+  background: #f2f5f9;
+  opacity: 0.78;
+}
+
 .material-type-button[aria-pressed="true"] {
   color: var(--navy-900);
   border-color: #9fc1e8;
   background: var(--blue-100);
+}
+
+.material-type-button.is-empty[aria-pressed="true"] {
+  color: var(--slate-600);
+  border-color: #bfd0e3;
+  background: #edf3f9;
+  opacity: 0.82;
 }
 
 .material-view-actions {

@@ -526,6 +526,7 @@
           (type.id === "all" || material.type === type.id),
       ).length;
       const button = createElement("button", "material-type-button");
+      button.classList.toggle("is-empty", count === 0);
       button.append(
         document.createTextNode(type.label),
         createElement("span", "material-type-count", `(${count})`),
@@ -533,6 +534,10 @@
       button.type = "button";
       button.dataset.materialType = type.id;
       button.setAttribute("aria-pressed", type.id === activeMaterialType ? "true" : "false");
+      if (count === 0) {
+        button.title = "등록된 자료가 없습니다.";
+        button.setAttribute("aria-label", `${type.label}, 등록된 자료 없음`);
+      }
       button.addEventListener("click", () => selectMaterialType(type.id));
       fragment.appendChild(button);
     });
