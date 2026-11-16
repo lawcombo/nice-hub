@@ -2,6 +2,7 @@
   "use strict";
 
   const elements = {
+    appSplash: document.querySelector("#appSplash"),
     tabs: document.querySelector("#categoryTabs"),
     typeTabs: document.querySelector("#materialTypeTabs"),
     categoryTabsShell: document.querySelector("#categoryTabsShell"),
@@ -103,6 +104,21 @@
     downloadVideo: document.querySelector("#downloadVideo"),
     openVideoNewTab: document.querySelector("#openVideoNewTab"),
   };
+
+  const appSplashStartedAt = performance.now();
+
+  function finishAppSplash() {
+    if (!elements.appSplash || elements.appSplash.hidden) return;
+    const remainingDelay = Math.max(0, 850 - (performance.now() - appSplashStartedAt));
+    window.setTimeout(() => {
+      elements.appSplash.classList.add("is-leaving");
+      window.setTimeout(() => {
+        elements.appSplash.hidden = true;
+      }, 440);
+    }, remainingDelay);
+  }
+
+  window.setTimeout(finishAppSplash, 6000);
 
   let categories = [];
   let materialTypes = [];
@@ -2269,6 +2285,8 @@
       elements.emptyTitle.textContent = "자료 목록을 불러오지 못했습니다.";
       elements.emptyMessage.textContent = "잠시 후 새로고침해 주세요.";
       elements.summary.textContent = "자료 목록 오류";
+    } finally {
+      finishAppSplash();
     }
   }
 

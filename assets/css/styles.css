@@ -100,6 +100,191 @@ a {
   margin-inline: auto;
 }
 
+.app-splash {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .app-splash {
+    position: fixed;
+    z-index: 5000;
+    inset: 0;
+    display: none;
+    min-height: 100dvh;
+    place-items: center;
+    overflow: hidden;
+    padding: max(28px, env(safe-area-inset-top)) 28px max(24px, env(safe-area-inset-bottom));
+    color: #fff;
+    background:
+      radial-gradient(circle at 78% 16%, rgba(46, 141, 242, 0.34), transparent 31%),
+      radial-gradient(circle at 14% 88%, rgba(41, 199, 188, 0.17), transparent 30%),
+      linear-gradient(155deg, #061a31 0%, #0a315c 52%, #125896 100%);
+    isolation: isolate;
+    transition:
+      opacity 0.42s ease,
+      visibility 0.42s ease;
+  }
+
+  .app-splash::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 78%);
+    content: "";
+  }
+
+  .app-splash.is-leaving {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .app-splash-content {
+    display: grid;
+    width: min(100%, 330px);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .app-splash-mark {
+    width: 104px;
+    height: 104px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 24px 55px rgba(0, 12, 31, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    animation: app-splash-float 2.7s ease-in-out infinite;
+  }
+
+  .app-splash-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .app-splash-kicker {
+    margin: 0 0 9px;
+    color: #8fc8ff;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+  }
+
+  .app-splash-title {
+    font-size: clamp(2rem, 10vw, 2.7rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-shadow: 0 10px 30px rgba(0, 12, 31, 0.28);
+  }
+
+  .app-splash-message {
+    margin: 16px 0 25px;
+    color: rgba(231, 242, 255, 0.88);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .app-splash-progress {
+    position: relative;
+    width: min(210px, 62vw);
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .app-splash-progress span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 42%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #63c6ff, #fff, #65e0d1);
+    box-shadow: 0 0 16px rgba(99, 198, 255, 0.75);
+    animation: app-splash-progress 1.35s ease-in-out infinite;
+  }
+
+  .app-splash-footer {
+    position: absolute;
+    right: 24px;
+    bottom: max(26px, env(safe-area-inset-bottom));
+    left: 24px;
+    margin: 0;
+    color: rgba(220, 236, 253, 0.68);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  .app-splash-glow {
+    position: absolute;
+    z-index: -1;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+
+  .app-splash-glow-one {
+    width: 260px;
+    height: 260px;
+    top: -92px;
+    right: -88px;
+  }
+
+  .app-splash-glow-two {
+    width: 190px;
+    height: 190px;
+    bottom: 72px;
+    left: -112px;
+  }
+}
+
+@media (max-width: 767px) and (display-mode: standalone) {
+  .app-splash {
+    display: grid;
+  }
+}
+
+@media (max-width: 767px) {
+  html.pwa-launch .app-splash {
+    display: grid;
+  }
+}
+
+@keyframes app-splash-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes app-splash-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  58%,
+  100% {
+    transform: translateX(245%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-splash-mark,
+  .app-splash-progress span {
+    animation: none;
+  }
+}
+
 .site-header {
   color: #fff;
   background: linear-gradient(118deg, var(--navy-950) 0%, var(--navy-900) 68%, #12447c 100%);

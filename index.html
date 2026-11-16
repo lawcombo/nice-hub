@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      if (new URLSearchParams(window.location.search).get("source") === "pwa") {
+        document.documentElement.classList.add("pwa-launch");
+      }
+    </script>
     <meta name="theme-color" content="#0b2e59" />
     <meta name="application-name" content="NICE 자료허브" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -21,6 +26,20 @@
     <script src="./assets/js/usage-guide.js" defer></script>
   </head>
   <body class="library-page">
+    <div id="appSplash" class="app-splash" role="status" aria-live="polite" aria-label="NICE HUB 실행 준비 중">
+      <span class="app-splash-glow app-splash-glow-one" aria-hidden="true"></span>
+      <span class="app-splash-glow app-splash-glow-two" aria-hidden="true"></span>
+      <div class="app-splash-content">
+        <div class="app-splash-mark" aria-hidden="true">
+          <img src="./assets/icons/app-icon-192.png" alt="" />
+        </div>
+        <p class="app-splash-kicker">FIELD SALES MATERIAL HUB</p>
+        <strong class="app-splash-title">NICE HUB</strong>
+        <p class="app-splash-message">최신 영업자료를 준비하고 있습니다.</p>
+        <div class="app-splash-progress" aria-hidden="true"><span></span></div>
+      </div>
+      <p class="app-splash-footer">언제 어디서나, 필요한 자료를 빠르게</p>
+    </div>
     <a class="skip-link" href="#materials">자료 목록으로 바로가기</a>
 
     <header class="site-header">
