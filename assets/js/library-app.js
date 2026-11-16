@@ -105,12 +105,15 @@
     openVideoNewTab: document.querySelector("#openVideoNewTab"),
   };
 
-  const appSplashStartedAt = performance.now();
+  let appSplashFirstPaintAt = 0;
+  let appSplashCanClose = false;
+  let appSplashCloseTimer = 0;
 
-  function finishAppSplash() {
-    if (!elements.appSplash || elements.appSplash.hidden) return;
-    const remainingDelay = Math.max(0, 5000 - (performance.now() - appSplashStartedAt));
-    window.setTimeout(() => {
+  function scheduleAppSplashClose() {
+    if (!elements.appSplash || elements.appSplash.hidden || !appSplashCanClose || !appSplashFirstPaintAt) return;
+    window.clearTimeout(appSplashCloseTimer);
+    const remainingDelay = Math.max(0, 5000 - (performance.now() - appSplashFirstPaintAt));
+    appSplashCloseTimer = window.setTimeout(() => {
       elements.appSplash.classList.add("is-leaving");
       window.setTimeout(() => {
         elements.appSplash.hidden = true;
@@ -118,7 +121,21 @@
     }, remainingDelay);
   }
 
-  window.setTimeout(finishAppSplash, 6000);
+  function finishAppSplash() {
+    appSplashCanClose = true;
+    scheduleAppSplashClose();
+  }
+
+  if (elements.appSplash) {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        appSplashFirstPaintAt = performance.now();
+        scheduleAppSplashClose();
+      });
+    });
+  }
+
+  window.setTimeout(finishAppSplash, 12000);
 
   let categories = [];
   let materialTypes = [];
