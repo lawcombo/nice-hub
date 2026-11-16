@@ -109,7 +109,7 @@
 
   function finishAppSplash() {
     if (!elements.appSplash || elements.appSplash.hidden) return;
-    const remainingDelay = Math.max(0, 850 - (performance.now() - appSplashStartedAt));
+    const remainingDelay = Math.max(0, 5000 - (performance.now() - appSplashStartedAt));
     window.setTimeout(() => {
       elements.appSplash.classList.add("is-leaving");
       window.setTimeout(() => {
