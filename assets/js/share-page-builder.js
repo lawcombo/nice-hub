@@ -8,7 +8,6 @@
   "use strict";
 
   const defaultPublicBaseUrl = "https://lawcombo.github.io/nice-hub/";
-  const shareCardVersion = "2";
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -32,10 +31,6 @@
     return `share/${getSafeMaterialId(material)}.html`;
   }
 
-  function getShareImagePath(material) {
-    return `assets/share-cards/${getSafeMaterialId(material)}.jpg`;
-  }
-
   function toAbsoluteUrl(path, publicBaseUrl = defaultPublicBaseUrl) {
     try {
       return new URL(String(path || ""), publicBaseUrl).href;
@@ -49,7 +44,6 @@
     if (options.includeVersion) {
       const version = material?.modifiedAt || material?.updatedAt || material?.registeredAt;
       if (version) url.searchParams.set("v", version);
-      url.searchParams.set("card", shareCardVersion);
     }
     return url.href;
   }
@@ -57,11 +51,11 @@
   function createSharePage(material, options = {}) {
     const publicBaseUrl = options.publicBaseUrl || defaultPublicBaseUrl;
     const title = normalizeText(material?.title, "NICE 허브 자료");
-    const description = "NICE HUB에서 항상 최신 자료로 연결됩니다.";
-    const shareImage = new URL(getShareImagePath(material), publicBaseUrl);
-    const shareImageVersion = material?.modifiedAt || material?.updatedAt || material?.registeredAt;
-    if (shareImageVersion) shareImage.searchParams.set("v", shareImageVersion);
-    const shareImageUrl = shareImage.href;
+    const description = normalizeText(
+      material?.description,
+      "NICE 허브에서 최신 자료를 확인하고 내려받으세요.",
+    );
+    const thumbnailUrl = toAbsoluteUrl(material?.thumbnail || "assets/icons/app-icon-512.png", publicBaseUrl);
     const pageUrl = getSharePageUrl(material, { publicBaseUrl });
     const materialId = getSafeMaterialId(material);
 
@@ -82,16 +76,12 @@
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${escapeHtml(pageUrl)}" />
-    <meta property="og:image" content="${escapeHtml(shareImageUrl)}" />
-    <meta property="og:image:secure_url" content="${escapeHtml(shareImageUrl)}" />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="${escapeHtml(`${title} NICE HUB 공유 카드`)}" />
+    <meta property="og:image" content="${escapeHtml(thumbnailUrl)}" />
+    <meta property="og:image:alt" content="${escapeHtml(`${title} 표지`)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
-    <meta name="twitter:image" content="${escapeHtml(shareImageUrl)}" />
+    <meta name="twitter:image" content="${escapeHtml(thumbnailUrl)}" />
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="manifest" href="manifest.webmanifest" />
     <script src="assets/js/material-open.js" defer></script>
@@ -129,7 +119,6 @@
   return {
     createSharePage,
     getSafeMaterialId,
-    getShareImagePath,
     getSharePagePath,
     getSharePageUrl,
   };

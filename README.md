@@ -350,7 +350,6 @@ GitHub에서 직접 교체할 경우:
 
 ```powershell
 node scripts/generate-share-pages.js
-pwsh -File scripts/generate-share-cards.ps1
 ```
 
 문자 앱의 링크 미리보기는 휴대폰 기종과 사용 중인 문자 앱의 지원 여부에 따라 표시되지 않을 수 있습니다.

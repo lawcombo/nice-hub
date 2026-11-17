@@ -1329,20 +1329,6 @@
     };
   }
 
-  async function createShareCardTreeEntry(material, currentLibrary, thumbnailSource) {
-    if (!window.NiceHubShareCard?.createShareCardBlob || !window.NiceHubShareCard?.getShareImagePath) {
-      throw new Error("공유 카드 이미지 생성 기능을 불러오지 못했습니다. 화면을 새로고침해 주세요.");
-    }
-    const image = await window.NiceHubShareCard.createShareCardBlob(material, currentLibrary, thumbnailSource);
-    const blob = await createBlob(verifiedToken, bytesToBase64(await image.arrayBuffer()));
-    return {
-      path: window.NiceHubShareCard.getShareImagePath(material),
-      mode: "100644",
-      type: "blob",
-      sha: blob.sha,
-    };
-  }
-
   async function commitLibraryUpdate(reference, latestLibrary, treeEntries, message) {
     const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
     const parentCommit = await githubApi(
@@ -1391,19 +1377,10 @@
 
       const update = await updater(material, latestLibrary);
       const sharePageEntry = await createSharePageTreeEntry(material);
-      const updateEntries = [...(update.treeEntries || [])];
-      if (update.regenerateShareCard) {
-        const shareCardEntry = await createShareCardTreeEntry(
-          material,
-          latestLibrary,
-          update.shareCardThumbnailSource,
-        );
-        updateEntries.push(shareCardEntry);
-      }
       const commit = await commitLibraryUpdate(
         reference,
         latestLibrary,
-        [...updateEntries, sharePageEntry],
+        [...(update.treeEntries || []), sharePageEntry],
         update.commitMessage,
       );
       library = latestLibrary;
@@ -1723,8 +1700,6 @@
 
         return {
           treeEntries,
-          regenerateShareCard: true,
-          shareCardThumbnailSource: file,
           commitMessage: `Update thumbnail: ${material.title}`,
           successMessage: `‘${material.title}’ 자료의 썸네일 이미지를 변경했습니다.`,
         };
@@ -1908,7 +1883,6 @@
           markMaterialUpdated(material);
           return {
             treeEntries,
-            regenerateShareCard: true,
             commitMessage: `Update material details: ${title}`,
             successMessage: `‘${title}’ 자료의 분류와 상세 정보를 변경했습니다.`,
           };
@@ -2122,7 +2096,6 @@
 
       setProgress("자료 목록을 업데이트하고 있습니다.", "파일과 자료 정보를 하나의 커밋으로 묶는 중입니다.");
       const sharePageEntry = await createSharePageTreeEntry(material);
-      const shareCardEntry = await createShareCardTreeEntry(material, latestLibrary, thumbnail);
       const dataBlob = await createBlob(verifiedToken, textToBase64(`${JSON.stringify(latestLibrary, null, 2)}\n`));
       const parentCommit = await githubApi(
         `/repos/${config.owner}/${config.repo}/git/commits/${reference.object.sha}`,
@@ -2136,7 +2109,6 @@
         treeEntries.push({ path: thumbnailPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha });
       }
       treeEntries.push(sharePageEntry);
-      treeEntries.push(shareCardEntry);
 
       const tree = await githubApi(`/repos/${config.owner}/${config.repo}/git/trees`, verifiedToken, {
         method: "POST",
@@ -2249,14 +2221,6 @@
       if (window.NiceHubSharePage?.getSharePagePath) {
         treeEntries.push({
           path: window.NiceHubSharePage.getSharePagePath(material),
-          mode: "100644",
-          type: "blob",
-          sha: null,
-        });
-      }
-      if (window.NiceHubShareCard?.getShareImagePath) {
-        treeEntries.push({
-          path: window.NiceHubShareCard.getShareImagePath(material),
           mode: "100644",
           type: "blob",
           sha: null,
