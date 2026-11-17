@@ -8,6 +8,7 @@
   "use strict";
 
   const defaultPublicBaseUrl = "https://lawcombo.github.io/nice-hub/";
+  const shareCardVersion = "2";
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -48,6 +49,7 @@
     if (options.includeVersion) {
       const version = material?.modifiedAt || material?.updatedAt || material?.registeredAt;
       if (version) url.searchParams.set("v", version);
+      url.searchParams.set("card", shareCardVersion);
     }
     return url.href;
   }
