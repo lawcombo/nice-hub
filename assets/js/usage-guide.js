@@ -77,15 +77,15 @@
           description: "전달할 자료가 여러 개라면 묶음 QR 모음판을 보여주세요. 고객이 관심 있는 자료의 QR을 직접 선택해 스캔할 수 있습니다.",
         },
         {
-          image: "assets/images/guide/nice-hub-tip-step-06-v2.png",
-          alt: "상담 후 고객이 스마트폰의 NICE HUB 최신 자료를 다시 확인하는 모습",
+          image: "assets/images/guide/nice-hub-tip-step-06-v3.png",
+          alt: "상담 후 고객이 이전에 공유받은 NICE HUB 링크에서 최신 문서를 다시 확인하는 모습",
           title: "상담 후에도 최신 링크로 이어가세요",
-          description: "개인 PC에 저장한 파일을 다시 보내기보다 NICE HUB 링크를 이용하세요. 고객은 같은 링크에서 현재 등록된 최신 자료를 다시 확인할 수 있습니다.",
+          description: "한 번 공유한 NICE HUB 자료 링크는 자료가 최신 버전으로 교체되어도 그대로 유지됩니다. 고객은 기존 링크를 다시 열기만 하면 항상 최신 문서를 확인할 수 있으므로 링크를 다시 공유할 필요가 없습니다.",
         },
       ],
     },
   };
-  const guideAssetVersion = "20261118-3";
+  const guideAssetVersion = "20261118-4";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
