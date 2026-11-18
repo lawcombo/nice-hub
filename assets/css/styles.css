@@ -4828,6 +4828,86 @@ button.button {
   }
 }
 
+@media (min-width: 621px) {
+  .usage-guide-dialog[data-guide-section="usage"] {
+    width: min(1280px, 100%);
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-body {
+    padding: 12px 16px 12px;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-slide {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media {
+    height: clamp(340px, calc(100dvh - 330px), 650px);
+    aspect-ratio: auto;
+    border-radius: 14px;
+    background: #eef5fd;
+    box-shadow: 0 10px 24px rgba(7, 29, 55, 0.1);
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media img {
+    object-fit: contain;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-content {
+    display: grid;
+    grid-template-columns: minmax(225px, auto) minmax(260px, 0.72fr) minmax(360px, 1.28fr);
+    align-items: center;
+    gap: 12px 22px;
+    padding: 11px 14px;
+    border: 1px solid #d4e0ed;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-step-row {
+    gap: 14px;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-content h3 {
+    margin: 0;
+    font-size: clamp(1rem, 1.55vw, 1.18rem);
+    line-height: 1.38;
+    white-space: normal;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-content > p:not(.usage-guide-swipe-hint) {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-install {
+    margin-top: 10px;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-install summary {
+    padding-block: 8px;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 980px) {
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-content {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: 8px 18px;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-step-row {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 900px) {
   .usage-guide-button-full {
     display: none;
@@ -4932,6 +5012,10 @@ button.button {
 
   .usage-guide-media {
     border-radius: 12px;
+  }
+
+  .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media img {
+    object-fit: contain;
   }
 
   .usage-guide-content {

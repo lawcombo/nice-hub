@@ -242,6 +242,7 @@
   function showSection(section, options = {}) {
     if (!guideSections[section]) return;
     activeSection = section;
+    elements.dialog.dataset.guideSection = activeSection;
     elements.subtitle.textContent = getCurrentGuide().subtitle;
     elements.install.hidden = activeSection !== "usage";
     elements.tabs.forEach((tab) => {
