@@ -252,6 +252,7 @@
   function showSection(section, options = {}) {
     if (!guideSections[section]) return;
     activeSection = section;
+    activeSteps[activeSection] = 0;
     elements.dialog.dataset.guideSection = activeSection;
     elements.subtitle.textContent = getCurrentGuide().subtitle;
     elements.installOpenButton.hidden = activeSection !== "usage";
