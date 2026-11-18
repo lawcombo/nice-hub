@@ -6,7 +6,7 @@
       subtitle: "화면을 따라 NICE HUB의 핵심 기능을 익혀보세요.",
       steps: [
         {
-          image: "assets/images/guide/nice-hub-manual-step-01.jpg",
+          image: "assets/images/guide/nice-hub-manual-step-01-v2.png",
           alt: "NICE HUB PC 화면에서 사업 카테고리, 자료 유형과 검색필터로 최신 자료를 찾는 방법",
           title: "PC에서 최신 자료 찾기",
           description: "사업 카테고리와 자료 유형을 선택하거나 검색필터에서 자료명을 검색하세요. 개인 PC에 저장된 파일 대신 NICE HUB에 등록된 최신 자료를 바로 확인할 수 있습니다.",
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261118-4";
+  const guideAssetVersion = "20261119-1";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),

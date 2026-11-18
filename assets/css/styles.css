@@ -5042,15 +5042,6 @@ button.button {
   }
 }
 
-.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-media {
-  aspect-ratio: 379 / 160;
-}
-
-.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-media img {
-  top: -23.4375%;
-  height: 140.625%;
-}
-
 @media (max-width: 900px) {
   .usage-guide-button-full {
     display: none;
