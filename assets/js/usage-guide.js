@@ -53,7 +53,7 @@
           description: "고객 업종과 상담 목적에 맞는 최신 자료를 미리 확인하고, 현장에서 바로 보여줄 자료와 상담 후 전달할 자료를 구분해 두세요.",
         },
         {
-          image: "assets/images/guide/nice-hub-tip-step-02.jpg",
+          image: "assets/images/guide/nice-hub-tip-step-02-v2.png",
           alt: "한국인 영업자가 고객의 요구를 들으며 모바일 NICE HUB에서 관련 자료를 찾는 모습",
           title: "고객의 관심사를 먼저 확인하세요",
           description: "처음부터 모든 자료를 보여주기보다 고객의 관심사와 불편사항을 먼저 듣고, 관련된 자료만 NICE HUB에서 빠르게 찾아 제시하세요.",
@@ -77,7 +77,7 @@
           description: "전달할 자료가 여러 개라면 묶음 QR 모음판을 보여주세요. 고객이 관심 있는 자료의 QR을 직접 선택해 스캔할 수 있습니다.",
         },
         {
-          image: "assets/images/guide/nice-hub-tip-step-06.jpg",
+          image: "assets/images/guide/nice-hub-tip-step-06-v2.png",
           alt: "상담 후 고객이 스마트폰의 NICE HUB 최신 자료를 다시 확인하는 모습",
           title: "상담 후에도 최신 링크로 이어가세요",
           description: "개인 PC에 저장한 파일을 다시 보내기보다 NICE HUB 링크를 이용하세요. 고객은 같은 링크에서 현재 등록된 최신 자료를 다시 확인할 수 있습니다.",
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261118-2";
+  const guideAssetVersion = "20261118-3";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),

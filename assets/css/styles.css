@@ -4473,7 +4473,7 @@ button.button {
 
 .usage-guide-tab.is-active .usage-guide-tab-icon {
   color: #fff;
-  background: linear-gradient(135deg, var(--navy-800), var(--blue-600));
+  background: linear-gradient(135deg, var(--navy-900), var(--blue-600));
 }
 
 .usage-guide-tab > span:last-child {
@@ -4614,55 +4614,29 @@ button.button {
   object-fit: cover;
 }
 
-.usage-guide-search-filter-demo {
+.usage-guide-step-three-marker {
   position: absolute;
-  right: 18px;
-  bottom: 16px;
   z-index: 3;
   display: none;
-  align-items: center;
-  padding: 4px;
-  border: 1px solid #c9d9e9;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(7, 29, 55, 0.2);
 }
 
-.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-search-filter-demo {
-  display: flex;
-}
-
-.usage-guide-search-filter-up {
-  display: inline-grid;
+.usage-guide-step-three-marker {
+  top: 4.3%;
+  left: 67%;
   width: 34px;
   height: 34px;
   place-items: center;
-  color: var(--navy-800);
-  font-size: 1rem;
-  font-weight: 900;
-}
-
-.usage-guide-search-filter-button {
-  display: inline-flex;
-  min-height: 34px;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 11px;
-  border-radius: 999px;
+  border: 3px solid #fff;
+  border-radius: 50%;
   color: #fff;
   background: var(--blue-700);
-  font-size: 0.72rem;
+  box-shadow: 0 5px 12px rgba(7, 29, 55, 0.25);
+  font-size: 0.78rem;
   font-weight: 900;
 }
 
-.usage-guide-search-filter-button svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-step-three-marker {
+  display: grid;
 }
 
 .usage-guide-slide.is-loading .usage-guide-media::after {
@@ -5068,6 +5042,15 @@ button.button {
   }
 }
 
+.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-media {
+  aspect-ratio: 379 / 160;
+}
+
+.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-media img {
+  top: -23.4375%;
+  height: 140.625%;
+}
+
 @media (max-width: 900px) {
   .usage-guide-button-full {
     display: none;
@@ -5212,11 +5195,11 @@ button.button {
     object-fit: cover;
   }
 
-  .usage-guide-search-filter-demo {
-    right: 5px;
-    bottom: 5px;
-    transform: scale(0.72);
-    transform-origin: right bottom;
+  .usage-guide-step-three-marker {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+    font-size: 0.6rem;
   }
 
   .usage-guide-content {
