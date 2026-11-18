@@ -85,6 +85,7 @@
       ],
     },
   };
+  const guideAssetVersion = "20261118-2";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
@@ -142,7 +143,9 @@
   }
 
   function resolveAsset(path) {
-    return new URL(path, document.baseURI).href;
+    const url = new URL(path, document.baseURI);
+    url.searchParams.set("guide", guideAssetVersion);
+    return url.href;
   }
 
   function createProgressButtons() {
