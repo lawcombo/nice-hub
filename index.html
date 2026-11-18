@@ -624,14 +624,47 @@
       >
         <header class="usage-guide-header">
           <div>
-            <span class="modal-label">FIELD SALES GUIDE</span>
-            <h2 id="usageGuideTitle">NICE HUB, 이렇게 활용하세요!</h2>
-            <p id="usageGuideSubtitle">최신 자료 찾기부터 현장 확인과 고객 공유까지!</p>
+            <span class="modal-label">NICE HUB GUIDE</span>
+            <h2 id="usageGuideTitle">NICE HUB 활용 가이드</h2>
+            <p id="usageGuideSubtitle">화면을 따라 NICE HUB의 핵심 기능을 익혀보세요.</p>
           </div>
           <button id="closeUsageGuide" class="icon-button" type="button" aria-label="활용 가이드 닫기">
             <span aria-hidden="true">×</span>
           </button>
         </header>
+
+        <nav class="usage-guide-tabs" role="tablist" aria-label="활용 가이드 구분">
+          <button
+            id="usageGuideUsageTab"
+            class="usage-guide-tab is-active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="usageGuideSlide"
+            data-guide-section="usage"
+          >
+            <span class="usage-guide-tab-icon" aria-hidden="true">01</span>
+            <span>
+              <strong>NICE HUB 사용법</strong>
+              <small>화면과 버튼을 따라 익히기</small>
+            </span>
+          </button>
+          <button
+            id="usageGuideTipsTab"
+            class="usage-guide-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="usageGuideSlide"
+            data-guide-section="tips"
+          >
+            <span class="usage-guide-tab-icon" aria-hidden="true">02</span>
+            <span>
+              <strong>현장 영업 꿀팁</strong>
+              <small>상담 단계별 활용 노하우</small>
+            </span>
+          </button>
+        </nav>
 
         <div class="usage-guide-body">
           <article id="usageGuideSlide" class="usage-guide-slide" aria-live="polite">
@@ -655,7 +688,7 @@
             </div>
           </article>
 
-          <details class="usage-guide-install">
+          <details id="usageGuideInstall" class="usage-guide-install">
             <summary>
               <span class="usage-guide-install-icon" aria-hidden="true">＋</span>
               <span>

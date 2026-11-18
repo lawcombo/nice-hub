@@ -4400,13 +4400,101 @@ button.button {
   display: grid;
   width: min(980px, 100%);
   max-height: calc(100dvh - 36px);
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 1px solid rgba(188, 207, 228, 0.9);
   border-radius: 22px;
   color: var(--slate-900);
   background: #fff;
   box-shadow: 0 30px 90px rgba(3, 19, 37, 0.36);
+}
+
+.usage-guide-tabs {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #d7e2ee;
+  background: #f7faff;
+}
+
+.usage-guide-tab {
+  display: flex;
+  min-width: 0;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid #cfdaea;
+  border-radius: 13px;
+  color: var(--slate-600);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.usage-guide-tab:hover {
+  border-color: #92b8e6;
+  transform: translateY(-1px);
+}
+
+.usage-guide-tab.is-active {
+  border-color: #74a8df;
+  color: var(--navy-900);
+  background: linear-gradient(135deg, #eef6ff, #fff);
+  box-shadow: 0 7px 18px rgba(22, 92, 169, 0.11);
+}
+
+.usage-guide-tab:focus-visible {
+  outline: 3px solid rgba(31, 111, 198, 0.28);
+  outline-offset: 2px;
+}
+
+.usage-guide-tab-icon {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 10px;
+  color: #60758e;
+  background: #edf2f8;
+  font-size: 0.67rem;
+  font-weight: 900;
+}
+
+.usage-guide-tab.is-active .usage-guide-tab-icon {
+  color: #fff;
+  background: linear-gradient(135deg, var(--navy-800), var(--blue-600));
+}
+
+.usage-guide-tab > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.usage-guide-tab strong {
+  overflow: hidden;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usage-guide-tab small {
+  overflow: hidden;
+  color: var(--slate-500);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .usage-guide-header {
@@ -4803,6 +4891,34 @@ button.button {
   .usage-guide-header p {
     margin-top: 2px;
     font-size: 0.68rem;
+  }
+
+  .usage-guide-tabs {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .usage-guide-tab {
+    min-height: 46px;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: 11px;
+  }
+
+  .usage-guide-tab-icon {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+    border-radius: 8px;
+    font-size: 0.6rem;
+  }
+
+  .usage-guide-tab strong {
+    font-size: 0.74rem;
+  }
+
+  .usage-guide-tab small {
+    display: none;
   }
 
   .usage-guide-body {

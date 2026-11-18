@@ -1,56 +1,98 @@
 (function () {
   "use strict";
 
-  const steps = [
-    {
-      image: "assets/images/guide/nice-hub-guide-step-01.png",
-      alt: "영업자가 사무실 PC의 NICE HUB에서 흩어져 있던 최신 영업자료를 한 번에 찾아 기뻐하는 모습",
-      title: "분산된 자료, NICE HUB에서 한 번에!",
-      description:
-        "여러 PC 폴더와 저장 위치를 뒤지지 않고 NICE HUB에서 사업·자료 유형별 최신 영업자료를 한 번에 검색하고 확인할 수 있습니다.",
+  const guideSections = {
+    usage: {
+      subtitle: "화면을 따라 NICE HUB의 핵심 기능을 익혀보세요.",
+      steps: [
+        {
+          image: "assets/images/guide/nice-hub-manual-step-01.jpg",
+          alt: "NICE HUB PC 화면에서 사업 카테고리, 자료 유형과 검색필터로 최신 자료를 찾는 방법",
+          title: "PC에서 최신 자료 찾기",
+          description: "사업 카테고리와 자료 유형을 선택하거나 검색필터에서 자료명을 검색하세요. 개인 PC에 저장된 파일 대신 NICE HUB에 등록된 최신 자료를 바로 확인할 수 있습니다.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-manual-step-02.jpg",
+          alt: "모바일 NICE HUB 화면에서 필요한 최신 자료를 찾는 방법",
+          title: "모바일에서도 언제 어디서나",
+          description: "모바일 브라우저나 홈 화면에 추가한 NICE HUB를 열고 사업·자료 유형 탭과 검색필터를 이용하세요. 외부에서도 필요한 최신 자료를 빠르게 찾을 수 있습니다.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-manual-step-03.jpg",
+          alt: "자료 카드의 링크 복사 버튼을 눌러 고객에게 공유하는 방법",
+          title: "고객에게 링크로 바로 공유",
+          description: "자료 카드의 ‘링크 복사’를 누른 뒤 카카오톡이나 문자에 붙여넣으세요. 고객은 전달받은 링크에서 현재 등록된 최신 문서를 확인할 수 있습니다.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-manual-step-04.jpg",
+          alt: "묶음 QR 생성 버튼으로 여러 자료의 QR 모음판을 만드는 순서",
+          title: "여러 자료는 묶음 QR로",
+          description: "‘묶음 QR 생성’을 누르고 전달할 자료를 선택한 다음 ‘QR 자료 생성’을 누르세요. 완성된 QR 모음판은 인쇄하거나 PDF로 저장할 수 있습니다.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-manual-step-05.jpg",
+          alt: "NICE HUB 보안 문서 라벨과 비밀번호 확인 화면 안내",
+          title: "민감한 자료는 보안 문서로",
+          description: "‘보안 문서’ 라벨이 표시된 자료는 비밀번호 확인 후 열 수 있습니다. 승인된 고객에게만 자료 링크와 비밀번호를 각각 안전하게 안내하세요.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-manual-step-06.jpg",
+          alt: "필요한 자료의 사업명, 자료명과 사용 목적을 정리해 사업지원팀에 요청하는 방법",
+          title: "필요한 자료는 사업지원팀에 요청",
+          description: "원하는 자료가 없거나 최신화가 필요하면 사업지원팀에 사업명, 필요한 자료명과 사용 목적을 전달해 업로드를 요청하세요.",
+        },
+      ],
     },
-    {
-      image: "assets/images/guide/nice-hub-guide-step-02.png",
-      alt: "영업자가 고객 미팅 중 스마트폰 NICE HUB에서 필요한 영업자료를 찾는 모습",
-      title: "필요한 영업자료, 현장에서도 바로!",
-      description:
-        "외부 영업 현장에서도 스마트폰으로 NICE HUB에 접속해 브로슈어, 제품소개서, 제안자료 등 필요한 영업자료를 즉시 확인할 수 있습니다.",
+    tips: {
+      subtitle: "상담 전 준비부터 고객 전달까지, 현장에서 이렇게 활용하세요.",
+      steps: [
+        {
+          image: "assets/images/guide/nice-hub-tip-step-01.jpg",
+          alt: "한국인 영업자가 방문 전 노트북의 실제 NICE HUB 화면에서 최신 자료를 준비하는 모습",
+          title: "방문 전, 보여줄 자료부터 준비하세요",
+          description: "고객 업종과 상담 목적에 맞는 최신 자료를 미리 확인하고, 현장에서 바로 보여줄 자료와 상담 후 전달할 자료를 구분해 두세요.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-tip-step-02.jpg",
+          alt: "한국인 영업자가 고객의 요구를 들으며 모바일 NICE HUB에서 관련 자료를 찾는 모습",
+          title: "고객의 관심사를 먼저 확인하세요",
+          description: "처음부터 모든 자료를 보여주기보다 고객의 관심사와 불편사항을 먼저 듣고, 관련된 자료만 NICE HUB에서 빠르게 찾아 제시하세요.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-tip-step-03.jpg",
+          alt: "한국인 영업자가 태블릿의 실제 NICE HUB 화면을 고객과 함께 보며 설명하는 모습",
+          title: "짧고 시각적인 자료부터 보여주세요",
+          description: "홍보영상이나 제품소개 이미지로 핵심을 짧게 보여준 뒤, 고객이 관심을 보이는 부분을 브로슈어와 제안서로 자세히 설명하세요.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-tip-step-04.jpg",
+          alt: "상담 직후 영업자가 NICE HUB의 실제 자료 링크를 고객에게 공유하는 모습",
+          title: "상담 직후, 약속한 자료만 공유하세요",
+          description: "상담에서 언급한 자료를 바로 링크로 전달하세요. 불필요한 파일을 한꺼번에 보내기보다 고객이 요청한 자료만 선별하는 것이 효과적입니다.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-tip-step-05.jpg",
+          alt: "영업자가 태블릿의 실제 NICE HUB 묶음 QR 화면을 보여주고 고객이 스캔하는 모습",
+          title: "여러 자료는 고객이 직접 고르게 하세요",
+          description: "전달할 자료가 여러 개라면 묶음 QR 모음판을 보여주세요. 고객이 관심 있는 자료의 QR을 직접 선택해 스캔할 수 있습니다.",
+        },
+        {
+          image: "assets/images/guide/nice-hub-tip-step-06.jpg",
+          alt: "상담 후 고객이 스마트폰의 NICE HUB 최신 자료를 다시 확인하는 모습",
+          title: "상담 후에도 최신 링크로 이어가세요",
+          description: "개인 PC에 저장한 파일을 다시 보내기보다 NICE HUB 링크를 이용하세요. 고객은 같은 링크에서 현재 등록된 최신 자료를 다시 확인할 수 있습니다.",
+        },
+      ],
     },
-    {
-      image: "assets/images/guide/nice-hub-guide-step-03.png",
-      alt: "영업자가 스마트폰의 제품소개서를 고객에게 보여주며 설명하는 모습",
-      title: "출력물 없이 스마트폰으로 간편하게!",
-      description:
-        "선택한 자료를 스마트폰 화면으로 보여주며 고객에게 제품과 서비스를 설명할 수 있어 무거운 출력물을 따로 준비하지 않아도 됩니다.",
-    },
-    {
-      image: "assets/images/guide/nice-hub-guide-step-04.png",
-      alt: "영업자가 스마트폰에서 자료를 공유하고 고객이 카카오톡으로 받은 링크를 눌러 문서를 확인하는 모습",
-      title: "카톡 링크로 고객에게 바로 공유!",
-      description:
-        "영업자 모바일에서 자료의 공유 버튼을 눌러 카카오톡 링크를 보내면, 고객은 전달받은 링크를 눌러 자신의 스마트폰에서 문서를 바로 확인할 수 있습니다.",
-    },
-    {
-      image: "assets/images/guide/nice-hub-guide-step-05.png",
-      alt: "영업자가 여러 자료의 QR 모음판을 고객에게 보여주고 고객이 원하는 자료의 QR 코드를 스마트폰으로 스캔하는 모습",
-      title: "묶음 QR로 원하는 자료를 한눈에!",
-      description:
-        "영업자가 필요한 자료의 QR을 한 화면에 모아 고객에게 보여주면, 고객은 원하는 자료를 직접 골라 QR코드를 스캔하고 바로 확인할 수 있습니다.",
-    },
-    {
-      image: "assets/images/guide/nice-hub-guide-step-06.png",
-      alt: "고객이 자신의 스마트폰에서 공유받은 제품소개 자료를 직접 확인하는 모습",
-      title: "고객도 본인 스마트폰으로 편리하게!",
-      description:
-        "고객은 QR코드나 공유받은 링크를 통해 자료를 직접 확인하고, 미팅이 끝난 뒤에도 같은 링크에서 최신 자료를 다시 열어볼 수 있습니다.",
-    },
-  ];
+  };
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
     modal: document.querySelector("#usageGuideModal"),
     dialog: document.querySelector(".usage-guide-dialog"),
     closeButton: document.querySelector("#closeUsageGuide"),
+    subtitle: document.querySelector("#usageGuideSubtitle"),
+    tabs: [...document.querySelectorAll("[data-guide-section]")],
     slide: document.querySelector("#usageGuideSlide"),
     image: document.querySelector("#usageGuideImage"),
     imageFallback: document.querySelector("#usageGuideImageFallback"),
@@ -61,9 +103,11 @@
     previousButton: document.querySelector("#usageGuidePrevious"),
     nextButton: document.querySelector("#usageGuideNext"),
     counter: document.querySelector("#usageGuideCounter"),
+    install: document.querySelector("#usageGuideInstall"),
   };
 
-  let activeStep = 0;
+  let activeSection = "usage";
+  const activeSteps = { usage: 0, tips: 0 };
   let lastFocusedElement = null;
   let touchStartX = null;
   let touchStartY = null;
@@ -73,6 +117,14 @@
 
   const modalHistoryKey = "niceHubModal";
   const modalHistoryValue = "usage-guide";
+
+  function getCurrentGuide() {
+    return guideSections[activeSection];
+  }
+
+  function getCurrentSteps() {
+    return getCurrentGuide().steps;
+  }
 
   function getHistoryState() {
     return history.state && typeof history.state === "object" ? history.state : {};
@@ -94,7 +146,7 @@
   }
 
   function createProgressButtons() {
-    const buttons = steps.map((step, index) => {
+    const buttons = getCurrentSteps().map((step, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "usage-guide-progress-dot";
@@ -102,26 +154,34 @@
       button.addEventListener("click", () => showStep(index));
       return button;
     });
+    elements.progress.setAttribute(
+      "aria-label",
+      `${activeSection === "usage" ? "NICE HUB 사용법" : "현장 영업 꿀팁"} 단계 선택`,
+    );
     elements.progress.replaceChildren(...buttons);
   }
 
-  function preloadStep(index) {
-    if (index < 0 || index >= steps.length || preloadedImages.has(index)) return;
+  function preloadStep(section, index) {
+    const steps = guideSections[section]?.steps || [];
+    const key = `${section}:${index}`;
+    if (index < 0 || index >= steps.length || preloadedImages.has(key)) return;
     const image = new Image();
     image.decoding = "async";
-    image.fetchPriority = index === 0 ? "high" : "low";
+    image.fetchPriority = section === "usage" && index === 0 ? "high" : "low";
     image.src = resolveAsset(steps[index].image);
-    preloadedImages.set(index, image);
+    preloadedImages.set(key, image);
   }
 
   function preloadGuideImages() {
-    steps.forEach((step, index) => {
-      window.setTimeout(() => preloadStep(index), index * 120);
+    Object.keys(guideSections).forEach((section, sectionIndex) => {
+      guideSections[section].steps.forEach((step, index) => {
+        window.setTimeout(() => preloadStep(section, index), (sectionIndex * 6 + index) * 90);
+      });
     });
   }
 
   function scheduleGuideImagePreload() {
-    preloadStep(0);
+    preloadStep("usage", 0);
     const startBackgroundPreload = () => {
       if ("requestIdleCallback" in window) {
         window.requestIdleCallback(preloadGuideImages, { timeout: 1200 });
@@ -141,19 +201,21 @@
   }
 
   function showStep(index, options = {}) {
+    const steps = getCurrentSteps();
     const normalizedIndex = Math.max(0, Math.min(index, steps.length - 1));
     const step = steps[normalizedIndex];
-    activeStep = normalizedIndex;
+    activeSteps[activeSection] = normalizedIndex;
 
-    elements.step.textContent = `STEP ${String(activeStep + 1).padStart(2, "0")} / ${String(steps.length).padStart(2, "0")}`;
+    elements.step.textContent = `STEP ${String(normalizedIndex + 1).padStart(2, "0")} / ${String(steps.length).padStart(2, "0")}`;
     elements.title.textContent = step.title;
     elements.description.textContent = step.description;
-    elements.counter.textContent = `${activeStep + 1} / ${steps.length}`;
-    elements.previousButton.disabled = activeStep === 0;
-    elements.nextButton.textContent = activeStep === steps.length - 1 ? "처음부터 보기" : "다음";
+    elements.counter.textContent = `${normalizedIndex + 1} / ${steps.length}`;
+    elements.previousButton.disabled = normalizedIndex === 0;
+    elements.nextButton.textContent =
+      normalizedIndex === steps.length - 1 ? (activeSection === "usage" ? "현장 꿀팁 보기" : "처음부터 보기") : "다음";
 
     [...elements.progress.children].forEach((button, progressIndex) => {
-      const isActive = progressIndex === activeStep;
+      const isActive = progressIndex === normalizedIndex;
       button.classList.toggle("is-active", isActive);
       button.setAttribute("aria-current", isActive ? "step" : "false");
     });
@@ -171,21 +233,48 @@
     elements.image.src = resolveAsset(step.image);
 
     if (options.animate !== false) animateSlide();
-    preloadStep(activeStep + 1);
+    preloadStep(activeSection, normalizedIndex + 1);
+  }
+
+  function showSection(section, options = {}) {
+    if (!guideSections[section]) return;
+    activeSection = section;
+    elements.subtitle.textContent = getCurrentGuide().subtitle;
+    elements.install.hidden = activeSection !== "usage";
+    elements.tabs.forEach((tab) => {
+      const isActive = tab.dataset.guideSection === activeSection;
+      tab.classList.toggle("is-active", isActive);
+      tab.setAttribute("aria-selected", String(isActive));
+    });
+    createProgressButtons();
+    showStep(activeSteps[activeSection], options);
   }
 
   function showPreviousStep() {
-    if (activeStep > 0) showStep(activeStep - 1);
+    const current = activeSteps[activeSection];
+    if (current > 0) showStep(current - 1);
   }
 
   function showNextStep() {
-    showStep(activeStep === steps.length - 1 ? 0 : activeStep + 1);
+    const steps = getCurrentSteps();
+    const current = activeSteps[activeSection];
+    if (current < steps.length - 1) {
+      showStep(current + 1);
+      return;
+    }
+    if (activeSection === "usage") {
+      showSection("tips");
+      return;
+    }
+    activeSteps.tips = 0;
+    showStep(0);
   }
 
   function openGuide() {
     if (!elements.modal.hidden) return;
     lastFocusedElement = document.activeElement;
-    showStep(0, { animate: false });
+    activeSteps.usage = 0;
+    showSection("usage", { animate: false });
     pushGuideHistory();
     elements.modal.hidden = false;
     document.body.classList.add("modal-open");
@@ -284,6 +373,9 @@
   elements.modal.querySelector("[data-close-usage-guide]").addEventListener("click", closeGuide);
   elements.previousButton.addEventListener("click", showPreviousStep);
   elements.nextButton.addEventListener("click", showNextStep);
+  elements.tabs.forEach((tab) => {
+    tab.addEventListener("click", () => showSection(tab.dataset.guideSection));
+  });
   elements.slide.addEventListener("touchstart", handleTouchStart, { passive: true });
   elements.slide.addEventListener("touchend", handleTouchEnd, { passive: true });
   window.addEventListener("popstate", handleBrowserBack);
