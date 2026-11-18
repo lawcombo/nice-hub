@@ -92,6 +92,11 @@
     modal: document.querySelector("#usageGuideModal"),
     dialog: document.querySelector(".usage-guide-dialog"),
     closeButton: document.querySelector("#closeUsageGuide"),
+    installOpenButton: document.querySelector("#openUsageGuideInstall"),
+    installModal: document.querySelector("#usageGuideInstallModal"),
+    installDialog: document.querySelector(".usage-guide-install-dialog"),
+    installCloseButton: document.querySelector("#closeUsageGuideInstall"),
+    installConfirmButton: document.querySelector("#confirmUsageGuideInstall"),
     subtitle: document.querySelector("#usageGuideSubtitle"),
     tabs: [...document.querySelectorAll("[data-guide-section]")],
     slide: document.querySelector("#usageGuideSlide"),
@@ -104,7 +109,6 @@
     previousButton: document.querySelector("#usageGuidePrevious"),
     nextButton: document.querySelector("#usageGuideNext"),
     counter: document.querySelector("#usageGuideCounter"),
-    install: document.querySelector("#usageGuideInstall"),
   };
 
   let activeSection = "usage";
@@ -114,10 +118,15 @@
   let touchStartY = null;
   let pendingHistoryClose = false;
   let historyCloseTimer = 0;
+  let installLastFocusedElement = null;
+  let pendingInstallHistoryClose = false;
+  let installHistoryCloseTimer = 0;
   const preloadedImages = new Map();
 
   const modalHistoryKey = "niceHubModal";
   const modalHistoryValue = "usage-guide";
+  const installHistoryKey = "niceHubGuideSubmodal";
+  const installHistoryValue = "install";
 
   function getCurrentGuide() {
     return guideSections[activeSection];
@@ -208,6 +217,7 @@
     const normalizedIndex = Math.max(0, Math.min(index, steps.length - 1));
     const step = steps[normalizedIndex];
     activeSteps[activeSection] = normalizedIndex;
+    elements.dialog.dataset.guideStep = String(normalizedIndex + 1);
 
     elements.step.textContent = `STEP ${String(normalizedIndex + 1).padStart(2, "0")} / ${String(steps.length).padStart(2, "0")}`;
     elements.title.textContent = step.title;
@@ -244,7 +254,7 @@
     activeSection = section;
     elements.dialog.dataset.guideSection = activeSection;
     elements.subtitle.textContent = getCurrentGuide().subtitle;
-    elements.install.hidden = activeSection !== "usage";
+    elements.installOpenButton.hidden = activeSection !== "usage";
     elements.tabs.forEach((tab) => {
       const isActive = tab.dataset.guideSection === activeSection;
       tab.classList.toggle("is-active", isActive);
@@ -286,8 +296,44 @@
     window.requestAnimationFrame(() => elements.closeButton.focus());
   }
 
+  function openInstallGuide() {
+    if (!elements.installModal.hidden) return;
+    installLastFocusedElement = document.activeElement;
+    try {
+      history.pushState({ ...getHistoryState(), [installHistoryKey]: installHistoryValue }, "", window.location.href);
+    } catch (error) {
+      console.warn("편리한 사용 방법 뒤로가기 기록을 추가하지 못했습니다.", error);
+    }
+    elements.installModal.hidden = false;
+    window.requestAnimationFrame(() => elements.installCloseButton.focus());
+  }
+
+  function finishClosingInstallGuide() {
+    if (elements.installModal.hidden) return;
+    window.clearTimeout(installHistoryCloseTimer);
+    pendingInstallHistoryClose = false;
+    elements.installModal.hidden = true;
+    if (installLastFocusedElement && document.contains(installLastFocusedElement)) installLastFocusedElement.focus();
+    installLastFocusedElement = null;
+  }
+
+  function closeInstallGuide() {
+    if (elements.installModal.hidden || pendingInstallHistoryClose) return;
+    if (getHistoryState()[installHistoryKey] !== installHistoryValue) {
+      finishClosingInstallGuide();
+      return;
+    }
+    pendingInstallHistoryClose = true;
+    history.back();
+    installHistoryCloseTimer = window.setTimeout(() => {
+      if (!pendingInstallHistoryClose) return;
+      finishClosingInstallGuide();
+    }, 500);
+  }
+
   function finishClosingGuide() {
     if (elements.modal.hidden) return;
+    if (!elements.installModal.hidden) finishClosingInstallGuide();
     window.clearTimeout(historyCloseTimer);
     pendingHistoryClose = false;
     elements.modal.hidden = true;
@@ -313,12 +359,16 @@
   }
 
   function handleBrowserBack() {
+    if (!elements.installModal.hidden) {
+      finishClosingInstallGuide();
+      return;
+    }
     if (elements.modal.hidden) return;
     finishClosingGuide();
   }
 
-  function trapFocus(event) {
-    const focusable = [...elements.dialog.querySelectorAll("button:not([disabled]), summary, a[href]")].filter(
+  function trapFocus(event, dialog = elements.dialog) {
+    const focusable = [...dialog.querySelectorAll("button:not([disabled]), summary, a[href]")].filter(
       (element) => element.offsetParent !== null,
     );
     if (!focusable.length) return;
@@ -335,6 +385,15 @@
   }
 
   function handleKeydown(event) {
+    if (!elements.installModal.hidden) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeInstallGuide();
+      } else if (event.key === "Tab") {
+        trapFocus(event, elements.installDialog);
+      }
+      return;
+    }
     if (event.key === "Escape") {
       event.preventDefault();
       closeGuide();
@@ -374,6 +433,10 @@
   scheduleGuideImagePreload();
   elements.openButton.addEventListener("click", openGuide);
   elements.closeButton.addEventListener("click", closeGuide);
+  elements.installOpenButton.addEventListener("click", openInstallGuide);
+  elements.installCloseButton.addEventListener("click", closeInstallGuide);
+  elements.installConfirmButton.addEventListener("click", closeInstallGuide);
+  elements.installModal.querySelector("[data-close-usage-guide-install]").addEventListener("click", closeInstallGuide);
   elements.modal.querySelector("[data-close-usage-guide]").addEventListener("click", closeGuide);
   elements.previousButton.addEventListener("click", showPreviousStep);
   elements.nextButton.addEventListener("click", showNextStep);

@@ -4533,6 +4533,49 @@ button.button {
   background: rgba(255, 255, 255, 0.11);
 }
 
+.usage-guide-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.usage-guide-helper-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 11px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.11);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.usage-guide-helper-button:hover {
+  border-color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.usage-guide-helper-button:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.usage-guide-helper-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .usage-guide-body {
   min-height: 0;
   overflow: hidden auto;
@@ -4569,6 +4612,57 @@ button.button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.usage-guide-search-filter-demo {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  padding: 4px;
+  border: 1px solid #c9d9e9;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(7, 29, 55, 0.2);
+}
+
+.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-search-filter-demo {
+  display: flex;
+}
+
+.usage-guide-search-filter-up {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: var(--navy-800);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.usage-guide-search-filter-button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--blue-700);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.usage-guide-search-filter-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .usage-guide-slide.is-loading .usage-guide-media::after {
@@ -4780,6 +4874,48 @@ button.button {
   color: var(--slate-500);
 }
 
+.usage-guide-install-modal {
+  z-index: 1120;
+  padding: 18px;
+}
+
+.usage-guide-install-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(570px, 100%);
+  overflow: hidden;
+  border: 1px solid #c7d6e7;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(3, 19, 37, 0.3);
+}
+
+.usage-guide-install-modal-content {
+  padding: 20px 22px 16px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.usage-guide-install-modal-content > p {
+  margin-bottom: 14px;
+}
+
+.usage-guide-install-modal-content .usage-guide-install-grid > div {
+  padding: 13px 14px;
+}
+
+.usage-guide-install-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--slate-200);
+  background: #fff;
+}
+
+.usage-guide-install-footer .button {
+  min-width: 130px;
+}
+
 .usage-guide-footer {
   display: grid;
   grid-template-columns: minmax(110px, 150px) 1fr minmax(140px, 190px);
@@ -4847,21 +4983,22 @@ button.button {
     width: min(100%, 1110px);
     max-width: 100%;
     height: auto;
-    aspect-ratio: 32 / 15;
+    aspect-ratio: 379 / 180;
     justify-self: center;
-    border-radius: 14px;
-    background: #eef5fd;
-    box-shadow: 0 10px 24px rgba(7, 29, 55, 0.1);
+    border: 0;
+    border-radius: 20px;
+    background: transparent;
+    box-shadow: none;
   }
 
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media img {
     position: absolute;
-    top: -20%;
-    right: 0;
+    top: -20.833%;
+    right: auto;
     bottom: auto;
-    left: 0;
-    width: 100%;
-    height: 120%;
+    left: -2.77%;
+    width: 105.54%;
+    height: 125%;
     object-fit: cover;
   }
 
@@ -4906,7 +5043,7 @@ button.button {
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media {
     width: 100%;
     height: auto;
-    aspect-ratio: 32 / 15;
+    aspect-ratio: 379 / 180;
   }
 
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-content {
@@ -4923,7 +5060,7 @@ button.button {
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media {
     width: min(100%, 760px);
     height: auto;
-    aspect-ratio: 32 / 15;
+    aspect-ratio: 379 / 180;
   }
 
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-install {
@@ -4996,6 +5133,26 @@ button.button {
     font-size: 0.68rem;
   }
 
+  .usage-guide-header-actions {
+    gap: 6px;
+  }
+
+  .usage-guide-helper-button {
+    width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .usage-guide-helper-button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
   .usage-guide-tabs {
     gap: 6px;
     padding: 8px 10px;
@@ -5038,18 +5195,28 @@ button.button {
   }
 
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media {
-    aspect-ratio: 32 / 15;
+    aspect-ratio: 379 / 180;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .usage-guide-dialog[data-guide-section="usage"] .usage-guide-media img {
     position: absolute;
-    top: -20%;
-    right: 0;
+    top: -20.833%;
+    right: auto;
     bottom: auto;
-    left: 0;
-    width: 100%;
-    height: 120%;
+    left: -2.77%;
+    width: 105.54%;
+    height: 125%;
     object-fit: cover;
+  }
+
+  .usage-guide-search-filter-demo {
+    right: 5px;
+    bottom: 5px;
+    transform: scale(0.72);
+    transform-origin: right bottom;
   }
 
   .usage-guide-content {
@@ -5078,8 +5245,28 @@ button.button {
     padding: 0 11px 11px;
   }
 
+  .usage-guide-install-modal {
+    padding: 10px;
+  }
+
+  .usage-guide-install-dialog {
+    border-radius: 16px;
+  }
+
+  .usage-guide-install-modal-content {
+    padding: 16px 16px 13px;
+  }
+
   .usage-guide-install-grid {
     grid-template-columns: 1fr;
+  }
+
+  .usage-guide-install-footer {
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .usage-guide-install-footer .button {
+    width: 100%;
   }
 
   .usage-guide-footer {

@@ -628,9 +628,17 @@
             <h2 id="usageGuideTitle">NICE HUB 활용 가이드</h2>
             <p id="usageGuideSubtitle">화면을 따라 NICE HUB의 핵심 기능을 익혀보세요.</p>
           </div>
-          <button id="closeUsageGuide" class="icon-button" type="button" aria-label="활용 가이드 닫기">
-            <span aria-hidden="true">×</span>
-          </button>
+          <div class="usage-guide-header-actions">
+            <button id="openUsageGuideInstall" class="usage-guide-helper-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" />
+              </svg>
+              <span>더 편리하게 사용하기</span>
+            </button>
+            <button id="closeUsageGuide" class="icon-button" type="button" aria-label="활용 가이드 닫기">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
         </header>
 
         <nav class="usage-guide-tabs" role="tablist" aria-label="활용 가이드 구분">
@@ -670,6 +678,17 @@
           <article id="usageGuideSlide" class="usage-guide-slide" aria-live="polite">
             <div class="usage-guide-media">
               <img id="usageGuideImage" alt="" decoding="async" />
+              <div class="usage-guide-search-filter-demo" aria-hidden="true">
+                <span class="usage-guide-search-filter-up">⌃</span>
+                <span class="usage-guide-search-filter-button">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 7h10M18 7h2M4 17h4M12 17h8M9 4v6M13 14v6" />
+                    <circle cx="9" cy="7" r="2" />
+                    <circle cx="11" cy="17" r="2" />
+                  </svg>
+                  검색·필터
+                </span>
+              </div>
               <div id="usageGuideImageFallback" class="usage-guide-image-fallback" hidden>
                 <span aria-hidden="true">!</span>
                 <strong>가이드 이미지를 불러오지 못했습니다.</strong>
@@ -688,35 +707,52 @@
             </div>
           </article>
 
-          <details id="usageGuideInstall" class="usage-guide-install">
-            <summary>
-              <span class="usage-guide-install-icon" aria-hidden="true">＋</span>
-              <span>
-                <strong>NICE HUB를 더 편리하게 사용하는 방법</strong>
-                <small>스마트폰 홈 화면에 추가하기</small>
-              </span>
-            </summary>
-            <div class="usage-guide-install-content">
-              <p>NICE HUB를 홈 화면에 추가하면 주소를 다시 입력하지 않고 앱처럼 빠르게 실행할 수 있습니다.</p>
-              <div class="usage-guide-install-grid">
-                <div>
-                  <strong>iPhone</strong>
-                  <p>Safari의 공유 메뉴에서 <b>홈 화면에 추가</b>를 선택하세요.</p>
-                </div>
-                <div>
-                  <strong>Android</strong>
-                  <p>Chrome 메뉴에서 <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 선택하세요.</p>
-                </div>
-              </div>
-              <small>브라우저와 기기 버전에 따라 메뉴 이름이나 위치가 다를 수 있습니다.</small>
-            </div>
-          </details>
         </div>
 
         <footer class="usage-guide-footer">
           <button id="usageGuidePrevious" class="button button-secondary" type="button">이전</button>
           <span id="usageGuideCounter" class="usage-guide-counter" aria-hidden="true">1 / 6</span>
           <button id="usageGuideNext" class="button button-primary" type="button">다음</button>
+        </footer>
+      </section>
+    </div>
+
+    <div id="usageGuideInstallModal" class="modal usage-guide-install-modal" hidden>
+      <div class="modal-backdrop" data-close-usage-guide-install></div>
+      <section
+        class="usage-guide-install-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="usageGuideInstallTitle"
+        aria-describedby="usageGuideInstallDescription"
+      >
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-label">QUICK ACCESS</span>
+            <h2 id="usageGuideInstallTitle">NICE HUB를 더 편리하게 사용하는 방법</h2>
+          </div>
+          <button id="closeUsageGuideInstall" class="icon-button" type="button" aria-label="편리한 사용 방법 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <div class="usage-guide-install-content usage-guide-install-modal-content">
+          <p id="usageGuideInstallDescription">
+            NICE HUB를 홈 화면에 추가하면 주소를 다시 입력하지 않고 앱처럼 빠르게 실행할 수 있습니다.
+          </p>
+          <div class="usage-guide-install-grid">
+            <div>
+              <strong>iPhone</strong>
+              <p>Safari의 공유 메뉴에서 <b>홈 화면에 추가</b>를 선택하세요.</p>
+            </div>
+            <div>
+              <strong>Android</strong>
+              <p>Chrome 메뉴에서 <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 선택하세요.</p>
+            </div>
+          </div>
+          <small>브라우저와 기기 버전에 따라 메뉴 이름이나 위치가 다를 수 있습니다.</small>
+        </div>
+        <footer class="usage-guide-install-footer">
+          <button id="confirmUsageGuideInstall" class="button button-primary" type="button">확인</button>
         </footer>
       </section>
     </div>
