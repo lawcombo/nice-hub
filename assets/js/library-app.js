@@ -2142,6 +2142,7 @@
     if (!elements.materialRequestModal.hidden) return;
     pushModalHistory("material-request");
     lastMaterialRequestFocusedElement = document.activeElement;
+    elements.materialRequestForm.reset();
     setMaterialRequestStatus();
     elements.copyMaterialRequest.disabled = false;
     elements.copyMaterialRequest.textContent = "양식 복사";
@@ -2170,16 +2171,27 @@
   function buildMaterialRequestText() {
     const getValue = (element) => element.value.trim() || "미입력";
     return [
-      "[NICE HUB 자료 요청]",
+      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      "          NICE HUB 자료 요청",
+      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
       "",
-      `요청자 / 소속 : ${getValue(elements.materialRequestRequester)}`,
-      `사업 / 제품 : ${getValue(elements.materialRequestBusiness)}`,
-      `요청 자료명 : ${getValue(elements.materialRequestName)}`,
-      `사용 목적 : ${getValue(elements.materialRequestPurpose)}`,
-      `필요 일정 : ${getValue(elements.materialRequestDueDate)}`,
+      "■ 요청 정보",
+      `  • 요청자 / 소속 : ${getValue(elements.materialRequestRequester)}`,
+      `  • 사업 / 제품   : ${getValue(elements.materialRequestBusiness)}`,
+      `  • 요청 자료명   : ${getValue(elements.materialRequestName)}`,
+      `  • 사용 목적     : ${getValue(elements.materialRequestPurpose)}`,
+      `  • 필요 일정     : ${getValue(elements.materialRequestDueDate)}`,
       "",
-      "상세 요청사항",
-      getValue(elements.materialRequestDetails),
+      "■ 상세 요청사항",
+      `  ${getValue(elements.materialRequestDetails)}`,
+      "",
+      "────────────────────────────",
+      "■ 요청 전 필수 확인",
+      "  1. 기존 자료의 업로드를 요청하는 경우,",
+      "     요청 자료 파일을 이메일에 반드시 함께 첨부해 주세요.",
+      "  2. 자료를 새로 제작해야 하는 경우,",
+      "     제작 범위와 일정은 사업지원팀과 별도로 협의해야 합니다.",
+      "────────────────────────────",
       "",
       "확인 후 NICE HUB 업로드를 부탁드립니다.",
     ].join("\n");
