@@ -18,10 +18,10 @@
           description: "모바일 브라우저나 홈 화면에 추가한 NICE HUB를 열고 사업·자료 유형 탭과 검색필터를 이용하세요. 외부에서도 필요한 최신 자료를 빠르게 찾을 수 있습니다.",
         },
         {
-          image: "assets/images/guide/nice-hub-manual-step-03-v2.png",
-          alt: "PC 자료 카드의 링크 복사와 모바일 공유하기로 고객에게 자료를 전달하는 방법",
+          image: "assets/images/guide/nice-hub-manual-step-03-v3.png",
+          alt: "PC에서 복사한 링크를 메일 본문에 붙여넣고 모바일에서 카카오톡으로 공유하는 방법",
           title: "고객에게 링크로 바로 공유",
-          description: "PC에서는 카드의 ‘링크 복사’를 눌러 카카오톡·문자·메일에 붙여넣고, 모바일에서는 ‘공유하기’를 눌러 카카오톡·SMS·이메일 등 원하는 앱을 선택하세요. 고객은 전달받은 링크에서 최신 자료를 확인할 수 있습니다.",
+          description: "PC에서는 카드의 ‘링크 복사’를 눌러 메일 본문에 붙여넣어 전달하고, 모바일에서는 ‘공유하기’에서 카카오톡을 선택해 고객 채팅방으로 바로 공유하세요. 고객은 전달받은 링크에서 최신 자료를 확인할 수 있습니다.",
         },
         {
           image: "assets/images/guide/nice-hub-manual-step-04.jpg",
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261119-7";
+  const guideAssetVersion = "20261119-8";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
