@@ -62,19 +62,19 @@
           image: "assets/images/guide/nice-hub-tip-step-03-v2.png",
           alt: "한국인 영업자가 태블릿으로 키오스크 소개 영상을 재생해 고객에게 보여주는 모습",
           title: "짧고 시각적인 자료부터 보여주세요",
-          description: "홍보영상이나 제품소개 이미지로 핵심을 짧게 보여준 뒤, 고객이 관심을 보이는 부분을 브로슈어와 제안서로 자세히 설명하세요.",
+          description: "홍보영상으로 제품과 솔루션의 핵심을 짧게 보여주세요. 처음부터 많은 내용을 설명하기보다 고객이 관심을 보이는 기능과 상황을 확인하는 데 집중하세요.",
         },
         {
-          image: "assets/images/guide/nice-hub-tip-step-04.jpg",
-          alt: "상담 직후 영업자가 NICE HUB의 실제 자료 링크를 고객에게 공유하는 모습",
-          title: "상담 직후, 약속한 자료만 공유하세요",
-          description: "상담에서 언급한 자료를 바로 링크로 전달하세요. 불필요한 파일을 한꺼번에 보내기보다 고객이 요청한 자료만 선별하는 것이 효과적입니다.",
+          image: "assets/images/guide/nice-hub-tip-step-04-v2.png",
+          alt: "한국인 영업자가 소개 영상에 이어 키오스크 브로슈어와 상세 자료를 고객에게 설명하는 모습",
+          title: "관심 분야의 상세 자료를 이어서 보여주세요",
+          description: "소개 영상에서 고객이 관심을 보인 내용과 연결되는 브로슈어, 제품소개서, 제안서를 NICE HUB에서 찾아 함께 보며 기능과 도입 효과를 구체적으로 설명하세요.",
         },
         {
           image: "assets/images/guide/nice-hub-tip-step-05.jpg",
           alt: "영업자가 태블릿의 실제 NICE HUB 묶음 QR 화면을 보여주고 고객이 스캔하는 모습",
-          title: "여러 자료는 고객이 직접 고르게 하세요",
-          description: "전달할 자료가 여러 개라면 묶음 QR 모음판을 보여주세요. 고객이 관심 있는 자료의 QR을 직접 선택해 스캔할 수 있습니다.",
+          title: "관련 자료는 묶음 QR로 전달하세요",
+          description: "상담에서 함께 본 자료와 추가로 참고할 자료를 묶음 QR로 구성해 보여주거나 공유하세요. 고객은 현장이나 상담 후 원하는 자료를 직접 선택해 확인할 수 있습니다.",
         },
         {
           image: "assets/images/guide/nice-hub-tip-step-06-v3.png",
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261119-2";
+  const guideAssetVersion = "20261119-3";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
