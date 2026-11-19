@@ -4931,32 +4931,6 @@ button.button {
   object-fit: cover;
 }
 
-.usage-guide-step-three-marker {
-  position: absolute;
-  z-index: 3;
-  display: none;
-}
-
-.usage-guide-step-three-marker {
-  top: 4.3%;
-  left: 67%;
-  width: 2.65%;
-  height: auto;
-  aspect-ratio: 1;
-  place-items: center;
-  border: clamp(1px, 0.18vw, 2.5px) solid #fff;
-  border-radius: 50%;
-  color: #fff;
-  background: var(--blue-700);
-  box-shadow: 0 5px 12px rgba(7, 29, 55, 0.25);
-  font-size: clamp(0.4rem, 0.72vw, 0.7rem);
-  font-weight: 900;
-}
-
-.usage-guide-dialog[data-guide-section="usage"][data-guide-step="1"] .usage-guide-step-three-marker {
-  display: grid;
-}
-
 .usage-guide-slide.is-loading .usage-guide-media::after {
   position: absolute;
   width: 32px;
@@ -5502,13 +5476,6 @@ button.button {
     width: 105.54%;
     height: 125%;
     object-fit: cover;
-  }
-
-  .usage-guide-step-three-marker {
-    width: 2.65%;
-    height: auto;
-    border-width: clamp(1px, 0.2vw, 2px);
-    font-size: clamp(0.38rem, 0.72vw, 0.55rem);
   }
 
   .usage-guide-content {
