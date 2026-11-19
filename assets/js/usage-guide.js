@@ -30,8 +30,8 @@
           description: "‘묶음 QR 생성’을 누르고 전달할 자료를 선택한 다음 ‘QR 자료 생성’을 누르세요. 완성된 QR 모음판은 인쇄하거나 PDF로 저장할 수 있습니다.",
         },
         {
-          image: "assets/images/guide/nice-hub-manual-step-05-v2.png",
-          alt: "NICE HUB 보안 문서 라벨이 표시된 단일 자료 카드",
+          image: "assets/images/guide/nice-hub-manual-step-05-v3.png",
+          alt: "보안 문서 라벨에서 패스워드 입력 화면으로 이어지는 이용 안내",
           title: "민감한 자료는 보안 문서로",
           description: "‘보안 문서’ 라벨이 표시된 자료는 비밀번호 확인 후 열 수 있습니다. 승인된 고객에게만 자료 링크와 비밀번호를 각각 안전하게 안내하세요.",
         },
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261119-4";
+  const guideAssetVersion = "20261119-5";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
