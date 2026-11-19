@@ -3616,6 +3616,42 @@ button.button {
   letter-spacing: -0.03em;
 }
 
+.admin-access-dialog .access-dialog-header {
+  padding: 16px 16px 14px 20px;
+  border-bottom: 0;
+  color: #fff;
+  background: linear-gradient(125deg, var(--navy-900) 0%, #1f67ad 72%, #2d80d4 100%);
+}
+
+.admin-access-dialog .access-dialog-header .modal-label {
+  color: #bcdcff;
+}
+
+.admin-access-dialog .access-dialog-header h2 {
+  color: #fff;
+  font-size: 1.16rem;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.admin-access-dialog .access-dialog-header .icon-button {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  border-color: rgba(255, 255, 255, 0.52);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-access-dialog .access-dialog-header .icon-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-access-dialog .access-form {
+  padding-top: 20px;
+}
+
 .access-form {
   padding: 23px 24px 24px;
 }
