@@ -2197,6 +2197,122 @@
     ].join("\n");
   }
 
+  function escapeMaterialRequestHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function buildMaterialRequestHtml() {
+    const getValue = (element) => escapeMaterialRequestHtml(element.value.trim() || "미입력").replaceAll("\n", "<br>");
+    const labelStyle =
+      "width:18%;padding:10px 12px;border:1px solid #cbd8e6;background:#eef4f8;color:#0b2e59;font-size:13px;font-weight:700;line-height:1.5;vertical-align:top;";
+    const valueStyle =
+      "width:32%;padding:10px 12px;border:1px solid #cbd8e6;background:#ffffff;color:#172233;font-size:13px;line-height:1.6;vertical-align:top;";
+    const sectionStyle =
+      "margin:24px 0 9px;padding:0 0 7px;border-bottom:2px solid #9bb5d0;color:#0b2e59;font-size:15px;font-weight:700;line-height:1.5;";
+
+    return `
+      <div style="margin:0;padding:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;color:#172233;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:760px;border-collapse:collapse;background:#ffffff;">
+          <tbody>
+            <tr>
+              <td style="padding:18px 20px;background:#0b2e59;color:#ffffff;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:#bcdcff;">NICE HUB · MATERIAL REQUEST</div>
+                <div style="margin-top:3px;font-size:21px;font-weight:700;line-height:1.4;">자료 요청서</div>
+                <div style="margin-top:3px;font-size:12px;line-height:1.5;color:#dcecff;">사업지원팀 · jsh@niceinfra.co.kr</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 18px 20px;border:1px solid #cbd8e6;border-top:0;background:#ffffff;">
+                <div style="${sectionStyle}margin-top:0;">01. 요청 정보</div>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;table-layout:fixed;">
+                  <tbody>
+                    <tr>
+                      <td style="${labelStyle}">요청자 / 소속</td>
+                      <td style="${valueStyle}">${getValue(elements.materialRequestRequester)}</td>
+                      <td style="${labelStyle}">사업 / 제품</td>
+                      <td style="${valueStyle}">${getValue(elements.materialRequestBusiness)}</td>
+                    </tr>
+                    <tr>
+                      <td style="${labelStyle}">요청 자료명</td>
+                      <td colspan="3" style="${valueStyle}width:82%;font-weight:700;color:#175bb5;">${getValue(elements.materialRequestName)}</td>
+                    </tr>
+                    <tr>
+                      <td style="${labelStyle}">사용 목적</td>
+                      <td style="${valueStyle}">${getValue(elements.materialRequestPurpose)}</td>
+                      <td style="${labelStyle}">필요 일정</td>
+                      <td style="${valueStyle}">${getValue(elements.materialRequestDueDate)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div style="${sectionStyle}">02. 상세 요청사항</div>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+                  <tbody>
+                    <tr>
+                      <td style="padding:13px 14px;border:1px solid #cbd8e6;background:#ffffff;color:#172233;font-size:13px;line-height:1.7;vertical-align:top;">${getValue(elements.materialRequestDetails)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div style="${sectionStyle}">03. 요청 전 필수 확인</div>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+                  <tbody>
+                    <tr>
+                      <td style="padding:13px 15px;border:1px solid #e5c16d;background:#fff9e9;color:#5b4618;font-size:12px;line-height:1.8;">
+                        <div><strong style="color:#c53d32;">①</strong> 기존 자료의 업로드를 요청하는 경우, <strong>요청 자료 파일을 이메일에 반드시 함께 첨부</strong>해 주세요.</div>
+                        <div style="margin-top:4px;"><strong style="color:#c53d32;">②</strong> 자료를 새로 제작해야 하는 경우, <strong>제작 범위와 일정은 사업지원팀과 별도로 협의</strong>해야 합니다.</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div style="margin-top:16px;padding:10px 12px;background:#f3f7fb;color:#0b2e59;font-size:12px;font-weight:700;line-height:1.6;text-align:center;">
+                  확인 후 NICE HUB 업로드를 부탁드립니다.
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `.trim();
+  }
+
+  async function copyRichContent(html, text) {
+    if (navigator.clipboard?.write && window.ClipboardItem && window.isSecureContext) {
+      const clipboardItem = new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([text], { type: "text/plain" }),
+      });
+      await navigator.clipboard.write([clipboardItem]);
+      return;
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length);
+
+    const handleCopy = (event) => {
+      event.clipboardData?.setData("text/html", html);
+      event.clipboardData?.setData("text/plain", text);
+      event.preventDefault();
+    };
+    document.addEventListener("copy", handleCopy);
+    const copied = document.execCommand("copy");
+    document.removeEventListener("copy", handleCopy);
+    textArea.remove();
+    if (!copied) await copyText(text);
+  }
+
   async function copyMaterialRequest(event) {
     event.preventDefault();
     if (!elements.materialRequestForm.reportValidity()) return;
@@ -2204,9 +2320,9 @@
     elements.copyMaterialRequest.disabled = true;
     setMaterialRequestStatus("요청 양식을 복사하고 있습니다.");
     try {
-      await copyText(buildMaterialRequestText());
+      await copyRichContent(buildMaterialRequestHtml(), buildMaterialRequestText());
       elements.copyMaterialRequest.textContent = "복사 완료";
-      setMaterialRequestStatus("복사되었습니다. 이메일에 붙여넣어 사업지원팀에 보내 주세요.");
+      setMaterialRequestStatus("표 양식으로 복사되었습니다. 이메일에 붙여넣어 사업지원팀에 보내 주세요.");
       showShareToast("자료 요청 양식을 복사했습니다.");
       window.clearTimeout(materialRequestCopyResetTimer);
       materialRequestCopyResetTimer = window.setTimeout(() => {
