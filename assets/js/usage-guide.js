@@ -59,8 +59,8 @@
           description: "처음부터 모든 자료를 보여주기보다 고객의 관심사와 불편사항을 먼저 듣고, 관련된 자료만 NICE HUB에서 빠르게 찾아 제시하세요.",
         },
         {
-          image: "assets/images/guide/nice-hub-tip-step-03.jpg",
-          alt: "한국인 영업자가 태블릿의 실제 NICE HUB 화면을 고객과 함께 보며 설명하는 모습",
+          image: "assets/images/guide/nice-hub-tip-step-03-v2.png",
+          alt: "한국인 영업자가 태블릿으로 키오스크 소개 영상을 재생해 고객에게 보여주는 모습",
           title: "짧고 시각적인 자료부터 보여주세요",
           description: "홍보영상이나 제품소개 이미지로 핵심을 짧게 보여준 뒤, 고객이 관심을 보이는 부분을 브로슈어와 제안서로 자세히 설명하세요.",
         },
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261119-1";
+  const guideAssetVersion = "20261119-2";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
