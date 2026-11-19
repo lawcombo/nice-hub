@@ -36,10 +36,10 @@
           description: "‘보안 문서’ 라벨이 표시된 자료는 비밀번호 확인 후 열 수 있습니다. 승인된 고객에게만 자료 링크와 비밀번호를 각각 안전하게 안내하세요.",
         },
         {
-          image: "assets/images/guide/nice-hub-manual-step-06.jpg",
-          alt: "필요한 자료의 사업명, 자료명과 사용 목적을 정리해 사업지원팀에 요청하는 방법",
+          image: "assets/images/guide/nice-hub-manual-step-06-v2.png",
+          alt: "자료 요청 버튼에서 양식을 작성하고 복사해 이메일로 신청하는 실제 화면 안내",
           title: "필요한 자료는 사업지원팀에 요청",
-          description: "원하는 자료가 없거나 최신화가 필요하면 사업지원팀에 사업명, 필요한 자료명과 사용 목적을 전달해 업로드를 요청하세요.",
+          description: "‘자료 요청’ 버튼에서 내용을 작성하고 ‘양식 복사’를 누른 뒤, 복사된 요청서를 메일 본문에 붙여넣어 사업지원팀에 보내세요. 기존 자료의 업로드 요청이라면 파일도 함께 첨부해 주세요.",
         },
       ],
     },
@@ -85,7 +85,7 @@
       ],
     },
   };
-  const guideAssetVersion = "20261119-5";
+  const guideAssetVersion = "20261119-6";
 
   const elements = {
     openButton: document.querySelector("#openUsageGuide"),
