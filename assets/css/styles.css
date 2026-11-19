@@ -4940,15 +4940,16 @@ button.button {
 .usage-guide-step-three-marker {
   top: 4.3%;
   left: 67%;
-  width: 34px;
-  height: 34px;
+  width: 2.65%;
+  height: auto;
+  aspect-ratio: 1;
   place-items: center;
-  border: 3px solid #fff;
+  border: clamp(1px, 0.18vw, 2.5px) solid #fff;
   border-radius: 50%;
   color: #fff;
   background: var(--blue-700);
   box-shadow: 0 5px 12px rgba(7, 29, 55, 0.25);
-  font-size: 0.78rem;
+  font-size: clamp(0.4rem, 0.72vw, 0.7rem);
   font-weight: 900;
 }
 
@@ -5504,10 +5505,10 @@ button.button {
   }
 
   .usage-guide-step-three-marker {
-    width: 24px;
-    height: 24px;
-    border-width: 2px;
-    font-size: 0.6rem;
+    width: 2.65%;
+    height: auto;
+    border-width: clamp(1px, 0.2vw, 2px);
+    font-size: clamp(0.38rem, 0.72vw, 0.55rem);
   }
 
   .usage-guide-content {
