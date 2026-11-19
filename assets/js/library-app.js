@@ -61,6 +61,21 @@
     resetQuickFilter: document.querySelector("#resetQuickFilter"),
     applyQuickFilter: document.querySelector("#applyQuickFilter"),
     closeQuickFilter: document.querySelector("#closeQuickFilter"),
+    openMaterialRequest: document.querySelector("#openMaterialRequest"),
+    floatingOpenMaterialRequest: document.querySelector("#floatingOpenMaterialRequest"),
+    materialRequestModal: document.querySelector("#materialRequestModal"),
+    materialRequestDialog: document.querySelector(".material-request-dialog"),
+    materialRequestForm: document.querySelector("#materialRequestForm"),
+    materialRequestRequester: document.querySelector("#materialRequestRequester"),
+    materialRequestBusiness: document.querySelector("#materialRequestBusiness"),
+    materialRequestName: document.querySelector("#materialRequestName"),
+    materialRequestPurpose: document.querySelector("#materialRequestPurpose"),
+    materialRequestDueDate: document.querySelector("#materialRequestDueDate"),
+    materialRequestDetails: document.querySelector("#materialRequestDetails"),
+    materialRequestStatus: document.querySelector("#materialRequestStatus"),
+    copyMaterialRequest: document.querySelector("#copyMaterialRequest"),
+    closeMaterialRequest: document.querySelector("#closeMaterialRequest"),
+    cancelMaterialRequest: document.querySelector("#cancelMaterialRequest"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
     floatingOpenAdminAccess: document.querySelector("#floatingOpenAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
@@ -183,6 +198,8 @@
   let activeDescriptionTooltipTarget = null;
   let lastQrBundleFocusedElement = null;
   let qrBundleToastTimer = 0;
+  let lastMaterialRequestFocusedElement = null;
+  let materialRequestCopyResetTimer = 0;
   const qrBundleSelectedIds = new Set();
 
   const adminAccessPassword = "5959";
@@ -324,6 +341,10 @@
   function closeVisibleModal() {
     if (!elements.qrBundleModal.hidden) {
       closeQrBundle();
+      return true;
+    }
+    if (!elements.materialRequestModal.hidden) {
+      closeMaterialRequest();
       return true;
     }
     if (!elements.quickFilterModal.hidden) {
@@ -2111,6 +2132,111 @@
     }
   }
 
+  function setMaterialRequestStatus(message = "", tone = "success") {
+    elements.materialRequestStatus.textContent = message;
+    if (message) elements.materialRequestStatus.dataset.tone = tone;
+    else delete elements.materialRequestStatus.dataset.tone;
+  }
+
+  function openMaterialRequest() {
+    if (!elements.materialRequestModal.hidden) return;
+    pushModalHistory("material-request");
+    lastMaterialRequestFocusedElement = document.activeElement;
+    setMaterialRequestStatus();
+    elements.copyMaterialRequest.disabled = false;
+    elements.copyMaterialRequest.textContent = "양식 복사";
+    elements.materialRequestModal.hidden = false;
+    document.body.classList.add("modal-open");
+    document.addEventListener("keydown", handleMaterialRequestKeydown);
+    window.requestAnimationFrame(() => elements.materialRequestDialog.focus({ preventScroll: true }));
+  }
+
+  function closeMaterialRequest() {
+    if (elements.materialRequestModal.hidden) return;
+    window.clearTimeout(materialRequestCopyResetTimer);
+    materialRequestCopyResetTimer = 0;
+    elements.materialRequestModal.hidden = true;
+    elements.copyMaterialRequest.disabled = false;
+    elements.copyMaterialRequest.textContent = "양식 복사";
+    setMaterialRequestStatus();
+    document.body.classList.remove("modal-open");
+    document.removeEventListener("keydown", handleMaterialRequestKeydown);
+    if (lastMaterialRequestFocusedElement && document.contains(lastMaterialRequestFocusedElement)) {
+      lastMaterialRequestFocusedElement.focus();
+    }
+    lastMaterialRequestFocusedElement = null;
+  }
+
+  function buildMaterialRequestText() {
+    const getValue = (element) => element.value.trim() || "미입력";
+    return [
+      "[NICE HUB 자료 요청]",
+      "",
+      `요청자 / 소속 : ${getValue(elements.materialRequestRequester)}`,
+      `사업 / 제품 : ${getValue(elements.materialRequestBusiness)}`,
+      `요청 자료명 : ${getValue(elements.materialRequestName)}`,
+      `사용 목적 : ${getValue(elements.materialRequestPurpose)}`,
+      `필요 일정 : ${getValue(elements.materialRequestDueDate)}`,
+      "",
+      "상세 요청사항",
+      getValue(elements.materialRequestDetails),
+      "",
+      "확인 후 NICE HUB 업로드를 부탁드립니다.",
+    ].join("\n");
+  }
+
+  async function copyMaterialRequest(event) {
+    event.preventDefault();
+    if (!elements.materialRequestForm.reportValidity()) return;
+
+    elements.copyMaterialRequest.disabled = true;
+    setMaterialRequestStatus("요청 양식을 복사하고 있습니다.");
+    try {
+      await copyText(buildMaterialRequestText());
+      elements.copyMaterialRequest.textContent = "복사 완료";
+      setMaterialRequestStatus("복사되었습니다. 이메일에 붙여넣어 사업지원팀에 보내 주세요.");
+      showShareToast("자료 요청 양식을 복사했습니다.");
+      window.clearTimeout(materialRequestCopyResetTimer);
+      materialRequestCopyResetTimer = window.setTimeout(() => {
+        elements.copyMaterialRequest.disabled = false;
+        elements.copyMaterialRequest.textContent = "양식 복사";
+        materialRequestCopyResetTimer = 0;
+      }, 1800);
+    } catch (error) {
+      console.error("자료 요청 양식을 복사하지 못했습니다.", error);
+      elements.copyMaterialRequest.disabled = false;
+      elements.copyMaterialRequest.textContent = "양식 복사";
+      setMaterialRequestStatus("복사하지 못했습니다. 브라우저의 클립보드 권한을 확인해 주세요.", "error");
+      showShareToast("자료 요청 양식을 복사하지 못했습니다.", "error");
+    }
+  }
+
+  function handleMaterialRequestKeydown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      requestModalClose("material-request", closeMaterialRequest);
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const focusable = [
+      ...elements.materialRequestModal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled])',
+      ),
+    ].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function openAdminAccess() {
     pushModalHistory("admin-access");
     lastAccessFocusedElement = document.activeElement;
@@ -2327,6 +2453,15 @@
     .addEventListener("click", () => requestModalClose("video", closeVideoPreview));
   elements.openAdminAccess.addEventListener("click", openAdminAccess);
   elements.floatingOpenAdminAccess.addEventListener("click", openAdminAccess);
+  elements.openMaterialRequest.addEventListener("click", openMaterialRequest);
+  elements.floatingOpenMaterialRequest.addEventListener("click", openMaterialRequest);
+  elements.materialRequestForm.addEventListener("submit", copyMaterialRequest);
+  elements.closeMaterialRequest.addEventListener("click", () =>
+    requestModalClose("material-request", closeMaterialRequest),
+  );
+  elements.cancelMaterialRequest.addEventListener("click", () =>
+    requestModalClose("material-request", closeMaterialRequest),
+  );
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
   elements.closeAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
   elements.cancelAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));

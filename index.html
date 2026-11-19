@@ -305,6 +305,21 @@
         <span class="floating-footer-action-label">공식 블로그</span>
       </a>
       <button
+        id="floatingOpenMaterialRequest"
+        class="floating-footer-action floating-footer-request"
+        type="button"
+        aria-label="자료 요청 양식 열기"
+        data-label="자료 요청"
+      >
+        <span class="floating-footer-action-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M6.5 3.5h8l3 3v14H6.5a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z" />
+            <path d="M14.5 3.5v4h4M8 11h6M8 14h4M16.5 13.5v5M14 16h5" />
+          </svg>
+        </span>
+        <span class="floating-footer-action-label">자료 요청</span>
+      </button>
+      <button
         id="floatingOpenAdminAccess"
         class="floating-footer-action floating-footer-admin"
         type="button"
@@ -361,6 +376,23 @@
             <span class="footer-action-card-arrow" aria-hidden="true">↗</span>
           </a>
           <button
+            id="openMaterialRequest"
+            class="footer-admin-button footer-action-card footer-action-request"
+            type="button"
+          >
+            <span class="footer-action-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M6.5 3.5h8l3 3v14H6.5a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z" />
+                <path d="M14.5 3.5v4h4M8 11h6M8 14h4M16.5 13.5v5M14 16h5" />
+              </svg>
+            </span>
+            <span class="footer-action-card-copy">
+              <strong>자료 요청</strong>
+              <small>필요한 자료의 업로드 요청</small>
+            </span>
+            <span class="footer-action-card-arrow" aria-hidden="true">＋</span>
+          </button>
+          <button
             id="openAdminAccess"
             class="footer-admin-button footer-action-card footer-action-admin"
             type="button"
@@ -380,6 +412,92 @@
         </div>
       </div>
     </footer>
+
+    <div id="materialRequestModal" class="modal material-request-modal" hidden>
+      <div class="modal-backdrop"></div>
+      <section
+        class="material-request-dialog"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="materialRequestTitle"
+        aria-describedby="materialRequestDescription"
+      >
+        <header class="material-request-header">
+          <div>
+            <span class="modal-label">MATERIAL REQUEST</span>
+            <h2 id="materialRequestTitle">자료 요청</h2>
+            <p id="materialRequestDescription">필요한 자료 정보를 작성한 뒤 요청 양식을 복사하세요.</p>
+          </div>
+          <button id="closeMaterialRequest" class="icon-button" type="button" aria-label="자료 요청 창 닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+
+        <form id="materialRequestForm" class="material-request-form" autocomplete="off">
+          <div class="material-request-body">
+            <div class="material-request-recipient">
+              <span class="material-request-recipient-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M3.5 6.5h17v11h-17z" />
+                  <path d="m4.5 7.5 7.5 6 7.5-6" />
+                </svg>
+              </span>
+              <span>
+                <small>보내실 곳</small>
+                <strong>사업지원팀 · jsh@niceinfra.co.kr</strong>
+              </span>
+            </div>
+
+            <div class="material-request-fields">
+              <label for="materialRequestRequester">
+                <span>요청자 / 소속</span>
+                <input id="materialRequestRequester" type="text" maxlength="80" placeholder="예: 영업1팀 홍길동" />
+              </label>
+              <label for="materialRequestBusiness">
+                <span>사업 / 제품</span>
+                <input id="materialRequestBusiness" type="text" maxlength="100" placeholder="예: 무인숙박 / 키오스크" />
+              </label>
+              <label class="material-request-wide" for="materialRequestName">
+                <span>요청 자료명 <em aria-hidden="true">*</em></span>
+                <input
+                  id="materialRequestName"
+                  type="text"
+                  maxlength="160"
+                  placeholder="예: 신규 키오스크 제품소개서"
+                  required
+                />
+              </label>
+              <label for="materialRequestPurpose">
+                <span>사용 목적</span>
+                <input id="materialRequestPurpose" type="text" maxlength="120" placeholder="예: 고객 방문 상담 및 제안" />
+              </label>
+              <label for="materialRequestDueDate">
+                <span>필요 일정</span>
+                <input id="materialRequestDueDate" type="text" maxlength="80" placeholder="예: 11월 25일까지" />
+              </label>
+              <label class="material-request-wide" for="materialRequestDetails">
+                <span>상세 요청사항</span>
+                <textarea
+                  id="materialRequestDetails"
+                  rows="4"
+                  maxlength="1000"
+                  placeholder="필요한 내용, 파일 형식, 참고사항 등을 입력해 주세요."
+                ></textarea>
+              </label>
+            </div>
+          </div>
+
+          <footer class="material-request-footer">
+            <p id="materialRequestStatus" class="material-request-status" role="status" aria-live="polite"></p>
+            <div class="material-request-actions">
+              <button id="cancelMaterialRequest" class="button button-secondary" type="button">취소</button>
+              <button id="copyMaterialRequest" class="button button-primary" type="submit">양식 복사</button>
+            </div>
+          </footer>
+        </form>
+      </section>
+    </div>
 
     <div id="quickFilterModal" class="modal quick-filter-modal" hidden>
       <div class="modal-backdrop" data-close-quick-filter></div>
