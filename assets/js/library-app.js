@@ -2174,6 +2174,7 @@
       "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
       "          NICE HUB 자료 요청",
       "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      "보내실 곳 : 사업지원팀 (jsh@niceinfra.co.kr / dkfmap@niceinfra.co.kr)",
       "",
       "■ 요청 정보",
       `  • 요청자 / 소속 : ${getValue(elements.materialRequestRequester)}`,
@@ -2223,7 +2224,7 @@
               <td style="padding:18px 20px;background:#0b2e59;color:#ffffff;">
                 <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:#bcdcff;">NICE HUB · MATERIAL REQUEST</div>
                 <div style="margin-top:3px;font-size:21px;font-weight:700;line-height:1.4;">자료 요청서</div>
-                <div style="margin-top:3px;font-size:12px;line-height:1.5;color:#dcecff;">사업지원팀 · jsh@niceinfra.co.kr</div>
+                <div style="margin-top:3px;font-size:12px;line-height:1.5;color:#dcecff;">사업지원팀<br>jsh@niceinfra.co.kr · dkfmap@niceinfra.co.kr</div>
               </td>
             </tr>
             <tr>
