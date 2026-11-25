@@ -334,6 +334,23 @@
         </span>
         <span class="floating-footer-action-label">자료 관리</span>
       </button>
+      <button
+        class="floating-footer-action floating-footer-utilities"
+        type="button"
+        data-open-utilities
+        aria-haspopup="dialog"
+        aria-controls="utilitiesDialog"
+        aria-label="편의 유틸"
+        data-label="편의 유틸"
+      >
+        <span class="floating-footer-action-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <rect x="3.5" y="7.5" width="17" height="13" rx="2" />
+            <path d="M8.5 7.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v2.5M3.5 13h17M10 13v2h4v-2" />
+          </svg>
+        </span>
+        <span class="floating-footer-action-label">편의 유틸</span>
+      </button>
     </nav>
 
     <footer class="site-footer">
@@ -409,9 +426,41 @@
             </span>
             <span class="footer-action-card-arrow" aria-hidden="true">→</span>
           </button>
+          <button
+            class="footer-admin-button footer-action-card footer-action-utilities"
+            type="button"
+            data-open-utilities
+            aria-haspopup="dialog"
+            aria-controls="utilitiesDialog"
+          >
+            <span class="footer-action-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <rect x="3.5" y="7.5" width="17" height="13" rx="2" />
+                <path d="M8.5 7.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v2.5M3.5 13h17M10 13v2h4v-2" />
+              </svg>
+            </span>
+            <span class="footer-action-card-copy">
+              <strong>편의 유틸</strong>
+              <small>업무 도구 다운로드</small>
+            </span>
+            <span class="footer-action-card-arrow" aria-hidden="true">↓</span>
+          </button>
         </div>
       </div>
     </footer>
+
+    <dialog id="utilitiesDialog" class="utilities-dialog" aria-labelledby="utilitiesTitle">
+      <header class="material-request-header">
+        <h2 id="utilitiesTitle">편의 유틸</h2>
+        <button id="closeUtilities" class="icon-button" type="button" aria-label="편의 유틸 닫기" autofocus>
+          <span aria-hidden="true">×</span>
+        </button>
+      </header>
+      <div class="utilities-body">
+        <p id="utilitiesStatus" class="utilities-status" role="status" hidden></p>
+        <ul id="utilitiesList" class="utilities-list" aria-label="다운로드 가능한 유틸" hidden></ul>
+      </div>
+    </dialog>
 
     <div id="materialRequestModal" class="modal material-request-modal" hidden>
       <div class="modal-backdrop"></div>

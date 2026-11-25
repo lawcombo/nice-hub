@@ -1,0 +1,10 @@
+[
+  {
+    "title": "포스트잇 유틸",
+    "description": "Windows 바탕화면에 포스트잇처럼 메모를 남길 수 있는 도구입니다.",
+    "platform": "Windows",
+    "format": "EXE",
+    "fileSizeBytes": 49664,
+    "downloadUrl": "https://github.com/lawcombo/nice-hub/releases/download/personal-postits-20261125/PersonalPostIts-footer.exe"
+  }
+]

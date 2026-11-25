@@ -76,6 +76,10 @@
     copyMaterialRequest: document.querySelector("#copyMaterialRequest"),
     closeMaterialRequest: document.querySelector("#closeMaterialRequest"),
     cancelMaterialRequest: document.querySelector("#cancelMaterialRequest"),
+    utilitiesDialog: document.querySelector("#utilitiesDialog"),
+    utilitiesList: document.querySelector("#utilitiesList"),
+    utilitiesStatus: document.querySelector("#utilitiesStatus"),
+    closeUtilities: document.querySelector("#closeUtilities"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
     floatingOpenAdminAccess: document.querySelector("#floatingOpenAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
@@ -200,6 +204,8 @@
   let qrBundleToastTimer = 0;
   let lastMaterialRequestFocusedElement = null;
   let materialRequestCopyResetTimer = 0;
+  let utilitiesLoaded = false;
+  let utilitiesLoading = false;
   const qrBundleSelectedIds = new Set();
 
   const adminAccessPassword = "5959";
@@ -339,6 +345,10 @@
   }
 
   function closeVisibleModal() {
+    if (elements.utilitiesDialog.open) {
+      closeUtilities();
+      return true;
+    }
     if (!elements.qrBundleModal.hidden) {
       closeQrBundle();
       return true;
@@ -2366,6 +2376,64 @@
     }
   }
 
+  function createUtilityItem(utility) {
+    const url = new URL(utility.downloadUrl);
+    if (url.protocol !== "https:") throw new Error("Invalid utility download link.");
+
+    const item = createElement("li", "utility-item");
+    const format = createElement("span", "utility-format", utility.format);
+    const details = createElement("div");
+    const fileMeta = [utility.platform, formatFileSize(utility.fileSizeBytes)].filter(Boolean).join(" · ");
+    details.append(
+      createElement("h3", "", utility.title),
+      createElement("p", "utility-description", utility.description),
+      createElement("p", "utility-file-meta", fileMeta),
+    );
+
+    const link = createElement("a", "button button-primary utility-download", "다운로드");
+    link.href = url.href;
+    link.setAttribute("aria-label", `${utility.title} 다운로드`);
+    item.append(format, details, link);
+    return item;
+  }
+
+  async function loadUtilities() {
+    if (utilitiesLoaded || utilitiesLoading) return;
+    utilitiesLoading = true;
+    elements.utilitiesStatus.hidden = false;
+    elements.utilitiesStatus.textContent = "목록을 불러오는 중입니다.";
+
+    try {
+      const response = await fetch(resolveUrl("assets/data/utilities.json"), { cache: "no-cache" });
+      if (!response.ok) throw new Error(`Utility catalog returned ${response.status}`);
+      const utilities = await response.json();
+      const items = utilities.map(createUtilityItem);
+      elements.utilitiesList.replaceChildren(...items);
+      elements.utilitiesList.hidden = items.length === 0;
+      elements.utilitiesStatus.textContent = items.length ? "" : "등록된 편의 유틸이 없습니다.";
+      elements.utilitiesStatus.hidden = items.length > 0;
+      utilitiesLoaded = true;
+    } catch (error) {
+      console.error("편의 유틸 목록을 불러오지 못했습니다.", error);
+      elements.utilitiesStatus.textContent = "목록을 불러오지 못했습니다. 창을 닫고 다시 열어 주세요.";
+    } finally {
+      utilitiesLoading = false;
+    }
+  }
+
+  function openUtilities() {
+    if (elements.utilitiesDialog.open) return;
+    elements.utilitiesDialog.showModal();
+    pushModalHistory("utilities");
+    document.body.classList.add("modal-open");
+    void loadUtilities();
+  }
+
+  function closeUtilities() {
+    elements.utilitiesDialog.close();
+    document.body.classList.remove("modal-open");
+  }
+
   function openAdminAccess() {
     pushModalHistory("admin-access");
     lastAccessFocusedElement = document.activeElement;
@@ -2591,6 +2659,14 @@
   elements.cancelMaterialRequest.addEventListener("click", () =>
     requestModalClose("material-request", closeMaterialRequest),
   );
+  document.querySelectorAll("[data-open-utilities]").forEach((button) => {
+    button.addEventListener("click", openUtilities);
+  });
+  elements.closeUtilities.addEventListener("click", () => requestModalClose("utilities", closeUtilities));
+  elements.utilitiesDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    requestModalClose("utilities", closeUtilities);
+  });
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
   elements.closeAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
   elements.cancelAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
