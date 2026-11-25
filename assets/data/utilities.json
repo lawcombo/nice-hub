@@ -1,11 +1,11 @@
 [
   {
-    "title": "포스트잇 유틸",
-    "description": "Windows 바탕화면에 포스트잇처럼 메모를 남길 수 있는 도구입니다.",
+    "title": "책갈피 알림 포스트잇",
+    "description": "바탕화면에 메모를 책갈피처럼 정리하고, 중요한 일정은 원하는 날짜와 시간에 알림으로 받아보세요.",
     "platform": "Windows",
     "format": "EXE",
-    "fileSizeBytes": 51712,
-    "previewImage": "assets/images/personal-postits-guide.png",
-    "downloadUrl": "https://github.com/lawcombo/nice-hub/releases/download/personal-postits-20261125/PersonalPostIts.exe"
+    "fileSizeBytes": 67072,
+    "previewImage": "assets/images/personal-postits-alert-guide.png",
+    "downloadUrl": "https://github.com/lawcombo/nice-hub/releases/download/personal-postits-20261125-alerts/PersonalPostIts.exe"
   }
 ]
