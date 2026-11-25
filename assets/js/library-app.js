@@ -13,8 +13,9 @@
     materialTypeTabsProgress: document.querySelector("#materialTypeTabsProgress"),
     tabScrollArrows: [...document.querySelectorAll("[data-scroll-target][data-scroll-direction]")],
     materialControls: document.querySelector(".material-controls"),
-    footer: document.querySelector(".site-footer"),
-    floatingFooterActions: document.querySelector("#floatingFooterActions"),
+    headerShortcuts: document.querySelector("#headerShortcuts"),
+    toggleHeaderShortcuts: document.querySelector("#toggleHeaderShortcuts"),
+    headerShortcutsMenu: document.querySelector("#headerShortcutsMenu"),
     viewModeButtons: document.querySelectorAll("[data-view-mode]"),
     openQrBundle: document.querySelector("#openQrBundle"),
     qrBundleModal: document.querySelector("#qrBundleModal"),
@@ -61,8 +62,7 @@
     resetQuickFilter: document.querySelector("#resetQuickFilter"),
     applyQuickFilter: document.querySelector("#applyQuickFilter"),
     closeQuickFilter: document.querySelector("#closeQuickFilter"),
-    openMaterialRequest: document.querySelector("#openMaterialRequest"),
-    floatingOpenMaterialRequest: document.querySelector("#floatingOpenMaterialRequest"),
+    shortcutOpenMaterialRequest: document.querySelector("#shortcutOpenMaterialRequest"),
     materialRequestModal: document.querySelector("#materialRequestModal"),
     materialRequestDialog: document.querySelector(".material-request-dialog"),
     materialRequestForm: document.querySelector("#materialRequestForm"),
@@ -85,8 +85,7 @@
     utilityPreviewImage: document.querySelector("#utilityPreviewImage"),
     utilityPreviewError: document.querySelector("#utilityPreviewError"),
     closeUtilityPreview: document.querySelector("#closeUtilityPreview"),
-    openAdminAccess: document.querySelector("#openAdminAccess"),
-    floatingOpenAdminAccess: document.querySelector("#floatingOpenAdminAccess"),
+    shortcutOpenAdminAccess: document.querySelector("#shortcutOpenAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
     adminAccessForm: document.querySelector("#adminAccessForm"),
     adminAccessPassword: document.querySelector("#adminAccessPassword"),
@@ -1102,19 +1101,13 @@
     quickFilterVisibilityFrame = 0;
     const controlsRect = elements.materialControls.getBoundingClientRect();
     const panelRect = elements.panel.getBoundingClientRect();
-    const footerRect = elements.footer.getBoundingClientRect();
-    const footerLift = Math.max(0, Math.min(footerRect.height, window.innerHeight - footerRect.top));
-    const footerVisible = footerRect.top < window.innerHeight && footerRect.bottom > 0;
     const floatingToolsHidden = controlsRect.bottom >= 12;
     elements.openQuickFilter.hidden = floatingToolsHidden;
-    elements.openQuickFilter.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.scrollToTop.hidden = floatingToolsHidden;
-    elements.scrollToTop.style.setProperty("--quick-filter-footer-lift", `${footerLift}px`);
     elements.scrollToTop.style.setProperty(
       "--quick-filter-button-width",
       `${elements.openQuickFilter.hidden ? 0 : elements.openQuickFilter.getBoundingClientRect().width}px`,
     );
-    elements.openQuickFilter.classList.toggle("is-footer-visible", footerRect.top < window.innerHeight);
     const dockRect = elements.floatingUtilityDock.getBoundingClientRect();
     const lastCardRect = elements.grid.lastElementChild?.getBoundingClientRect();
     if (dockRect.width > 0 && dockRect.height > 0) {
@@ -1132,9 +1125,9 @@
       elements.floatingUtilityDock.style.setProperty("--floating-utility-left", `${dockLeft}px`);
       elements.floatingUtilityDock.style.setProperty("--floating-utility-top", `${dockTop}px`);
     }
-    elements.floatingFooterActions.style.setProperty("--floating-actions-top", `${Math.max(16, panelRect.top)}px`);
-    elements.floatingFooterActions.classList.add("is-positioned");
-    elements.floatingFooterActions.classList.toggle("is-footer-visible", footerVisible);
+    const shortcutsHeight = elements.headerShortcutsMenu.offsetHeight;
+    const shortcutsTop = Math.max(16, Math.min(panelRect.top, window.innerHeight - shortcutsHeight - 16));
+    elements.headerShortcutsMenu.style.setProperty("--shortcuts-top", `${shortcutsTop}px`);
     if (!elements.quickFilterModal.hidden) positionQuickFilterDialog();
   }
 
@@ -2157,8 +2150,15 @@
     else delete elements.materialRequestStatus.dataset.tone;
   }
 
+  function closeHeaderShortcuts(restoreFocus = false) {
+    if (elements.toggleHeaderShortcuts.getAttribute("aria-expanded") !== "true") return;
+    elements.toggleHeaderShortcuts.setAttribute("aria-expanded", "false");
+    if (restoreFocus) elements.toggleHeaderShortcuts.focus({ preventScroll: true });
+  }
+
   function openMaterialRequest() {
     if (!elements.materialRequestModal.hidden) return;
+    closeHeaderShortcuts(true);
     pushModalHistory("material-request");
     lastMaterialRequestFocusedElement = document.activeElement;
     elements.materialRequestForm.reset();
@@ -2481,6 +2481,7 @@
   }
 
   function openAdminAccess() {
+    closeHeaderShortcuts(true);
     pushModalHistory("admin-access");
     lastAccessFocusedElement = document.activeElement;
     elements.adminAccessPassword.value = "";
@@ -2694,10 +2695,22 @@
   elements.videoModal
     .querySelector("[data-close-video-modal]")
     .addEventListener("click", () => requestModalClose("video", closeVideoPreview));
-  elements.openAdminAccess.addEventListener("click", openAdminAccess);
-  elements.floatingOpenAdminAccess.addEventListener("click", openAdminAccess);
-  elements.openMaterialRequest.addEventListener("click", openMaterialRequest);
-  elements.floatingOpenMaterialRequest.addEventListener("click", openMaterialRequest);
+  elements.toggleHeaderShortcuts.addEventListener("click", () => {
+    const expanded = elements.toggleHeaderShortcuts.getAttribute("aria-expanded") === "true";
+    elements.toggleHeaderShortcuts.setAttribute("aria-expanded", String(!expanded));
+  });
+  elements.headerShortcutsMenu.addEventListener("click", (event) => {
+    if (event.target.closest("a[href]")) closeHeaderShortcuts(true);
+  });
+  document.addEventListener("click", (event) => {
+    if (!elements.headerShortcuts.contains(event.target)) closeHeaderShortcuts();
+  });
+  elements.headerShortcuts.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeHeaderShortcuts(true);
+  });
+  window.matchMedia("(min-width: 901px)").addEventListener("change", () => closeHeaderShortcuts());
+  elements.shortcutOpenAdminAccess.addEventListener("click", openAdminAccess);
+  elements.shortcutOpenMaterialRequest.addEventListener("click", openMaterialRequest);
   elements.materialRequestForm.addEventListener("submit", copyMaterialRequest);
   elements.closeMaterialRequest.addEventListener("click", () =>
     requestModalClose("material-request", closeMaterialRequest),
