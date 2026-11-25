@@ -2753,15 +2753,32 @@ button.button {
   padding: 16px;
 }
 
-.utilities-team-label {
-  width: fit-content;
-  margin: 0 0 12px;
-  padding: 6px 10px;
-  border: 1px solid #bee3e7;
+.utilities-list-header {
+  gap: 10px;
+}
+
+.utilities-list-header h2 {
+  flex-shrink: 0;
+}
+
+.utilities-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.utilities-header-actions .icon-button {
+  flex-shrink: 0;
+}
+
+.utilities-header-actions .utilities-team-label {
+  margin: 0;
+  padding: 5px 8px;
+  border: 1px solid rgba(214, 246, 255, 0.42);
   border-radius: 8px;
-  color: #096771;
-  background: #eaf8fa;
-  font-size: 0.75rem;
+  color: #f0fcff;
+  background: rgba(219, 246, 255, 0.14);
+  font-size: 0.7rem;
   font-weight: 750;
   line-height: 1.5;
   word-break: keep-all;
@@ -2818,6 +2835,13 @@ button.button {
   background: #eaf8fa;
   font-size: 0.72rem;
   font-weight: 850;
+}
+
+.utility-icon {
+  display: block;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
 }
 
 .utility-item h3,

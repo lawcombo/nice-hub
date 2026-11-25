@@ -450,14 +450,16 @@
     </footer>
 
     <dialog id="utilitiesDialog" class="utilities-dialog" aria-labelledby="utilitiesTitle">
-      <header class="material-request-header">
+      <header class="material-request-header utilities-list-header">
         <h2 id="utilitiesTitle">편의 유틸</h2>
-        <button id="closeUtilities" class="icon-button" type="button" aria-label="편의 유틸 닫기" autofocus>
-          <span aria-hidden="true">×</span>
-        </button>
+        <div class="utilities-header-actions">
+          <p class="utilities-team-label">사업지원팀에서 직접 개발한 유틸. 믿고 쓰셔도 됩니다.</p>
+          <button id="closeUtilities" class="icon-button" type="button" aria-label="편의 유틸 닫기" autofocus>
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
       </header>
       <div class="utilities-body">
-        <p class="utilities-team-label">사업지원팀에서 직접 개발한 유틸. 믿고 쓰셔도 됩니다.</p>
         <p id="utilitiesStatus" class="utilities-status" role="status" hidden></p>
         <ul id="utilitiesList" class="utilities-list" aria-label="다운로드 가능한 유틸" hidden></ul>
       </div>

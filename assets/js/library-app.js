@@ -2391,6 +2391,15 @@
 
     const item = createElement("li", "utility-item");
     const format = createElement("span", "utility-format", utility.format);
+    let icon = format;
+    if (utility.iconImage) {
+      const image = createElement("img", "utility-icon");
+      image.alt = "";
+      image.decoding = "async";
+      image.addEventListener("error", () => image.replaceWith(format), { once: true });
+      image.src = resolveUrl(utility.iconImage);
+      icon = image;
+    }
     const details = createElement("div");
     const fileMeta = [utility.platform, formatFileSize(utility.fileSizeBytes)].filter(Boolean).join(" · ");
     details.append(
@@ -2414,7 +2423,7 @@
     link.href = url.href;
     link.setAttribute("aria-label", `${utility.title} 다운로드`);
     actions.append(link);
-    item.append(format, details, actions);
+    item.append(icon, details, actions);
     return item;
   }
 
