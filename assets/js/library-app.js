@@ -80,6 +80,11 @@
     utilitiesList: document.querySelector("#utilitiesList"),
     utilitiesStatus: document.querySelector("#utilitiesStatus"),
     closeUtilities: document.querySelector("#closeUtilities"),
+    utilityPreviewDialog: document.querySelector("#utilityPreviewDialog"),
+    utilityPreviewTitle: document.querySelector("#utilityPreviewTitle"),
+    utilityPreviewImage: document.querySelector("#utilityPreviewImage"),
+    utilityPreviewError: document.querySelector("#utilityPreviewError"),
+    closeUtilityPreview: document.querySelector("#closeUtilityPreview"),
     openAdminAccess: document.querySelector("#openAdminAccess"),
     floatingOpenAdminAccess: document.querySelector("#floatingOpenAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
@@ -345,6 +350,10 @@
   }
 
   function closeVisibleModal() {
+    if (elements.utilityPreviewDialog.open) {
+      closeUtilityPreview();
+      return true;
+    }
     if (elements.utilitiesDialog.open) {
       closeUtilities();
       return true;
@@ -2390,11 +2399,39 @@
       createElement("p", "utility-file-meta", fileMeta),
     );
 
+    const actions = createElement("div", "utility-item-actions");
+    if (utility.previewImage) {
+      const preview = createElement("button", "button button-secondary", "미리보기");
+      preview.type = "button";
+      preview.setAttribute("aria-label", `${utility.title} 미리보기`);
+      preview.setAttribute("aria-haspopup", "dialog");
+      preview.setAttribute("aria-controls", "utilityPreviewDialog");
+      preview.addEventListener("click", () => openUtilityPreview(utility));
+      actions.append(preview);
+    }
+
     const link = createElement("a", "button button-primary utility-download", "다운로드");
     link.href = url.href;
     link.setAttribute("aria-label", `${utility.title} 다운로드`);
-    item.append(format, details, link);
+    actions.append(link);
+    item.append(format, details, actions);
     return item;
+  }
+
+  function openUtilityPreview(utility) {
+    if (elements.utilityPreviewDialog.open) return;
+    elements.utilityPreviewTitle.textContent = `${utility.title} 미리보기`;
+    elements.utilityPreviewImage.alt = `${utility.title} 사용 안내`;
+    elements.utilityPreviewImage.hidden = false;
+    elements.utilityPreviewError.hidden = true;
+    elements.utilityPreviewImage.src = resolveUrl(utility.previewImage);
+    elements.utilityPreviewDialog.showModal();
+    elements.utilityPreviewImage.parentElement.scrollTop = 0;
+    pushModalHistory("utility-preview");
+  }
+
+  function closeUtilityPreview() {
+    elements.utilityPreviewDialog.close();
   }
 
   async function loadUtilities() {
@@ -2666,6 +2703,17 @@
   elements.utilitiesDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
     requestModalClose("utilities", closeUtilities);
+  });
+  elements.closeUtilityPreview.addEventListener("click", () =>
+    requestModalClose("utility-preview", closeUtilityPreview),
+  );
+  elements.utilityPreviewDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    requestModalClose("utility-preview", closeUtilityPreview);
+  });
+  elements.utilityPreviewImage.addEventListener("error", () => {
+    elements.utilityPreviewImage.hidden = true;
+    elements.utilityPreviewError.hidden = false;
   });
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
   elements.closeAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));

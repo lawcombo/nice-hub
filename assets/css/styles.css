@@ -2753,6 +2753,36 @@ button.button {
   padding: 16px;
 }
 
+.utilities-team-label {
+  width: fit-content;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  border: 1px solid #bee3e7;
+  border-radius: 8px;
+  color: #096771;
+  background: #eaf8fa;
+  font-size: 0.75rem;
+  font-weight: 750;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.utility-preview-dialog {
+  width: min(650px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+}
+
+.utility-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.utility-preview-image[hidden] {
+  display: none;
+}
+
 .utilities-list {
   display: grid;
   gap: 10px;
@@ -2812,7 +2842,12 @@ button.button {
   font-size: 0.73rem;
 }
 
-.utility-download {
+.utility-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.utility-item-actions > .button {
   white-space: nowrap;
 }
 
@@ -4518,7 +4553,13 @@ button.button {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .utility-download {
+  .utility-item-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .utility-item-actions > :only-child {
     grid-column: 1 / -1;
   }
 

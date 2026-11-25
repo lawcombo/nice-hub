@@ -457,8 +457,22 @@
         </button>
       </header>
       <div class="utilities-body">
+        <p class="utilities-team-label">사업지원팀에서 직접 개발한 유틸. 믿고 쓰셔도 됩니다.</p>
         <p id="utilitiesStatus" class="utilities-status" role="status" hidden></p>
         <ul id="utilitiesList" class="utilities-list" aria-label="다운로드 가능한 유틸" hidden></ul>
+      </div>
+    </dialog>
+
+    <dialog id="utilityPreviewDialog" class="utilities-dialog utility-preview-dialog" aria-labelledby="utilityPreviewTitle">
+      <header class="material-request-header">
+        <h2 id="utilityPreviewTitle">유틸 미리보기</h2>
+        <button id="closeUtilityPreview" class="icon-button" type="button" aria-label="미리보기 닫기" autofocus>
+          <span aria-hidden="true">×</span>
+        </button>
+      </header>
+      <div class="utilities-body">
+        <img id="utilityPreviewImage" class="utility-preview-image" alt="" decoding="async" />
+        <p id="utilityPreviewError" class="utilities-status" role="status" hidden>이미지를 불러오지 못했습니다.</p>
       </div>
     </dialog>
 
