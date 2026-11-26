@@ -214,6 +214,7 @@
   let materialRequestCopyResetTimer = 0;
   let utilitiesLoaded = false;
   let utilitiesLoading = false;
+  let utilityPreviewCropTop = 0;
   let utilityPreviewScale = 1;
   let utilityPreviewDrag = null;
   const qrBundleSelectedIds = new Set();
@@ -2455,7 +2456,9 @@
     image.alt = `${utility.title} 사용 안내`;
     image.hidden = true;
     image.style.removeProperty("width");
+    image.style.removeProperty("height");
     elements.utilityPreviewError.hidden = true;
+    utilityPreviewCropTop = Number.isInteger(utility.previewCropTop) ? Math.max(0, utility.previewCropTop) : 0;
     utilityPreviewScale = 1;
     updateUtilityPreviewZoomControls();
     elements.utilityPreviewDialog.showModal();
@@ -2491,11 +2494,14 @@
     const anchorY = clientY ?? viewBounds.top + viewport.clientHeight / 2;
     const imageX = Math.max(0, Math.min(1, (anchorX - oldBounds.left) / oldBounds.width));
     const imageY = Math.max(0, Math.min(1, (anchorY - oldBounds.top) / oldBounds.height));
-    const aspectRatio = image.naturalWidth / image.naturalHeight;
+    const cropTop = Math.min(utilityPreviewCropTop, image.naturalHeight - 1);
+    const aspectRatio = image.naturalWidth / (image.naturalHeight - cropTop);
     const fitWidth = Math.max(1, Math.min(viewBounds.width - 20, (viewBounds.height - 20) * aspectRatio));
 
     utilityPreviewScale = Math.max(1, Math.min(utilityPreviewMaxScale, scale));
-    image.style.width = `${fitWidth * utilityPreviewScale}px`;
+    const imageWidth = fitWidth * utilityPreviewScale;
+    image.style.width = `${imageWidth}px`;
+    image.style.height = `${imageWidth / aspectRatio}px`;
     if (utilityPreviewScale === 1) {
       viewport.scrollLeft = 0;
       viewport.scrollTop = 0;

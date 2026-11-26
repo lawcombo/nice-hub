@@ -2735,6 +2735,8 @@ button.button {
   display: block;
   max-width: none;
   height: auto;
+  object-fit: cover;
+  object-position: center bottom;
   user-select: none;
 }
 
