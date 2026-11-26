@@ -82,8 +82,12 @@
     closeUtilities: document.querySelector("#closeUtilities"),
     utilityPreviewDialog: document.querySelector("#utilityPreviewDialog"),
     utilityPreviewTitle: document.querySelector("#utilityPreviewTitle"),
+    utilityPreviewViewport: document.querySelector("#utilityPreviewViewport"),
     utilityPreviewImage: document.querySelector("#utilityPreviewImage"),
     utilityPreviewError: document.querySelector("#utilityPreviewError"),
+    utilityPreviewZoomOut: document.querySelector("#utilityPreviewZoomOut"),
+    utilityPreviewZoomReset: document.querySelector("#utilityPreviewZoomReset"),
+    utilityPreviewZoomIn: document.querySelector("#utilityPreviewZoomIn"),
     closeUtilityPreview: document.querySelector("#closeUtilityPreview"),
     shortcutOpenAdminAccess: document.querySelector("#shortcutOpenAdminAccess"),
     adminAccessModal: document.querySelector("#adminAccessModal"),
@@ -210,6 +214,8 @@
   let materialRequestCopyResetTimer = 0;
   let utilitiesLoaded = false;
   let utilitiesLoading = false;
+  let utilityPreviewScale = 1;
+  let utilityPreviewDrag = null;
   const qrBundleSelectedIds = new Set();
 
   const adminAccessPassword = "5959";
@@ -220,6 +226,8 @@
   const viewModeStorageKey = "niceHubViewMode";
   const materialsPageSize = 12;
   const qrBundleSelectionLimit = 10;
+  const utilityPreviewMaxScale = 4;
+  const utilityPreviewZoomStep = 1.25;
 
   function getSavedViewMode() {
     try {
@@ -2441,18 +2449,99 @@
 
   function openUtilityPreview(utility) {
     if (elements.utilityPreviewDialog.open) return;
+    const image = elements.utilityPreviewImage;
+    const previewUrl = resolveUrl(utility.previewImage);
     elements.utilityPreviewTitle.textContent = `${utility.title} 미리보기`;
-    elements.utilityPreviewImage.alt = `${utility.title} 사용 안내`;
-    elements.utilityPreviewImage.hidden = false;
+    image.alt = `${utility.title} 사용 안내`;
+    image.hidden = true;
+    image.style.removeProperty("width");
     elements.utilityPreviewError.hidden = true;
-    elements.utilityPreviewImage.src = resolveUrl(utility.previewImage);
+    utilityPreviewScale = 1;
+    updateUtilityPreviewZoomControls();
     elements.utilityPreviewDialog.showModal();
-    elements.utilityPreviewImage.parentElement.scrollTop = 0;
+    elements.utilityPreviewViewport.scrollLeft = 0;
+    elements.utilityPreviewViewport.scrollTop = 0;
     pushModalHistory("utility-preview");
+    image.src = previewUrl;
+    if (image.complete && image.naturalWidth && image.currentSrc === previewUrl) showUtilityPreviewImage();
   }
 
   function closeUtilityPreview() {
+    stopUtilityPreviewDrag();
     elements.utilityPreviewDialog.close();
+  }
+
+  function updateUtilityPreviewZoomControls() {
+    const hidden = elements.utilityPreviewImage.hidden;
+    elements.utilityPreviewZoomOut.disabled = hidden || utilityPreviewScale === 1;
+    elements.utilityPreviewZoomReset.disabled = hidden || utilityPreviewScale === 1;
+    elements.utilityPreviewZoomIn.disabled = hidden || utilityPreviewScale === utilityPreviewMaxScale;
+    elements.utilityPreviewZoomReset.textContent = `${Math.round(utilityPreviewScale * 100)}%`;
+    elements.utilityPreviewViewport.classList.toggle("is-zoomed", !hidden && utilityPreviewScale > 1);
+  }
+
+  function setUtilityPreviewScale(scale, clientX, clientY) {
+    const image = elements.utilityPreviewImage;
+    if (image.hidden || !image.naturalWidth || !elements.utilityPreviewDialog.open) return;
+
+    const viewport = elements.utilityPreviewViewport;
+    const viewBounds = viewport.getBoundingClientRect();
+    const oldBounds = image.getBoundingClientRect();
+    const anchorX = clientX ?? viewBounds.left + viewport.clientWidth / 2;
+    const anchorY = clientY ?? viewBounds.top + viewport.clientHeight / 2;
+    const imageX = Math.max(0, Math.min(1, (anchorX - oldBounds.left) / oldBounds.width));
+    const imageY = Math.max(0, Math.min(1, (anchorY - oldBounds.top) / oldBounds.height));
+    const aspectRatio = image.naturalWidth / image.naturalHeight;
+    const fitWidth = Math.max(1, Math.min(viewBounds.width - 20, (viewBounds.height - 20) * aspectRatio));
+
+    utilityPreviewScale = Math.max(1, Math.min(utilityPreviewMaxScale, scale));
+    image.style.width = `${fitWidth * utilityPreviewScale}px`;
+    if (utilityPreviewScale === 1) {
+      viewport.scrollLeft = 0;
+      viewport.scrollTop = 0;
+    } else {
+      const newBounds = image.getBoundingClientRect();
+      viewport.scrollLeft += newBounds.left + newBounds.width * imageX - anchorX;
+      viewport.scrollTop += newBounds.top + newBounds.height * imageY - anchorY;
+    }
+    updateUtilityPreviewZoomControls();
+  }
+
+  function showUtilityPreviewImage() {
+    if (!elements.utilityPreviewDialog.open || !elements.utilityPreviewImage.hidden) return;
+    elements.utilityPreviewImage.hidden = false;
+    elements.utilityPreviewError.hidden = true;
+    setUtilityPreviewScale(1);
+  }
+
+  function handleUtilityPreviewWheel(event) {
+    if (event.ctrlKey || event.metaKey || !event.deltaY || elements.utilityPreviewImage.hidden) return;
+    event.preventDefault();
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? elements.utilityPreviewViewport.clientHeight : 1;
+    const delta = Math.max(-160, Math.min(160, event.deltaY * unit));
+    setUtilityPreviewScale(utilityPreviewScale * Math.exp(-delta / 500), event.clientX, event.clientY);
+  }
+
+  function startUtilityPreviewDrag(event) {
+    if (event.pointerType !== "mouse" || event.button !== 0 ||
+      event.target !== elements.utilityPreviewImage || utilityPreviewScale <= 1) return;
+
+    const viewport = elements.utilityPreviewViewport;
+    viewport.setPointerCapture(event.pointerId);
+    utilityPreviewDrag = { x: event.clientX, y: event.clientY, left: viewport.scrollLeft, top: viewport.scrollTop };
+    viewport.classList.add("is-dragging");
+  }
+
+  function moveUtilityPreviewDrag(event) {
+    if (!utilityPreviewDrag) return;
+    const viewport = elements.utilityPreviewViewport;
+    viewport.scrollLeft = utilityPreviewDrag.left + utilityPreviewDrag.x - event.clientX;
+    viewport.scrollTop = utilityPreviewDrag.top + utilityPreviewDrag.y - event.clientY;
+  }
+
+  function stopUtilityPreviewDrag() {
+    utilityPreviewDrag = null;
+    elements.utilityPreviewViewport.classList.remove("is-dragging");
   }
 
   async function loadUtilities() {
@@ -2745,10 +2834,22 @@
     event.preventDefault();
     requestModalClose("utility-preview", closeUtilityPreview);
   });
+  elements.utilityPreviewImage.addEventListener("load", showUtilityPreviewImage);
   elements.utilityPreviewImage.addEventListener("error", () => {
     elements.utilityPreviewImage.hidden = true;
     elements.utilityPreviewError.hidden = false;
+    updateUtilityPreviewZoomControls();
   });
+  elements.utilityPreviewViewport.addEventListener("wheel", handleUtilityPreviewWheel, { passive: false });
+  elements.utilityPreviewViewport.addEventListener("pointerdown", startUtilityPreviewDrag);
+  elements.utilityPreviewViewport.addEventListener("pointermove", moveUtilityPreviewDrag);
+  elements.utilityPreviewViewport.addEventListener("pointerup", stopUtilityPreviewDrag);
+  elements.utilityPreviewViewport.addEventListener("pointercancel", stopUtilityPreviewDrag);
+  elements.utilityPreviewViewport.addEventListener("lostpointercapture", stopUtilityPreviewDrag);
+  elements.utilityPreviewZoomOut.addEventListener("click", () => setUtilityPreviewScale(utilityPreviewScale / utilityPreviewZoomStep));
+  elements.utilityPreviewZoomReset.addEventListener("click", () => setUtilityPreviewScale(1));
+  elements.utilityPreviewZoomIn.addEventListener("click", () => setUtilityPreviewScale(utilityPreviewScale * utilityPreviewZoomStep));
+  window.addEventListener("resize", () => setUtilityPreviewScale(utilityPreviewScale));
   elements.adminAccessForm.addEventListener("submit", handleAdminAccessSubmit);
   elements.closeAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
   elements.cancelAdminAccess.addEventListener("click", () => requestModalClose("admin-access", closeAdminAccess));
