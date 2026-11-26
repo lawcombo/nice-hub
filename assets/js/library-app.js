@@ -1759,10 +1759,18 @@
     }, 2000);
   }
 
+  function getFileNameFromPathname(pathname) {
+    try {
+      return decodeURIComponent(pathname.split("/").pop() || "");
+    } catch {
+      return "";
+    }
+  }
+
   function getFileExtension(path) {
     try {
       const pathname = new URL(path, document.baseURI).pathname;
-      const fileName = decodeURIComponent(pathname.split("/").pop() || "");
+      const fileName = getFileNameFromPathname(pathname);
       const extension = fileName.match(/\.[a-z0-9]{1,10}$/i)?.[0] || "";
       return extension.toLowerCase();
     } catch (error) {
@@ -2401,7 +2409,11 @@
       icon = image;
     }
     const details = createElement("div");
-    const fileMeta = [utility.platform, formatFileSize(utility.fileSizeBytes)].filter(Boolean).join(" · ");
+    const fileMeta = [
+      utility.platform,
+      formatFileSize(utility.fileSizeBytes),
+      getFileNameFromPathname(url.pathname),
+    ].filter(Boolean).join(" · ");
     details.append(
       createElement("h3", "", utility.title),
       createElement("p", "utility-description", utility.description),
