@@ -4,10 +4,10 @@
     "description": "바탕화면에 메모를 책갈피처럼 정리하고, 중요한 일정은 원하는 날짜와 시간에 알림으로 받아보세요.",
     "platform": "Windows",
     "format": "EXE",
-    "fileSizeBytes": 310784,
+    "fileSizeBytes": 311808,
     "iconImage": "assets/images/personal-postits-v2-icon.png",
     "previewImage": "assets/images/personal-postits-v16-guide-original.png",
     "previewCropTop": 170,
-    "downloadUrl": "https://github.com/lawcombo/nice-hub/releases/download/personal-postits-20261125-alerts/PersonalPostIts_v17.exe"
+    "downloadUrl": "https://github.com/lawcombo/nice-hub/releases/download/personal-postits-20261125-alerts/PersonalPostIts_v18.exe"
   }
 ]
